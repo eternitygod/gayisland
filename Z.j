@@ -1,3 +1,5 @@
+//必须在某个初始化函数里面call STEP 否则无法运行
+
 globals  
 	hashtable I=InitHashtable()
 	hashtable P=InitHashtable()
