@@ -1,19 +1,32 @@
-
-
+globals
+	unit Storm = null
+	boolean NoAcess = false
+	boolean StormSpiritChoose = true
+endglobals
 function StormSpiritRemnantShadowDamage takes nothing returns nothing
 	local integer Lv = GetUnitAbilityLevel(Storm,'ASt1')
 	local integer Damage = 100 + 40 *Lv
+	local integer DamageType = 1
 	call DestroyEffect(AddSpecialEffect("Abilities\\Weapons\\ChimaeraLightningMissile\\ChimaeraLightningMissile.mdl",GetUnitX(GetEnumUnit()),GetUnitY(GetEnumUnit())))
-	call R8D ( Storm ,GetEnumUnit(), 1 , Damage)
+	call R8D( Storm,GetEnumUnit(), DamageType , Damage)
+	if test then
+		call TestTipsDamage(Storm,GetEnumUnit(),'ASt1',Damage,DamageType)
+	endif
 endfunction
 
+function StormSpiritChooseON takes nothing returns nothing
+	local player p = GetOwningPlayer(GetTriggerUnit())
+		call DisplayTimedTextToPlayer(p,0,0,$A,"球状闪电滚动自动选择：|cffff0000关|r")
+		set StormSpiritChoose = false
+	set p = null
+endfunction
 
 function StormSpiritRemnantShadowTrigger takes nothing returns boolean
 	local trigger t2 = GetTriggeringTrigger()
 	local integer t2h = GetHandleId(t2)
 	local trigger t1 = LoadTriggerHandle(HY, t2h,9)
 	local integer t1h = GetHandleId(t1)
-	local unit Rs = LoadUnitHandle(HY,t2h ,'StRs')
+	local unit Rs = LoadUnitHandle(HY,t2h,'StRs')
 	local group g
 	//local integer Lv = LoadInteger(HY, t2h , 'AbLv')
 	local boolexpr b 
@@ -30,7 +43,7 @@ function StormSpiritRemnantShadowTrigger takes nothing returns boolean
 		set b = Condition(function GeneralUnitselection)
 		call GroupEnumUnitsInRange(g,GetUnitX(Rs),GetUnitY(Rs),285, b )
 		call DestroyBoolExpr(b)
-		call ForGroup(g ,function StormSpiritRemnantShadowDamage)
+		call ForGroup(g,function StormSpiritRemnantShadowDamage)
 		call DestroyGroup( g )
 		call DestroyEffect(AddSpecialEffect("Abilities\\Weapons\\Bolt\\BoltImpact.mdl",GetUnitX(Rs),GetUnitY(Rs)))
 		call DestroyEffect(AddSpecialEffect("Abilities\\Weapons\\Bolt\\BoltImpact.mdl",GetUnitX(Rs),GetUnitY(Rs)))
@@ -56,8 +69,8 @@ function CreateStormSpiritRemnantShadow takes nothing returns boolean
 	local integer t2h
 	//local integer LV
 	local integer TEC = GetTriggerEvalCount(t1)
-	local real x = LoadReal(HY, t1h ,'St1X')
-	local real y = LoadReal(HY, t1h ,'St1Y')
+	local real x = LoadReal(HY, t1h,'St1X')
+	local real y = LoadReal(HY, t1h,'St1Y')
 	local real fac
 	local unit Rs
 	if TEC == 1 then
@@ -67,13 +80,13 @@ function CreateStormSpiritRemnantShadow takes nothing returns boolean
 		set t2 = CreateTrigger()
 		set t2h =GetHandleId(t2)
 		//set LV = LoadInteger(HY, t1h , 'AbLv')
-		set fac = LoadReal(HY, t1h , 'ufac')
+		set fac = LoadReal(HY, t1h, 'ufac')
 		set Rs = CreateUnit(GetOwningPlayer(Storm),'npn2',x,y, fac)
 		call SetUnitVertexColor( Rs,$FF,$FF,$FF,100)
 		call UnitApplyTimedLife( Rs,'BTLF',$C)
-		call SaveUnitHandle(HY, t1h , 'StRs', Rs)
-		call SaveUnitHandle(HY, t2h , 'StRs', Rs)
-		call SaveTriggerHandle(HY, t2h , 9 , t1)
+		call SaveUnitHandle(HY, t1h, 'StRs', Rs)
+		call SaveUnitHandle(HY, t2h, 'StRs', Rs)
+		call SaveTriggerHandle(HY, t2h, 9 , t1)
 		//call SaveInteger(HY, t2h , 'AbLv', Lv)
 		call TriggerRegisterUnitInRange(t2, Rs,$EB,Condition(function Zzzzz))
 		call TriggerRegisterUnitEvent(t2, Rs,EVENT_UNIT_DEATH)
@@ -97,8 +110,8 @@ function StormSpiritRemnantShadow takes nothing returns nothing
 	local integer h = GetHandleId( t )
 	local real x = GetUnitX( u )
 	local real y = GetUnitY( u )
-	call TriggerRegisterTimerEvent( t ,.5,true)
-	call TriggerAddCondition( t ,Condition(function CreateStormSpiritRemnantShadow))
+	call TriggerRegisterTimerEvent( t,.5,true)
+	call TriggerAddCondition( t,Condition(function CreateStormSpiritRemnantShadow))
 	call SaveReal( HY, h, 'St1X', ( x )*1.)
 	call SaveReal( HY, h, 'St1Y', ( y )*1.)
 	call SaveReal( HY, h, 'ufac', GetUnitFacing( u )*1.)
@@ -160,6 +173,28 @@ function StormSpiritElectricVortex takes nothing returns nothing
 	set t = null
 endfunction
 
+function StormSpiritWall takes nothing returns nothing
+	
+	if GetDestructableLife(GetEnumDestructable()) > 0.00 then
+		if GetDestructableTypeId(GetEnumDestructable()) == 'Dofw' or GetDestructableTypeId(GetEnumDestructable()) == 'Dofv' or GetDestructableTypeId(GetEnumDestructable()) == 'Ztd3' then
+			set NoAcess = true
+		endif
+	endif
+	
+endfunction
+
+function StormSpiritDestructible takes nothing returns nothing
+	
+	if GetDestructableTypeId(GetEnumDestructable()) == 'ZTtw' then
+		call KillDestructable(GetEnumDestructable())
+	endif
+	if GetDestructableTypeId(GetEnumDestructable()) == 'ZTtc' then
+		call KillDestructable(GetEnumDestructable())
+	endif
+	if GetDestructableTypeId(GetEnumDestructable()) == 'NTtw' then
+		call KillDestructable(GetEnumDestructable())
+	endif
+endfunction
 
 function StormSpiritBallLightningMove takes nothing returns boolean
 	local trigger t = GetTriggeringTrigger()
@@ -186,11 +221,20 @@ function StormSpiritBallLightningMove takes nothing returns boolean
 	local real MCR = LoadReal(HY,h,$C7)
 	//local boolean MDR = LoadBoolean(HY,h,0)
 	//local boolexpr b
-	local boolean NoAcess = false
+	
 	local player p = GetOwningPlayer(WUE)
+	local location tion = Location(NBX, NCX)
+	local integer StormSpirith = GetHandleId(WUE)
 	//local sound s = 
+	call EnumDestructablesInCircleBJ(168, tion, function StormSpiritDestructible)
+	call EnumDestructablesInCircleBJ(550, tion, function StormSpiritWall)
+	call RemoveLocation(tion)
 	if IsTerrainPathable(NBX, NCX, PATHING_TYPE_WALKABILITY) == true then
 		set NoAcess = true
+		
+	endif
+	
+	if NoAcess then
 		call DisplayTimedTextToPlayer(p,.5,-1.,2.,"|cffffcc00无法通行|r")
 		if(GetLocalPlayer()== p )then
 			call StopSound(ifes, false, false)
@@ -238,7 +282,7 @@ function StormSpiritBallLightningMove takes nothing returns boolean
 	endif
 	call SaveInteger(HY,h,$C2,(Y2X))
 	call ChangeRGBA(WUE,-1,-1,-1,0)
-	if Y2X == 0 or GetUnitState(WUE,UNIT_STATE_MANA) < 1 then
+	if Y2X == 0 or GetUnitState(WUE,UNIT_STATE_MANA) < 1 or GetUnitState(WUE,UNIT_STATE_LIFE) < 1 then
 		call DestroyLightning(APX)
 		//call A3X(NBX,NCX,75)
 		call DestroyEffect((LoadEffectHandle(HY,h,32)))
@@ -246,8 +290,9 @@ function StormSpiritBallLightningMove takes nothing returns boolean
 		call RemoveUnit(MNR)
 		call ChangeRGBA(WUE,-1,-1,-1,$FF)
 		call SetUnitPathing(WUE,true)
-		call SetUnitInvulnerable(WUE,false)
+		//call SetUnitInvulnerable(WUE,false)
 		call FlushChildHashtable(HY,h)
+		set NoAcess = false
 		call DestroyTrigger(t)
 	else
 		//call A3X(NBX,NCX,75)
@@ -279,6 +324,7 @@ function StormSpiritBallLightning takes nothing returns nothing
 	local real Cost = 30+.06*GetUnitState(u,UNIT_STATE_MAX_MANA)
 	//local boolean MDR=false
 	local real Distance
+	
 	//if GetUnitAbilityLevel(WUE,'A3FJ')>0 then
 	//set MBR=$F+.05*GetUnitState(WUE,UNIT_STATE_MAX_MANA)
 	//set MDR=true
@@ -307,7 +353,7 @@ function StormSpiritBallLightning takes nothing returns nothing
 		call SetUnitVertexColor(MNR,$FF,$FF,$FF,0)
 		call SetUnitPathing(u,false)
 		call SetUnitPathing(KBX,false)
-		call SetUnitInvulnerable(u,true)
+		//call SetUnitInvulnerable(u,true)
 		call SaveUnitHandle(HY,h,19, KBX)
 		call SaveUnitHandle(HY,h,2, u)
 		call SaveUnitHandle(HY,h,$C3,(MNR))
@@ -322,9 +368,11 @@ function StormSpiritBallLightning takes nothing returns nothing
 		call SaveEffectHandle(HY,h,32,(AddSpecialEffectTarget("effects\\Lightning_Ball_Tail_FX.mdx",MNR,"origin")))
 		call TriggerRegisterTimerEvent(t,.04,true)
 		call TriggerAddCondition(t,Condition(function StormSpiritBallLightningMove))
-		call ShowUnit(u,false)
-		call ShowUnit(u,true)
-		call SelectUnitAddForPlayer(u,GetOwningPlayer(u))
+		if StormSpiritChoose then
+			call ShowUnit(u,false)
+			call ShowUnit(u,true)
+			call SelectUnitAddForPlayer(u,GetOwningPlayer(u))
+		endif
 		//call SaveBoolean(HY,h,0,MDR)
 	endif
 	set u = null
@@ -369,7 +417,7 @@ function StormSpiritOverload takes nothing returns nothing
 endfunction
 
 function StormSpiritOverloadReady takes nothing returns boolean
-	local integer AbId=GetSpellAbilityId()
+	local integer AbId = GetSpellAbilityId()
 	if AbId == 'ASt1' or AbId == 'ASt2' or AbId == 'ASt4' and LoadInteger(HY,GetHandleId(GetTriggerUnit()),'ASt3') != 1  then
 		call SaveInteger(HY,GetHandleId(GetTriggerUnit()),'ASt3',1)
 		call StormSpiritOverload()
@@ -381,71 +429,12 @@ endfunction
 function SkillStormSpiritOverload takes nothing returns nothing
 	local unit u = GetTriggerUnit()
 	local trigger t = CreateTrigger()
-	call TriggerRegisterUnitEvent( t , u ,EVENT_UNIT_SPELL_EFFECT)
-	call TriggerAddCondition( t ,Condition(function StormSpiritOverloadReady))
+	call TriggerRegisterUnitEvent( t, u,EVENT_UNIT_SPELL_EFFECT)
+	call TriggerAddCondition( t,Condition(function StormSpiritOverloadReady))
 	set u = null
 	set t = null
 endfunction
 
-function StormSpiritOverloadGroupDamage takes nothing returns nothing
-	local unit u = CreateUnit(GetOwningPlayer(Storm),'ndum',GetUnitX(GetEnumUnit()),GetUnitY(GetEnumUnit()),GetUnitFacing(GetEnumUnit()))
-	call UnitAddAbility(u,'ACsw')
-	call IssueTargetOrder( u, "slow", GetEnumUnit() )
-	call R8D(Storm,GetEnumUnit(),1,GetUnitAbilityLevel(Storm,'ASt3')*20+$A)
-	//call CCX(GetEnumUnit(),'A335',1,.6,'B08B')
-	//call RemoveUnit(u)
-	set u = null
-endfunction
 
-function StormSpiritDamage takes nothing returns nothing
-	local unit u = GetTriggerUnit()
-	local unit du = GetEventDamageSource()
-	local integer h = GetHandleId(du)
-	local player p = GetOwningPlayer(u)
-	local group g
-	local boolexpr b
-	if(YDWEIsEventPhysicalDamage() == true) then 
-		if IPA(p) then
-			//call BJDebugMsg("攻击单位")
-			if LoadInteger(HY,GetHandleId(du),'ASt3') == 1  then
-				//call BJDebugMsg("范围伤害")
-				set g = CreateGroup()
-				call DestroyEffect(LoadEffectHandle(HY,h,$C8))
-				call DestroyEffect(LoadEffectHandle(HY,h,$C9))
-				call SaveInteger(HY,GetHandleId(du),'ASt3',2)
-				//set U2=WUE
-				//set HTV=WUE
-				//set HUV=GetUnitAbilityLevel(WUE,'ASt3')*20+$A
-				set b = Condition(function GeneralUnitselection)
-				call GroupEnumUnitsInRange( g ,GetUnitX( u) ,GetUnitY( u ),300,b)
-				call ForGroup(g,function StormSpiritOverloadGroupDamage)
-				call V7X(g)
-				call DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\Thunderclap\\ThunderClapCaster.mdl",GetUnitX(u),GetUnitY(u)))
-			endif
-		endif
-	endif
-	set u = null
-	set du = null
-	set g = null
-	set p = null
-	set b = null
-	
-endfunction
 
-function StormSpiritDamageTriggerAG takes nothing returns nothing
-	local timer t = GetExpiredTimer()
-	call ExecuteFunc( "CreateStormSpiritDamageTrigger" )
-	call DestroyTrigger( StormSpiritDamageTrigger )
-	call DestroyTimer( t )
-	set t = null
-endfunction
 
-function CreateStormSpiritDamageTrigger takes nothing returns nothing
-	local timer tt = CreateTimer()
-	set StormSpiritDamageTrigger = null
-	set StormSpiritDamageTrigger = CreateTrigger()
-	call YDWESyStemAnyUnitDamagedRegistTrigger( StormSpiritDamageTrigger )
-	call TriggerAddAction(StormSpiritDamageTrigger, function StormSpiritDamage)
-	call TimerStart(tt,600.00,false,function StormSpiritDamageTriggerAG)
-	set tt = null
-endfunction

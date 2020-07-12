@@ -12,11 +12,17 @@ function LCB takes unit u ,boolean b returns nothing
 	if b then
 		//call SaveInteger(HY,uh,0,0)
 		call FlushChildHashtable(HY,uh)
-		call YDWESetUnitAbilityDataString( u, 'Alc0', 1, 204, "ReplaceableTextures\\PassiveButtons\\PASBTNMagicalSentry.blp" )
+		call UnitRemoveAbility(u , 'AlcB')
+		call UnitAddAbility(u ,'Alc0')
+		call UnitMakeAbilityPermanent(u ,true , 'Alc0')
+		//call YDWESetUnitAbilityDataString( u, 'Alc0', 1, 204, "ReplaceableTextures\\PassiveButtons\\PASBTNMagicalSentry.blp" )
 	else
 		call SaveInteger(HY,uh,0,1)
 		call FT("|c0009d396 0x 施法！！|r",5,u,.03,255,255,255,$FF,64)
-		call YDWESetUnitAbilityDataString( u, 'Alc0', 1, 204, "ReplaceableTextures\\CommandButtons\\BTNMagicalSentry.blp" )
+		call UnitRemoveAbility(u , 'Alc0')
+		call UnitAddAbility(u ,'AlcB')
+		call UnitMakeAbilityPermanent(u ,true , 'AlcB')
+		//call YDWESetUnitAbilityDataString( u, 'Alc0', 1, 204, "ReplaceableTextures\\CommandButtons\\BTNMagicalSentry.blp" )
 	endif
 endfunction
 
@@ -260,61 +266,4 @@ function LC40 takes nothing returns nothing
 	set p = null
 endfunction
 
-function LCD takes nothing returns nothing
-	local unit u = GetTriggerUnit()
-	local unit du = GetEventDamageSource() //GetEventDamage()
-	local integer BLv
-	local integer CA
-	local integer Ri
-	local integer pb
-	local real Rd
-	local integer hd
-	local integer Bisi
-	local integer isid
-	local integer Ilv
-	local real mu
-	local player p = GetOwningPlayer(u)
-	if (YDWEIsEventPhysicalDamage() == true) then 
-		if IPA(p) then
-			set BLv = GetUnitAbilityLevel( du , 'Blc3' )
-			set Ri = GetRandomInt( 0, 100 )
-			set pb = 15
-			if BLv > 0 and Ri <= pb then
-				set Rd = GetEventDamage()
-				set CA = GetUnitAbilityLevel(LC,'Alc3')
-				set mu = 1.10 + 0.10 * CA
-				set hd = R2I(Rd * mu)
-				call R8D(du,u,5,hd)
-				call FT(I2S(hd)+"!",5,du,.025,$FF,0,0,$FF,64)
-			endif
-			set Bisi = GetUnitAbilityLevel(du,'Bisi')
-			if Bisi > 0 then
-				set Ilv = GetUnitAbilityLevel(LC,'Alc2')
-				set isid = 2 + Ilv * 6
-				call R8D(du,u,1,isid)
-				call FT("+"+I2S(isid),1,du,.022,100,$C8,$FF,$FF,-42)
-			endif
-		endif
-	endif
-	set u = null
-	set p = null
-	set du = null
-endfunction
 
-function LcltAG takes nothing returns nothing
-	local timer t = GetExpiredTimer()
-	call ExecuteFunc("Lclt")
-	call DestroyTrigger( AudtLC )
-	call DestroyTimer( t )
-	set t = null
-endfunction
-
-function Lclt takes nothing returns nothing
-	local timer tt = CreateTimer()
-	set AudtLC = null
-	set AudtLC = CreateTrigger()
-	call YDWESyStemAnyUnitDamagedRegistTrigger( AudtLC )
-	call TriggerAddAction(AudtLC, function LCD)
-	call TimerStart(tt,600.00,false,function LcltAG)
-	set tt = null
-endfunction

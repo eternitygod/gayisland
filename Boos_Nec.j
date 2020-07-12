@@ -38,12 +38,12 @@ endfunction
 
 function NHA takes nothing returns nothing //竭心光环
 	local integer h = GetHandleId(GetExpiredTimer())
-	local unit  u = udg_Boos[2]
+	local unit u = udg_Boos[2]
 	local group g
 	local boolexpr b
-	if (GetUnitState(u, UNIT_STATE_LIFE) > 0.00) == true then
+	if(GetUnitState(u, UNIT_STATE_LIFE) > 0.00) == true then
 		set g = CreateGroup()
-		set b = Condition (function BoosG1)
+		set b = Condition(function BoosG1)
 		call GroupEnumUnitsInRange(g,GetUnitX(u),GetUnitY(u),1200.00,b)
 		call DestroyBoolExpr(b)
 		call ForGroup(g,function NHD)
@@ -113,8 +113,8 @@ function NRA takes nothing returns nothing //召唤骷髅
 	local timer t1 = GetExpiredTimer()
 	local integer rh = GetHandleId(t1)
 	local timer Stop
-	if (GetUnitState(udg_Boos[2], UNIT_STATE_LIFE) > 0.00) == true then 
-		if (GetUnitTypeId(udg_Boos[2]) == 'Ulic') then//前者不需要施法则直接召唤，后者需要施法。
+	if(GetUnitState(udg_Boos[2], UNIT_STATE_LIFE) > 0.00) == true then 
+		if(GetUnitTypeId(udg_Boos[2]) == 'Ulic') then//前者不需要施法则直接召唤，后者需要施法。
 			//call TransmissionFromUnitWithNameBJ(GetPlayersAll(), udg_Boos[2], GetUnitName(udg_Boos[2]), null, "死者服从于我！", bj_TIMETYPE_SET, 4.00, false)
 			call NecRaiseSkeleton()
 		else
@@ -139,13 +139,21 @@ function GroupExpF takes nothing returns nothing
 	call SuspendHeroXP( GetEnumUnit(), false )
 endfunction
 
+function LichDeathConditions takes nothing returns nothing
+	
+	
+	
+endfunction
 
 function CreateLichTimer takes nothing returns nothing
 	local timer t = GetExpiredTimer()
+	local trigger dt = CreateTrigger()
 	local unit u
 	set u = CreateUnit(Player(10),'Ulic',GetUnitX(udg_Boos[2]),GetUnitY(udg_Boos[2]),GetUnitFacing(udg_Boos[2]))
 	call PlaySoundOnUnitBJ( gg_snd_HeroLichReady1, 100, udg_Boos[2] )
 	set udg_Boos[2] = u
+	call TriggerRegisterUnitEvent( dt, udg_Boos[2], EVENT_UNIT_DEATH )//Nec 死亡
+	call TriggerAddCondition( dt, Condition(function LichDeathConditions))
 	call ADDXP(udg_Boos[2],11900) //15级
 	call SetUnitAnimation( udg_Boos[2], "spell" )
 	call ForGroup(udg_HeroGroup,function GroupExpF) //允许单位组经验获取
@@ -163,7 +171,7 @@ function CreateLichEffect takes nothing returns nothing
 	local integer I = LoadInteger(HY,h,'Effe')
 	local real X = GetUnitX(udg_Boos[2])
 	local real Y = GetUnitY(udg_Boos[2])
-	call DestroyEffect( AddSpecialEffect("Objects\\Spawnmodels\\Undead\\UndeadDissipate\\UndeadDissipate.mdl", X , Y ) )
+	call DestroyEffect( AddSpecialEffect("Objects\\Spawnmodels\\Undead\\UndeadDissipate\\UndeadDissipate.mdl", X, Y ) )
 	set I = I + 1 
 	call SaveInteger(HY,h,'Effe',I)
 	if I > 6 then
@@ -200,10 +208,10 @@ function NecAttackAI takes nothing returns nothing
 	local unit u = udg_Boos[2]
 	local unit NecAttackunit
 	local boolexpr b
-	if (GetUnitState(udg_Boos[2], UNIT_STATE_LIFE) > 0.00) == true then 
-		if (GetUnitCurrentOrder( udg_Boos[2] ) == String2OrderIdBJ("stop")) then
+	if(GetUnitState(udg_Boos[2], UNIT_STATE_LIFE) > 0.00) == true then 
+		if(GetUnitCurrentOrder( udg_Boos[2] ) == String2OrderIdBJ("stop")) then
 			set r = LoadRectHandle( HY, h, 'real')
-			set b = Condition (function NecAttackAIEnumUnits)
+			set b = Condition(function NecAttackAIEnumUnits)
 			set g = GetUnitsInRectMatching(r,b)
 			call DestroyBoolExpr(b)
 			set NecAttackunit = GroupPickRandomUnit(g)
@@ -213,7 +221,7 @@ function NecAttackAI takes nothing returns nothing
 		elseif GetUnitCurrentOrder( udg_Boos[2])  == String2OrderIdBJ("") then
 			set r = LoadRectHandle( HY, h, 'real')
 			set g = GetUnitsInRectMatching(r,b)
-			set b = Condition (function NecAttackAIEnumUnits)
+			set b = Condition(function NecAttackAIEnumUnits)
 			call DestroyBoolExpr(b)
 			set NecAttackunit = GroupPickRandomUnit(g)
 			call IssuePointOrderById( u, 851983, GetUnitX(NecAttackunit), GetUnitY(NecAttackunit) )
@@ -235,17 +243,11 @@ function NecAttackAI takes nothing returns nothing
 endfunction
 
 function NecDeatHcoilConditions takes nothing returns nothing
-	local real cd = YDWEGetUnitAbilityState(udg_Boos[2], 'AUdc', 1)
-	//call BJDebugMsg("DeatehCoil Cd  = "+ R2S(cd))
-	if cd == 0.00 then
-		if GetUnitState(udg_Boos[2], UNIT_STATE_LIFE) <= 1200.00 then
-			if GetUnitCurrentOrder( udg_Boos[2] ) != String2OrderIdBJ("channel") then
+	if GetUnitState(udg_Boos[2], UNIT_STATE_LIFE) <= 1200.00 then
+		if GetUnitCurrentOrder( udg_Boos[2] ) != String2OrderIdBJ("channel") then
 			call IssueTargetOrder( udg_Boos[2], "deathcoil", udg_Boos[2] )
-			
-			endif
 		endif
 	endif
-	
 endfunction
 
 function Boos_NecActions takes nothing returns nothing
@@ -262,6 +264,7 @@ function Boos_NecActions takes nothing returns nothing
 	local group PlayerHeroG = udg_HeroGroup
 	//local group EggG = udg_EggGroup
 	local trigger NecDeath = CreateTrigger()
+	local integer DeathH = GetHandleId(NecDeath)
 	//设置
 	call DisableTrigger(GetTriggeringTrigger()) 
 	call SetUnitInvulnerable(Nec, true) //设置boos无敌 5秒后关闭
@@ -285,6 +288,9 @@ function Boos_NecActions takes nothing returns nothing
 	//触发器
 	call TriggerRegisterUnitEvent( NecDeath, udg_Boos[2], EVENT_UNIT_DEATH )//Nec 死亡
 	call TriggerAddCondition(NecDeath, Condition(function NecDeathConditions))
+	call SaveRectHandle(HY,DeathH,0,r1)
+	
+
 	call TriggerRegisterUnitEvent( DeatHcoil, udg_Boos[2], EVENT_UNIT_DAMAGED )//死亡缠绕
 	call TriggerAddCondition( DeatHcoil, Condition(function NecDeatHcoilConditions))
 	
