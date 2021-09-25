@@ -1,0 +1,387 @@
+
+
+IncludeFile "UI\FrameDef\UI\EscMenuTemplates.fdf",
+IncludeFile "UI\FrameDef\UI\EscMenuMainPanel.fdf",
+IncludeFile "UI\FrameDef\UI\UpperButtonBar.fdf",
+
+Frame "SIMPLEBUTTON" "PickHeroButtonTemplate" {
+    DecorateFileNames,
+    Width 0.085,
+    Height 0.022,
+    ButtonPushedTextOffset 0.001 -0.001,
+    NormalTexture "UpperMenuButtonBackground",
+    NormalText "UpperButtonBarButtonTextTemplate" "选择英雄",
+    UseHighlight "UpperMenuButtonHighlight",
+}
+
+Frame "FRAME" "PuckHeroReturnButtonFrame" {
+    Width 0.1,
+    Height 0.1,
+    TabFocusPush, // Enables ControlShortcutKey for children
+    LayerStyle "IGNORETRACKEVENTS", // this Frame itself will not control/Block the Mouse
+    Frame "GLUETEXTBUTTON" "PuckHeroReturnGlueTextButton" INHERITS WITHCHILDREN "EscMenuButtonTemplate" {
+        SetPoint TOP, "PuckHeroReturnButtonFrame", TOP, 0, 0,
+        ControlShortcutKey "R", // 
+        ButtonText "PickHeroReturnButtonText",
+		Frame "TEXT" "PickHeroReturnButtonText" INHERITS "EscMenuButtonTextTemplate" {
+		    Text "KEY_RETURN_TO_GAME",
+		}
+    }
+}
+
+Frame "TEXT" "TipText"{
+    DecorateFileNames,
+    FrameFont "MasterFont", 0.011, "",
+}
+
+//创建一个带边框的背景 宽100 高50
+Frame "BACKDROP" "TooltipBackDrop" 
+{
+	DecorateFileNames, //Look-Up Names in some String table (for example gameinterface)
+    BackdropTileBackground, //Tile mode enabled
+	BackdropBackground  "ToolTipBackground", //BackgroundFile
+    BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+    BackdropCornerSize  0.008, //higher numbers make the corners bigger.
+    BackdropBackgroundInsets 0.0022 0.0022 0.0022 0.0022, //makes the background smaller, from the outside.
+    BackdropEdgeFile  "ToolTipBorder", //the border File
+    BackdropBlendAll,
+}
+
+
+
+Frame "BACKDROP" "BackDrop_Template"
+{
+    BackdropBackground  "ReplaceableTextures\CommandButtons\BTNCancel.blp",
+    BackdropBlendAll,
+}
+
+Frame "TEXT" "Text_Template"{
+    DecorateFileNames,
+    FrameFont "MasterFont", 0.018, "",
+    //设置文本居中
+    FontJustificationH JUSTIFYCENTER,
+    FontJustificationV JUSTIFYMIDDLE,
+    FontFlags "FIXEDSIZE",
+    FontColor 1.0 1.0 0.0 1.0,
+    FontHighlightColor 1.0 1.0 0.0 1.0,
+    FontDisabledColor 1.0 1.0 0.0 1.0,
+    FontShadowColor 0.0 0.0 0.0 0.9,	
+    FontShadowOffset 0.001 -0.001,	
+    Text " ",
+}
+
+
+Frame "BUTTON" "HeroButton"{
+    Width 0.038,
+    Height 0.038,
+    //设置样式 悬停高亮                 可获取鼠标焦点 HIGHLTGHTONFOCUS
+	ControlStyle "AUTOTRACK",
+    //设置正常状态背景
+    ControlBackdrop "HeroButtonBackDrop",
+    Frame "BACKDROP" "HeroButtonBackDrop" INHERITS "BackDrop_Template"{
+    }
+    ButtonText "HeroButtonCoolDown",
+    Frame "TEXT" "HeroButtonCoolDown" INHERITS "Text_Template"{
+    }
+}
+
+
+//创建一个带边框的背景 宽100 高50
+Frame "BACKDROP" "back_frame" 
+{
+    BackdropTileBackground,
+    BackdropBackground  "UI\Widgets\ToolTips\Human\human-tooltip-background.blp",
+    BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+    BackdropCornerSize  0.012,
+    BackdropBackgroundSize  0.032,
+    BackdropBackgroundInsets 0.004f 0.004f 0.004f 0.004f,
+    BackdropEdgeFile  "UI\Widgets\ToolTips\Human\human-tooltip-border.blp",
+    BackdropBlendAll,
+}
+
+
+
+Frame "HIGHLIGHT" "Highlight_Template" {
+    HighlightType "FILETEXTURE",
+    HighlightAlphaFile "UI\Widgets\EscMenu\Human\quest-button-highlight.blp",
+    HighlightAlphaMode "ADD",
+    /*LayerStyle "IGNORETRACKEVENTS", 用rgba创建一个颜色高亮蒙版
+    HighlightColor 0.0 0.0 1.0 0.1,
+    HighlightType "SHADE",*/
+}
+
+
+
+
+
+//创建一个2d模型
+Frame "SPRITE" "RaceSkillCoolDown_Sprite"
+{
+	LayerStyle "NOSHADING|IGNORETRACKEVENTS",
+    SetAllPoints,
+    BackgroundArt "UI\feedback\cooldown\ui-cooldown-indicator.mdx",
+}
+
+Frame "BACKDROP" "NumberOverlay_BackDrop_Template"{
+    Width 0.016,
+    Height 0.015,
+
+    //BackdropTileBackground,
+    BackdropBackground  "UI\Widgets\Console\Human\CommandButton\human-button-lvls-overlay.blp",
+    BackdropBlendAll,
+}
+
+Frame "TEXT" "NumberOverlay_Text_Template"  {
+    //SetAllPoints,
+    DecorateFileNames,
+    FrameFont "MasterFont", 0.009, "",
+    FontJustificationH JUSTIFYCENTER,
+    FontJustificationV JUSTIFYMIDDLE,
+}
+
+
+//种族技能按钮模板
+//Frame "FRAME" "RaceSkill_Frame1"{
+
+   
+    //Frame "SPRITE" "RaceSkillCoolDown1"{
+    //    SetAllPoints,
+    //    BackgroundArt "UI\feedback\cooldown\ui-cooldown-indicator.mdx",
+    //}
+//}
+
+//Frame "FRAME" "RaceSkill_Frame2"{
+
+    Frame "TEXTBUTTON" "RaceSkill_Button2"
+    {
+        Width 0.038,
+        Height 0.038,
+        //设置样式 悬停高亮                 可获取鼠标焦点 HIGHLTGHTONFOCUS
+	    ControlStyle "AUTOTRACK",
+        //设置正常状态背景
+        ControlBackdrop "RaceSkill_ButtonBack2",
+        Frame "BACKDROP" "RaceSkill_ButtonBack2" INHERITS "BackDrop_Template"{
+        }
+        ButtonText "RaceSkill_Text2",
+        Frame "TEXT" "RaceSkill_Text2" INHERITS "Text_Template"{
+        }
+    }
+    //Frame "SPRITE" "RaceSkillCoolDown2" INHERITS "Sprite_Template"{
+    //    Width 0.04,
+    //    Height 0.04,
+    //}
+//}
+
+//Frame "FRAME" "RaceSkill_Frame3"{
+
+    Frame "TEXTBUTTON" "RaceSkill_Button3"
+    {
+        Width 0.038,
+        Height 0.038,
+        //设置样式 悬停高亮                 可获取鼠标焦点 HIGHLTGHTONFOCUS
+	    ControlStyle "AUTOTRACK",
+        //设置正常状态背景
+        ControlBackdrop "RaceSkill_ButtonBack3",
+        Frame "BACKDROP" "RaceSkill_ButtonBack3" INHERITS "BackDrop_Template"{
+        }
+        ButtonText "RaceSkill_Text3",
+        Frame "TEXT" "RaceSkill_Text3" INHERITS "Text_Template"{
+        }
+    }
+    //Frame "SPRITE" "RaceSkillCoolDown3" INHERITS "Sprite_Template"{
+    //    Width 0.04,
+    //    Height 0.04,
+    //}
+//}
+
+//text文字模板
+Frame "TEXT" "text_frame"
+{
+    DecorateFileNames,
+    FrameFont "MasterFont", 0.800, "",
+}
+
+Frame "TEXT" "ClockTimeText"
+{
+    DecorateFileNames,
+    FrameFont "EscMenuTextFont", 0.011, "",
+    FontJustificationH JUSTIFYCENTER,
+    FontJustificationV JUSTIFYMIDDLE,    
+    FontFlags "FIXEDSIZE",
+    FontColor 0.99 0.827 0.0705 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,	
+    FontShadowOffset 0.001 -0.001,
+    Text " ",
+}
+
+//控制台纹理
+Frame "SIMPLEFRAME" "EXConsoleUI" {
+	DecorateFileNames,
+    // The top of the UI console
+    Texture "ConsoleUI_Texture01" {
+        File "ConsoleTexture01",
+        Width 0.256,
+        Height 0.032,
+        TexCoord 0, 1, 0, 0.125,
+        AlphaMode "ALPHAKEY",
+        Anchor TOPLEFT,0,0,
+    }
+    Texture "ConsoleUI_Texture02" {
+        File "ConsoleTexture02",
+        Width 0.087,
+        Height 0.032,
+        TexCoord 0, 0.33984375, 0, 0.125,
+        AlphaMode "ALPHAKEY",
+        Anchor TOPLEFT,0.256, 0,
+    }
+
+    Texture "ConsoleUI_Texture03" {
+        File "ConsoleTexture02",
+        Width 0.053,
+        Height 0.032,
+        TexCoord 0.79296875, 1, 0, 0.125,
+        AlphaMode "ALPHAKEY",
+        Anchor TOPRIGHT,-0.288, 0,
+    } 
+    Texture "ConsoleUI_Texture04" {
+        File "ConsoleTexture03",
+        Width 0.256,
+        Height 0.032,
+        TexCoord 0, 1, 0, 0.125,
+        AlphaMode "ALPHAKEY",
+        Anchor TOPRIGHT,-0.032, 0,
+    }
+    Texture "ConsoleUI_Texture05" {
+        File "ConsoleTexture04",
+        Width 0.032,
+        Height 0.032,
+        TexCoord 0, 1, 0, 0.125,
+        AlphaMode "ALPHAKEY",
+        Anchor TOPRIGHT,0,0,
+    }
+
+    // The bottom of the UI console
+    Texture "ConsoleUI_Texture06" {
+        File "ConsoleTexture01",
+        Width 0.256,
+        Height 0.176,
+        TexCoord 0, 1, 0.3125, 1,
+        AlphaMode "ALPHAKEY",
+        Anchor BOTTOMLEFT,0,0,
+    }
+    Texture "ConsoleUI_Texture07" {
+        File "ConsoleTexture02",
+        Width 0.256,
+        Height 0.15,
+        TexCoord 0, 1, 0.4140625, 1,
+        AlphaMode "ALPHAKEY",
+        Anchor BOTTOMLEFT,0.256,0,
+    }
+    Texture "ConsoleUI_Texture08" {
+        File "ConsoleTexture03",
+        Width 0.256,
+        Height 0.176,
+        TexCoord 0, 1, 0.3125, 1,
+        AlphaMode "ALPHAKEY",
+        Anchor BOTTOMRIGHT,-0.032,0.0,
+    }
+    Texture "ConsoleUI_Texture09" {
+        File "ConsoleTexture04",
+        Width 0.032,
+        Height 0.176,
+        TexCoord 0, 1, 0.3125, 1,
+        AlphaMode "ALPHAKEY",
+        Anchor BOTTOMRIGHT,0,0,
+    }
+}
+
+Frame "SIMPLEFRAME" "TimeIndicatorFrame" {
+    Texture "CustomConsoleUIClock" {
+        File "ui\console\human\humanuitile-timeindicatorframe",
+        Width 0.128,
+        Height 0.064,
+        AlphaMode "ALPHAKEY",
+        Anchor TOP, 0.0, 0.00,
+    }
+}
+
+//物品栏遮挡板
+Frame "SIMPLEFRAME" "SimpleInventoryCover" {
+	UseActiveContext,
+    DecorateFileNames,	
+    Width 0.128,
+    Height 0.175,           
+	//SetPoint BOTTOMRIGHT, "ConsoleUI", BOTTOMLEFT, 0.6, 0.0,
+    
+    Texture "InventoryCoverTexture" {
+        File "ConsoleInventoryCoverTexture",
+        Width 0.128,
+        Height 0.2558,
+		SetPoint BOTTOMRIGHT, "SimpleInventoryCover", BOTTOMRIGHT, 0.0, 0.0,
+    }
+
+}
+
+//创建一个聊天输入框
+Frame "EDITBOX" "Demo_EditBox" 
+{
+    Width 0.18,
+    Height 0.04,
+    EditBorderSize 0.007,
+    EditCursorColor 1.0 1.0 1.0,
+
+    ControlBackdrop "Demo_EditBoxBack",
+    Frame "BACKDROP" "Demo_EditBoxBack" {
+        BackdropTileBackground,
+        BackdropBackground  "UI\Widgets\BattleNet\bnet-inputbox-back.blp",
+        BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+        BackdropCornerSize  0.032,
+        BackdropBackgroundInsets 0.004 0.004 0.004 0.004,
+        BackdropEdgeFile  "UI\Widgets\BattleNet\bnet-inputbox-border.blp",
+        BackdropBlendAll,
+    }
+}
+
+//创建一个水平滚动条
+Frame "SLIDER" "Demo_Slider" {
+    Height 0.01,
+    Width 0.23725,
+
+    SliderMinValue 0,
+    SliderMaxValue 1,
+    SliderInitialValue 0,
+    SliderStepSize 0.01,
+    SliderLayoutHorizontal, //SliderLayoutVertical 设置为垂直滚动条
+
+    //设置滚动条背景
+    ControlBackdrop "Demo_SliderBackdrop",
+    Frame "BACKDROP" "Demo_SliderBackdrop" {
+        BackdropTileBackground,
+        BackdropBackground  "UI\Widgets\Glues\GlueScreen-Slider-BackdropBackground.blp",
+        BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+        BackdropCornerSize  0.008,
+        BackdropBackgroundInsets 0.004 0.004 0.004 0.004,
+        BackdropEdgeFile  "UI\Widgets\Glues\GlueScreen-Slider-BackdropBorder.blp",
+        BackdropBlendAll,
+    }
+    //设置滚动条按钮
+    SliderThumbButtonFrame "DemoSlider_Button",
+    Frame "BUTTON" "DemoSlider_Button" {
+        Width 0.016,
+        Height 0.016,
+
+        ControlBackdrop "DemoSlider_ButtonBackdrop",
+        Frame "BACKDROP" "DemoSlider_ButtonBackdrop" {
+            BackdropBlendAll,
+            BackdropBackground  "UI\Widgets\Glues\SinglePlayerSkirmish-ScrollBarKnob.blp",
+        }
+
+        ControlDisabledBackdrop "DemoSlider_ButtonDisabledBackdrop",
+        Frame "BACKDROP" "DemoSlider_ButtonDisabledBackdrop" {
+            BackdropBlendAll,
+            BackdropBackground  "UI\Widgets\Glues\SinglePlayerSkirmish-ScrollBarKnobDisabled.blp",
+        }
+    }
+}
+
+

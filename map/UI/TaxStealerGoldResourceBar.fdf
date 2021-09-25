@@ -1,0 +1,47 @@
+
+IncludeFile "UI\FrameDef\UI\ResourceBar.fdf",
+
+String "TaxStealerResourceBarTextTemplate" {
+    Font "MasterFont",0.01,
+    Height 0.01640625,
+    TextLength 10,
+    Text "0",
+}
+
+Frame "SIMPLEFRAME" "TaxStealerResourceBarFrame" {
+    DecorateFileNames,
+    Width 0.33828125,
+    Height 0.0218,
+
+    Layer "BACKGROUND"{
+    	Texture {
+			File "ConsoleTexture02",
+			Width 0.053,
+			Height 0.032,
+			TexCoord 0.79296875, 1, 0, 0.125,
+			AlphaMode "ALPHAKEY",
+			Anchor TOPRIGHT,-0.288, 0,
+		} 
+        Texture {
+			File "ConsoleTexture04",
+			Width 0.032,
+			Height 0.032,
+			TexCoord 0, 1, 0, 0.125,
+			AlphaMode "ALPHAKEY",
+			Anchor TOPRIGHT,-0.256,0,
+		}
+    }
+
+    Texture "TaxStealerResourceBarIcon" INHERITS "ResourceBarIconTemplate" {
+        Anchor TOPLEFT, 0.0000, -0.003125,
+        File "GoldIcon",
+    }
+    String "TaxStealerResourceBarGoldText" INHERITS "TaxStealerResourceBarTextTemplate" {
+        Anchor TOPRIGHT, -0.26484375, -0.003125,
+        FontJustificationH JUSTIFYRIGHT,
+    }
+
+}
+
+
+

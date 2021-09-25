@@ -1,0 +1,48 @@
+
+IncludeFile "UI\FrameDef\UI\SimpleInfoPanel.fdf",
+
+Frame "SIMPLEFRAME" "SimpleInfoPanelIconMoveSpeed" {
+    UseActiveContext,
+    SetAllPoints,
+    DecorateFileNames,
+    Height 0.03125,
+    Width 0.03125,
+
+    // --- icon -------------------------------------------------------------
+    Texture "InfoPanelIconMoveSpeedBackdrop" INHERITS "InfoPanelIconTemplate" {
+    }
+
+    // --- icon # -----------------------------------------------------------
+	String "InfoPanelIconMoveSpeedLevel" INHERITS "SimpleInfoPanelAttributeTextTemplate" {
+        SetPoint CENTER, "InfoPanelIconMoveSpeedBackdrop", BOTTOMRIGHT, -0.007625, 0.006875,
+	}
+
+    // --- value ------------------------------------------------------------
+    String "InfoPanelMoveSpeedIconValue" INHERITS "SimpleInfoPanelValueTextTemplate" {
+         SetPoint TOPLEFT, "InfoPanelIconMoveSpeedBackdrop", TOPRIGHT, 0.0, -0.005,
+    }
+}
+
+Frame "SIMPLEFRAME" "SimpleInfoPanelIconAttackSpeed" {
+    UseActiveContext,
+    SetAllPoints,
+    DecorateFileNames,
+    Height 0.03125,
+    Width 0.03125,
+
+    // --- icon -------------------------------------------------------------
+    Texture "InfoPanelIconAttackSpeedBackdrop" INHERITS "InfoPanelIconTemplate" {
+    }
+
+    // --- icon # -----------------------------------------------------------
+	String "InfoPanelIconAttackSpeedLevel" INHERITS "SimpleInfoPanelAttributeTextTemplate" {
+        SetPoint CENTER, "InfoPanelIconAttackSpeedBackdrop", BOTTOMRIGHT, -0.007625, 0.006875,
+	}
+
+    // --- value ------------------------------------------------------------
+    String "InfoPanelAttackSpeedIconValue" INHERITS "SimpleInfoPanelValueTextTemplate" {
+         SetPoint TOPLEFT, "InfoPanelIconAttackSpeedBackdrop", TOPRIGHT, 0.0, -0.005,
+    }
+}
+
+

@@ -1,0 +1,6 @@
+
+UI\PickHeroTemplate.fdf
+UI\BuffTemplate.fdf
+UI\TaxStealerGoldResourceBar.fdf
+UI\ExtraUnitInfoPanel.fdf
+

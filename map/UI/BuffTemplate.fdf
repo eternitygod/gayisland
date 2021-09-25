@@ -1,0 +1,78 @@
+
+
+IncludeFile "UI\FrameDef\UI\UpperButtonBar.fdf",
+
+Texture "BuffButtonBackgroundTemplate" {
+    Width 0.016,
+    Height 0.016,
+    File "UpperMenuButtonTexture",
+}
+
+Frame "SIMPLEBUTTON" "BuffButtonTemplate" {
+    Width 0.016,
+    Height 0.016,
+}
+
+//模拟buff栏
+Frame "SIMPLEFRAME" "BuffButtonFrame" {
+    Width 0.128,
+    Height 0.016,
+
+    Frame "SIMPLEBUTTON" "BuffButton01" INHERITS "BuffButtonTemplate"{
+        //SetPoint TOPLEFT,"BuffButtonFrame",TOPLEFT,0.002,0,
+        NormalTexture "BuffButtonBackground01",
+        Texture "BuffButtonBackground01" INHERITS "BuffButtonBackgroundTemplate"{
+        }
+    }
+
+    Frame "SIMPLEBUTTON" "BuffButton02" INHERITS "BuffButtonTemplate" {
+        //SetPoint LEFT,"BuffButton01",RIGHT,0,0,
+        NormalTexture "BuffButtonBackground02",
+        Texture "BuffButtonBackground02" INHERITS "BuffButtonBackgroundTemplate"{
+        }
+    }
+
+    Frame "SIMPLEBUTTON" "BuffButton03" INHERITS "BuffButtonTemplate" {
+        //SetPoint LEFT,"BuffButton02",RIGHT,0,0,
+        NormalTexture "BuffButtonBackground03",
+        Texture "BuffButtonBackground03" INHERITS "BuffButtonBackgroundTemplate"{
+        }
+    }
+
+    Frame "SIMPLEBUTTON" "BuffButton04" INHERITS "BuffButtonTemplate" {
+        //SetPoint LEFT,"BuffButton03",RIGHT,0,0,
+        NormalTexture "BuffButtonBackground04",
+        Texture "BuffButtonBackground04" INHERITS "BuffButtonBackgroundTemplate"{
+        }
+    }
+
+    Frame "SIMPLEBUTTON" "BuffButton05" INHERITS "BuffButtonTemplate" {
+        //SetPoint LEFT,"BuffButton04",RIGHT,0,0,
+        NormalTexture "BuffButtonBackground05",
+        Texture "BuffButtonBackground05" INHERITS "BuffButtonBackgroundTemplate"{
+        }
+    }
+
+    Frame "SIMPLEBUTTON" "BuffButton06" INHERITS "BuffButtonTemplate" {
+        //SetPoint LEFT,"BuffButton05",RIGHT,0,0,
+        NormalTexture "BuffButtonBackground06",
+        Texture "BuffButtonBackground06" INHERITS "BuffButtonBackgroundTemplate"{
+        }
+    }
+
+    Frame "SIMPLEBUTTON" "BuffButton07" INHERITS "BuffButtonTemplate" {
+        //SetPoint LEFT,"BuffButton06",RIGHT,0,0,
+        NormalTexture "BuffButtonBackground07",
+        Texture "BuffButtonBackground07" INHERITS "BuffButtonBackgroundTemplate"{
+        }
+    }
+
+    Frame "SIMPLEBUTTON" "BuffButton08" INHERITS "BuffButtonTemplate" {
+        //SetPoint LEFT,"BuffButton07",RIGHT,0,0,
+        NormalTexture "BuffButtonBackground08",
+        Texture "BuffButtonBackground08" INHERITS "BuffButtonBackgroundTemplate"{
+        }
+    }
+
+}
+
