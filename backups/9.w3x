@@ -106,8 +106,7 @@ constant integer EVENT_DAMAGE_DATA_WEAPON_TYPE= 5
 constant integer EVENT_DAMAGE_DATA_ATTACK_TYPE= 6
         //是否要DeBug
 boolean IsMirage= false
-constant integer UnitDelayedStandingKey=2
-hashtable UnitAbilityTrigger= InitHashtable()
+constant integer UnitDelayedStandingKey=3
 //endglobals from Common
 //globals from UITips:
 constant boolean LIBRARY_UITips=true
@@ -171,9 +170,9 @@ integer TaxStealerResourceBarFrame
 integer TaxStealerGoldFrameText
 integer TaxStealerGoldTipBoxedFrame
 integer TaxStealerGoldTipTextTitle
-constant integer StormSpirit___HaveOverload=3
-constant integer StormSpirit___OverloadEffectRight=4
-constant integer StormSpirit___OverloadEffectLeft=5
+constant integer StormSpirit__HaveOverload=4
+constant integer StormSpirit__OverloadEffectRight=5
+constant integer StormSpirit__OverloadEffectLeft=6
 	//ui的frame
 integer GameUI
 	//控制台UI
@@ -1146,16 +1145,6 @@ native DzFrameGetParent takes integer frame returns integer
     endfunction
 
 
-    // 创建一个绑定单位技能的触发器(使用重修之书后将删除此触发器) 多用于某些给单一单位注册的触发器
-    function CreateUnitAbilityTrigger takes unit whichUnit,integer iAbilityId returns trigger
-        local integer iHandleId= GetHandleId(whichUnit)
-        set bj_lastCreatedTrigger=CreateTrigger()
-        call SaveTriggerHandle(UnitAbilityTrigger, iHandleId, iAbilityId, bj_lastCreatedTrigger)
-        return bj_lastCreatedTrigger
-    endfunction
-
-
-
 //library Common ends
 //library UITips:
 	
@@ -1712,7 +1701,7 @@ endfunction
     function IntroCinematic___Init takes nothing returns nothing
         local trigger trig= CreateTrigger()
         call TriggerAddAction(trig, function IntroCinematicActions)
-        //call TriggerExecute(trig)
+        call TriggerExecute(trig)
         set trig=null
     endfunction
 
@@ -3038,9 +3027,6 @@ endfunction
         call SaveStr(ObjectData, SPELL_EFFECT, 'Ast0', "BallLightning")
         call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Ast3', "OverloadLearn1")
 
-        //枪兵 PikeMan
-        
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Apm2', "BattleSpiralLearn1")
 
         //屠夫 Pudge
         call SaveStr(ObjectData, SPELL_EFFECT, 'Apg1', "Pudge_MeatHook")
@@ -4126,7 +4112,7 @@ endfunction
 // scope StormSpirit begins
 
 
-    function StormSpirit___BallLightningMove takes nothing returns nothing
+    function StormSpirit__BallLightningMove takes nothing returns nothing
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local real distance= LoadReal(HT, h, 0)
@@ -4254,14 +4240,14 @@ endfunction
         call SaveInteger(HT, h, 30, ( IMaxBJ(R2I(SquareRoot(( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 )) / ( 25 + 25 * lv )), 1) ))
         call SaveEffectHandle(HT, h, 32, ( AddSpecialEffectTarget("effects\\Lightning_Ball_Tail_FX.mdx", d2, "origin") ))
         call TriggerRegisterTimerEvent(t, .04, true)
-        call TriggerAddCondition(t, Condition(function StormSpirit___BallLightningMove))
+        call TriggerAddCondition(t, Condition(function StormSpirit__BallLightningMove))
         set light=null
         set t=null
         set d1=null
         set d2=null
     endfunction
 
-    function StormSpirit___ElectricVortexTow takes nothing returns boolean
+    function StormSpirit__ElectricVortexTow takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit target= LoadUnitHandle(HT, h, 17)
@@ -4285,7 +4271,7 @@ endfunction
         return false
     endfunction
 
-    function StormSpirit___ElectricVortex_Fx takes unit u,unit target,integer lv returns nothing
+    function StormSpirit__ElectricVortex_Fx takes unit u,unit target,integer lv returns nothing
         local trigger t= CreateTrigger()
         local integer h= GetHandleId(t)
         local real x= GetUnitX(u)
@@ -4296,7 +4282,7 @@ endfunction
 
         call TriggerRegisterTimerEvent(t, .05, true)
         call TriggerRegisterDeathEvent(t, target)
-        call TriggerAddCondition(t, Condition(function StormSpirit___ElectricVortexTow))
+        call TriggerAddCondition(t, Condition(function StormSpirit__ElectricVortexTow))
 
         call SaveUnitHandle(HT, h, 17, target)
         call SaveInteger(HT, h, 5, 10 + 10 * lv)
@@ -4313,13 +4299,13 @@ endfunction
     //电子涡流
     function ElectricVortex takes nothing returns nothing
         if not HaveSpellShield((Tmp_SpellAbilityUnit)) then // INLINED!!
-            call StormSpirit___ElectricVortex_Fx((Tmp_SpellAbilityUnit) , (Tmp_SpellAbilityUnit) , (Tmp_SpellAbilityLevel)) // INLINED!!
+            call StormSpirit__ElectricVortex_Fx((Tmp_SpellAbilityUnit) , (Tmp_SpellAbilityUnit) , (Tmp_SpellAbilityLevel)) // INLINED!!
         endif
     endfunction
 
 
     //残影动作 造成伤害或持续时间到期
-    function StormSpirit___StaticRremnantActions takes nothing returns boolean
+    function StormSpirit__StaticRremnantActions takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local trigger effT= LoadTriggerHandle(HT, h, 9)
@@ -4377,7 +4363,7 @@ endfunction
     endfunction
 
     //创建残影 有0.5s的延迟出现 1.0s延迟生效
-    function StormSpirit___CreateStaticRremnant takes nothing returns boolean
+    function StormSpirit__CreateStaticRremnant takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local trigger newT
@@ -4399,7 +4385,7 @@ endfunction
             call SaveTriggerHandle(HT, newH, 9, t)
             call TriggerRegisterUnitInRange(newT, shadow, 235, null) //残影触发范围
             call TriggerRegisterUnitEvent(newT, shadow, EVENT_UNIT_DEATH)
-            call TriggerAddCondition(newT, Condition(function StormSpirit___StaticRremnantActions))
+            call TriggerAddCondition(newT, Condition(function StormSpirit__StaticRremnantActions))
             //else c > 2 then
         else
             call DestroyEffect(AddSpecialEffectTarget("effects\\ManaFlareBoltImpact_NoSound.mdx", LoadUnitHandle(HT, h, 30), "origin"))
@@ -4413,7 +4399,7 @@ endfunction
     //风暴之灵 - 残影
     function StaticRremnant takes nothing returns nothing
 
-        local integer h= CreateTimerEventTrigger(0.5, true, function StormSpirit___CreateStaticRremnant)
+        local integer h= CreateTimerEventTrigger(0.5, true, function StormSpirit__CreateStaticRremnant)
         local real x= GetUnitX((Tmp_SpellAbilityUnit)) // INLINED!!
         local real y= GetUnitY((Tmp_SpellAbilityUnit)) // INLINED!!
         call SaveInteger(HT, h, 50, (Tmp_SpellAbilityLevel)) // INLINED!!
@@ -4433,9 +4419,9 @@ endfunction
         local group g= LoginGroup()
         local unit u= Tmp_DamageInjured
         local real damage= GetUnitAbilityLevel(Tmp_DamageSource, 'Ast3') * 20 + 10
-        call SaveInteger(UnitKeyBuff, h, StormSpirit___HaveOverload, 0)
-        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit___OverloadEffectLeft))
-        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit___OverloadEffectRight))
+        call SaveInteger(UnitKeyBuff, h, StormSpirit__HaveOverload, 0)
+        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectLeft))
+        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectRight))
         call DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\Thunderclap\\ThunderClapCaster.mdl", GetUnitX(u), GetUnitY(u)))
 	
         set P2=GetOwningPlayer(Tmp_DamageSource)
@@ -4455,7 +4441,7 @@ endfunction
     endfunction
 
     function OverLoad_Filter takes nothing returns boolean
-        if LoadInteger(UnitKeyBuff, GetHandleId(Tmp_DamageSource), StormSpirit___HaveOverload) == 1 then
+        if LoadInteger(UnitKeyBuff, GetHandleId(Tmp_DamageSource), StormSpirit__HaveOverload) == 1 then
             call OverLoadActions()
         endif
         return false
@@ -4464,10 +4450,10 @@ endfunction
     function AddOverLoad takes nothing returns boolean
         local unit u= GetTriggerUnit()
         local integer h= GetHandleId(u)
-        if LoadInteger(UnitKeyBuff, h, StormSpirit___HaveOverload) == 0 then
-            call SaveInteger(UnitKeyBuff, h, StormSpirit___HaveOverload, 1)
-            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit___OverloadEffectRight, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "right hand") ))
-            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit___OverloadEffectLeft, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "left hand") ))
+        if LoadInteger(UnitKeyBuff, h, StormSpirit__HaveOverload) == 0 then
+            call SaveInteger(UnitKeyBuff, h, StormSpirit__HaveOverload, 1)
+            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectRight, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "right hand") ))
+            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectLeft, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "left hand") ))
         endif
         set u=null
         return false
@@ -4493,45 +4479,7 @@ endfunction
 
 
 // END IMPORT OF C:\Users\mayn\Desktop\GayIsland\map\Vjass\Hero\StormSpirit.j
-// BEGIN IMPORT OF C:\Users\mayn\Desktop\GayIsland\map\Vjass\Hero\PikeMan.j
 
-
-
-
-
-function BattleSpiralActions takes nothing returns boolean
-    local unit whichUnit= GetTriggerUnit()
-    local unit hAttacker= GetAttacker()
-    local integer iAbilityLevle= GetUnitAbilityLevel(whichUnit, 'Apm2')
-    local string effectPath= null
-    if IsUnitEnemy(whichUnit, GetOwningPlayer(hAttacker)) then
-        if PrdRandom(whichUnit, 'Apm2', 15) then
-            set effectPath="Abilities\\Spells\\Human\\BattleSpiral\\SpinFX3.mdx"
-            call SetUnitAnimation(whichUnit, "spin")
-            call DestroyEffect(AddSpecialEffectTarget(effectPath, whichUnit, "origin"))
-            call UnitDelayedStanding(whichUnit , 0.6)
-        endif
-    endif
-
-    set whichUnit=null
-    set hAttacker=null
-    return false
-endfunction
-
-// 学习战斗螺旋
-function BattleSpiralLearn1 takes nothing returns nothing
-    local unit whichUnit= GetLearningUnit()
-    local integer iAbilityId= GetLearnedSkill()
-    local trigger trig= CreateUnitAbilityTrigger(whichUnit , iAbilityId)
-
-    call TriggerRegisterUnitEvent(trig, whichUnit, EVENT_UNIT_ATTACKED)
-    call TriggerAddCondition(trig, Condition(function BattleSpiralActions))
-
-    set whichUnit=null
-    set trig=null
-endfunction
-
-// END IMPORT OF C:\Users\mayn\Desktop\GayIsland\map\Vjass\Hero\PikeMan.j
 
 
 
@@ -4543,11 +4491,11 @@ endfunction
 
 // scope Pudge begins
 
-    function Pudge___MeatHook_Filter takes nothing returns boolean
+    function Pudge__MeatHook_Filter takes nothing returns boolean
         return Alive_NoStructure(GetFilterUnit())
     endfunction
     
-    function Pudge___MeatHook_Return takes nothing returns boolean
+    function Pudge__MeatHook_Return takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit target= LoadUnitHandle(HT, h, 5)
@@ -4578,7 +4526,7 @@ endfunction
         return false
     endfunction
     
-    function Pudge___Pudge_MeatHook_Move takes nothing returns boolean
+    function Pudge__Pudge_MeatHook_Move takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit u= LoadUnitHandle(HT, h, 10)
@@ -4609,7 +4557,7 @@ endfunction
             call SaveEffectHandle(HT, rh, 2100 + count, hook)
             set hook=null
             set g=LoginGroup()
-            call GroupEnumUnitsInRange(g, x, y, range, Condition(function Pudge___MeatHook_Filter))
+            call GroupEnumUnitsInRange(g, x, y, range, Condition(function Pudge__MeatHook_Filter))
             call GroupRemoveUnit(g, u)
             set target=FirstOfGroup(g)
             if target == null then
@@ -4622,7 +4570,7 @@ endfunction
                 call ClearTrigger(t)
                 call TriggerRegisterTimerEvent(rt, .025, true)
                 call TriggerRegisterDeathEvent(rt, target)
-                call TriggerAddCondition(rt, Condition(function Pudge___MeatHook_Return))
+                call TriggerAddCondition(rt, Condition(function Pudge__MeatHook_Return))
                 call SetUnitPathing(target, false)
                 call SaveInteger(HT, rh, 21, count)
                 call SaveBoolean(HT, rh, 10, true)
@@ -4637,7 +4585,7 @@ endfunction
             call FlushChildHashtable(HT, h)
             call ClearTrigger(t)
             call TriggerRegisterTimerEvent(rt, .025, true)
-            call TriggerAddCondition(rt, Condition(function Pudge___MeatHook_Return))
+            call TriggerAddCondition(rt, Condition(function Pudge__MeatHook_Return))
             call SaveInteger(HT, rh, 21, count)
         endif
     
@@ -4649,7 +4597,7 @@ endfunction
     
     //技能函数不能为私有函数(因为函数名记录在哈希表内)
     function Pudge_MeatHook takes nothing returns nothing
-        local integer h= CreateTimerEventTrigger(.025, true, function Pudge___Pudge_MeatHook_Move)
+        local integer h= CreateTimerEventTrigger(.025, true, function Pudge__Pudge_MeatHook_Move)
         //前进方向
         local real a= AngleBetweenXY(GetUnitX((Tmp_SpellAbilityUnit)), GetUnitY((Tmp_SpellAbilityUnit)), (Tmp_SpellTargetX), (Tmp_SpellTargetY)) // INLINED!!
         
@@ -4661,7 +4609,7 @@ endfunction
     
     endfunction
     
-    function Pudge___Pudge_Rot_Action takes nothing returns boolean
+    function Pudge__Pudge_Rot_Action takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit u= LoadUnitHandle(HT, h, 10)
@@ -4715,7 +4663,7 @@ endfunction
             set trig=CreateTrigger()
             set h=GetHandleId(trig)
             call TriggerRegisterTimerEvent(trig, 0.1, true)
-            call TriggerAddCondition(trig, Condition(function Pudge___Pudge_Rot_Action))
+            call TriggerAddCondition(trig, Condition(function Pudge__Pudge_Rot_Action))
             call SaveTriggerHandle(UnitKeyBuff, GetHandleId(whichUnit), 'Bpg2', trig)
             call SaveUnitHandle(HT, h, 10, whichUnit)
             call UnitAddPermanentAbility(whichUnit, 'Ab05')
@@ -6767,6 +6715,8 @@ function TestEsc takes nothing returns boolean
 		call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "运行时间" + R2S(S2R(EXExecuteScript("os.clock()")) - time))
 		call BJDebugMsg(R2S(GetUnitState(LocalPlayerSelectUnit, UNIT_STATE_RATE_OF_FIRE)))
 	endif
+	call SetUnitAnimation(GetDetectedUnit(), "spin")
+	call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Human\\BattleSpiral\\SpinFX3.mdx", GetDetectedUnit(), "origin"))
 
 	//call GetLocalizedHotkey("yd_leak_monitor::create_report")
 	//call EnableNewUnitStateUI(not NewUnitStateUIIsEnable)

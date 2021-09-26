@@ -17,8 +17,9 @@ function ClickReturnButton takes nothing returns nothing
 
 	call DzFrameShow(PickHeroBackDrop, false)
 	//call DzFrameCageMouse(PickHeroBackDrop, false)
-	//call EnableUserControl(true)
-	//call EnableSelect(true, true)
+	//
+	
+	call EnableSelect(true, true)
 	call EnableDragSelect(true, true)
 	call EnablePreSelect(true, true)
 endfunction
@@ -27,7 +28,8 @@ function ClickPickHeroButton takes nothing returns nothing
 
 	call DzFrameShow(PickHeroBackDrop, true)
 	//call DzFrameCageMouse(PickHeroBackDrop, true)
-	//call EnableSelect(false, false)
+	
+	call EnableSelect(false, false)
 	call EnableDragSelect(false, false)
 	call EnablePreSelect(false, false)
 endfunction

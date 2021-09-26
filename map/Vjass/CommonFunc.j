@@ -667,6 +667,52 @@ library Common
         return Tmp_SpellTargetY
     endfunction
 
+    globals
+        key UnitDelayedStandingKey
+    endglobals
+
+    function UnitDelayStandActions takes nothing returns nothing
+        local timer hTimer = GetExpiredTimer()
+        local integer iHandleId = GetHandleId(hTimer)
+        local unit whichUnit = LoadUnitHandle(HT, iHandleId, 0)
+
+        if UnitAlive(whichUnit) then
+            call SetUnitAnimation(whichUnit, "Stand")
+        endif
+        call RemoveSavedHandle(UnitKeyBuff, GetHandleId(whichUnit), UnitDelayedStandingKey)
+
+        call DestroyTimer(hTimer)
+        set hTimer = null
+        set whichUnit = null
+    endfunction
+
+    // 让单位在等待一段时间后播放Stand动作 重复使用会覆盖
+    function UnitDelayedStanding takes unit whichUnit, real dur returns nothing
+        local integer iHandleId = GetHandleId(whichUnit)
+        local timer hTimer = LoadTimerHandle(UnitKeyBuff, iHandleId, UnitDelayedStandingKey)
+        if hTimer == null then
+            set hTimer = CreateTimer()
+            call SaveUnitHandle(HT, GetHandleId(hTimer), 0, whichUnit)
+            call SaveTimerHandle(UnitKeyBuff, iHandleId, UnitDelayedStandingKey, hTimer)
+        endif
+        call TimerStart(hTimer, dur, false, function UnitDelayStandActions)
+
+        set hTimer = null
+    endfunction
+
+    globals
+        hashtable UnitAbilityTrigger = InitHashtable()
+    endglobals
+
+    // 创建一个绑定单位技能的触发器(使用重修之书后将删除此触发器) 多用于某些给单一单位注册的触发器
+    function CreateUnitAbilityTrigger takes unit whichUnit, integer iAbilityId returns trigger
+        local integer iHandleId = GetHandleId(whichUnit)
+        set bj_lastCreatedTrigger = CreateTrigger()
+        call SaveTriggerHandle(UnitAbilityTrigger, iHandleId, iAbilityId, bj_lastCreatedTrigger)
+        return bj_lastCreatedTrigger
+    endfunction
+
+
 endlibrary
 
 

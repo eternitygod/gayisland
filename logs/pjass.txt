@@ -1,0 +1,4 @@
+Parse successful:     2418 lines: C:\Users\mayn\Desktop\GayIsland\tools\jasshelper\scripts\common.j
+Parse successful:     7130 lines: C:\Users\mayn\Desktop\GayIsland\scripts\blizzard.j
+Parse successful:     7022 lines: logs\currentmapscript.j
+Parse successful:    16570 lines: <total>

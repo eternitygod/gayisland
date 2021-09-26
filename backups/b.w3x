@@ -106,8 +106,8 @@ constant integer EVENT_DAMAGE_DATA_WEAPON_TYPE= 5
 constant integer EVENT_DAMAGE_DATA_ATTACK_TYPE= 6
         //是否要DeBug
 boolean IsMirage= false
-constant integer UnitDelayedStandingKey=2
-hashtable UnitAbilityTrigger= InitHashtable()
+constant integer UnitDelayedStandingKey=3
+hashtable UnitAbilityTrigger
 //endglobals from Common
 //globals from UITips:
 constant boolean LIBRARY_UITips=true
@@ -171,9 +171,9 @@ integer TaxStealerResourceBarFrame
 integer TaxStealerGoldFrameText
 integer TaxStealerGoldTipBoxedFrame
 integer TaxStealerGoldTipTextTitle
-constant integer StormSpirit___HaveOverload=3
-constant integer StormSpirit___OverloadEffectRight=4
-constant integer StormSpirit___OverloadEffectLeft=5
+constant integer StormSpirit___HaveOverload=4
+constant integer StormSpirit___OverloadEffectRight=5
+constant integer StormSpirit___OverloadEffectLeft=6
 	//ui的frame
 integer GameUI
 	//控制台UI
@@ -1712,7 +1712,7 @@ endfunction
     function IntroCinematic___Init takes nothing returns nothing
         local trigger trig= CreateTrigger()
         call TriggerAddAction(trig, function IntroCinematicActions)
-        //call TriggerExecute(trig)
+        call TriggerExecute(trig)
         set trig=null
     endfunction
 
@@ -4505,12 +4505,10 @@ function BattleSpiralActions takes nothing returns boolean
     local integer iAbilityLevle= GetUnitAbilityLevel(whichUnit, 'Apm2')
     local string effectPath= null
     if IsUnitEnemy(whichUnit, GetOwningPlayer(hAttacker)) then
-        if PrdRandom(whichUnit, 'Apm2', 15) then
-            set effectPath="Abilities\\Spells\\Human\\BattleSpiral\\SpinFX3.mdx"
-            call SetUnitAnimation(whichUnit, "spin")
-            call DestroyEffect(AddSpecialEffectTarget(effectPath, whichUnit, "origin"))
-            call UnitDelayedStanding(whichUnit , 0.6)
-        endif
+        set effectPath="Abilities\\Spells\\Human\\BattleSpiral\\SpinFX3.mdx"
+        call SetUnitAnimation(whichUnit, "spin")
+        call DestroyEffect(AddSpecialEffectTarget(effectPath, whichUnit, "origin"))
+        call UnitDelayedStanding(whichUnit , 0.6)
     endif
 
     set whichUnit=null
@@ -4520,7 +4518,7 @@ endfunction
 
 // 学习战斗螺旋
 function BattleSpiralLearn1 takes nothing returns nothing
-    local unit whichUnit= GetLearningUnit()
+    local unit whichUnit= GetTriggerUnit()
     local integer iAbilityId= GetLearnedSkill()
     local trigger trig= CreateUnitAbilityTrigger(whichUnit , iAbilityId)
 
@@ -4543,11 +4541,11 @@ endfunction
 
 // scope Pudge begins
 
-    function Pudge___MeatHook_Filter takes nothing returns boolean
+    function Pudge__MeatHook_Filter takes nothing returns boolean
         return Alive_NoStructure(GetFilterUnit())
     endfunction
     
-    function Pudge___MeatHook_Return takes nothing returns boolean
+    function Pudge__MeatHook_Return takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit target= LoadUnitHandle(HT, h, 5)
@@ -4578,7 +4576,7 @@ endfunction
         return false
     endfunction
     
-    function Pudge___Pudge_MeatHook_Move takes nothing returns boolean
+    function Pudge__Pudge_MeatHook_Move takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit u= LoadUnitHandle(HT, h, 10)
@@ -4609,7 +4607,7 @@ endfunction
             call SaveEffectHandle(HT, rh, 2100 + count, hook)
             set hook=null
             set g=LoginGroup()
-            call GroupEnumUnitsInRange(g, x, y, range, Condition(function Pudge___MeatHook_Filter))
+            call GroupEnumUnitsInRange(g, x, y, range, Condition(function Pudge__MeatHook_Filter))
             call GroupRemoveUnit(g, u)
             set target=FirstOfGroup(g)
             if target == null then
@@ -4622,7 +4620,7 @@ endfunction
                 call ClearTrigger(t)
                 call TriggerRegisterTimerEvent(rt, .025, true)
                 call TriggerRegisterDeathEvent(rt, target)
-                call TriggerAddCondition(rt, Condition(function Pudge___MeatHook_Return))
+                call TriggerAddCondition(rt, Condition(function Pudge__MeatHook_Return))
                 call SetUnitPathing(target, false)
                 call SaveInteger(HT, rh, 21, count)
                 call SaveBoolean(HT, rh, 10, true)
@@ -4637,7 +4635,7 @@ endfunction
             call FlushChildHashtable(HT, h)
             call ClearTrigger(t)
             call TriggerRegisterTimerEvent(rt, .025, true)
-            call TriggerAddCondition(rt, Condition(function Pudge___MeatHook_Return))
+            call TriggerAddCondition(rt, Condition(function Pudge__MeatHook_Return))
             call SaveInteger(HT, rh, 21, count)
         endif
     
@@ -4649,7 +4647,7 @@ endfunction
     
     //技能函数不能为私有函数(因为函数名记录在哈希表内)
     function Pudge_MeatHook takes nothing returns nothing
-        local integer h= CreateTimerEventTrigger(.025, true, function Pudge___Pudge_MeatHook_Move)
+        local integer h= CreateTimerEventTrigger(.025, true, function Pudge__Pudge_MeatHook_Move)
         //前进方向
         local real a= AngleBetweenXY(GetUnitX((Tmp_SpellAbilityUnit)), GetUnitY((Tmp_SpellAbilityUnit)), (Tmp_SpellTargetX), (Tmp_SpellTargetY)) // INLINED!!
         
@@ -4661,7 +4659,7 @@ endfunction
     
     endfunction
     
-    function Pudge___Pudge_Rot_Action takes nothing returns boolean
+    function Pudge__Pudge_Rot_Action takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit u= LoadUnitHandle(HT, h, 10)
@@ -4715,7 +4713,7 @@ endfunction
             set trig=CreateTrigger()
             set h=GetHandleId(trig)
             call TriggerRegisterTimerEvent(trig, 0.1, true)
-            call TriggerAddCondition(trig, Condition(function Pudge___Pudge_Rot_Action))
+            call TriggerAddCondition(trig, Condition(function Pudge__Pudge_Rot_Action))
             call SaveTriggerHandle(UnitKeyBuff, GetHandleId(whichUnit), 'Bpg2', trig)
             call SaveUnitHandle(HT, h, 10, whichUnit)
             call UnitAddPermanentAbility(whichUnit, 'Ab05')

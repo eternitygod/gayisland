@@ -505,6 +505,7 @@ globals
     item bj_lastCreatedItem = null
     item bj_lastRemovedItem = null
 
+    trigger            bj_lastCreatedTrigger       = null
     texttag            bj_lastCreatedTextTag       = null
     lightning          bj_lastCreatedLightning     = null
     image              bj_lastCreatedImage         = null

@@ -5,6 +5,6 @@
 //! import "Hero\DeterminedExterminator.j"
 //! import "Hero\ModelCitizen.j"
 //! import "Hero\StormSpirit.j"
-
+//! import "Hero\PikeMan.j"
 
 
