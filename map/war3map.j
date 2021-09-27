@@ -106,7 +106,15 @@ constant integer EVENT_DAMAGE_DATA_WEAPON_TYPE= 5
 constant integer EVENT_DAMAGE_DATA_ATTACK_TYPE= 6
         //是否要DeBug
 boolean IsMirage= false
-constant integer UnitDelayedStandingKey=2
+        
+        // 魔法
+constant integer DAMAGE_TYPE_MAGICAL= 1
+        // 物理
+constant integer DAMAGE_TYPE_PHYSICAL= 2
+        // 纯粹
+constant integer DAMAGE_TYPE_PURE= 3
+        
+constant integer UnitDelayedStandingKey=9
 hashtable UnitAbilityTrigger= InitHashtable()
 //endglobals from Common
 //globals from UITips:
@@ -171,9 +179,9 @@ integer TaxStealerResourceBarFrame
 integer TaxStealerGoldFrameText
 integer TaxStealerGoldTipBoxedFrame
 integer TaxStealerGoldTipTextTitle
-constant integer StormSpirit___HaveOverload=3
-constant integer StormSpirit___OverloadEffectRight=4
-constant integer StormSpirit___OverloadEffectLeft=5
+constant integer StormSpirit___HaveOverload=10
+constant integer StormSpirit___OverloadEffectRight=11
+constant integer StormSpirit___OverloadEffectLeft=12
 	//ui的frame
 integer GameUI
 	//控制台UI
@@ -664,6 +672,7 @@ native DzFrameGetParent takes integer frame returns integer
         set trig=null
         set durTimer=null
     endfunction
+
 
     //造成伤害 脚本中除了普攻以外的伤害都由此造成
     function DamageUnit takes unit whichUnit,unit target,integer Type,real amount returns nothing
@@ -4502,14 +4511,55 @@ endfunction
 function BattleSpiralActions takes nothing returns boolean
     local unit whichUnit= GetTriggerUnit()
     local unit hAttacker= GetAttacker()
-    local integer iAbilityLevle= GetUnitAbilityLevel(whichUnit, 'Apm2')
-    local string effectPath= null
+    local string spinEffectPath= null
+    local string targetEffectPath= null
+    local group enumDamageTarget
+    local unit firstUnit
+
+    local integer iAbilityLevle
+    local real rDamageAmount
+    local real radius
+    local integer iDamageType
+
     if IsUnitEnemy(whichUnit, GetOwningPlayer(hAttacker)) then
         if PrdRandom(whichUnit, 'Apm2', 15) then
-            set effectPath="Abilities\\Spells\\Human\\BattleSpiral\\SpinFX3.mdx"
+
+            // 物理伤害 对敌对单位 非建筑 无视魔免
+
+            set iAbilityLevle=GetUnitAbilityLevel(whichUnit, 'Apm2')
+            set radius=325
+            set iDamageType=DAMAGE_TYPE_PHYSICAL
+            set rDamageAmount=50 + iAbilityLevle * 20
+            set spinEffectPath="Abilities\\Spells\\Human\\BattleSpiral\\SpinFX3.mdx"
+            set targetEffectPath="Abilities\\Spells\\Other\\Stampede\\StampedeMissileDeath.mdl"
+
             call SetUnitAnimation(whichUnit, "spin")
-            call DestroyEffect(AddSpecialEffectTarget(effectPath, whichUnit, "origin"))
+            call DestroyEffect(AddSpecialEffectTarget(spinEffectPath, whichUnit, "origin"))
             call UnitDelayedStanding(whichUnit , 0.6)
+
+
+            set enumDamageTarget=LoginGroup()
+            call GroupEnumUnitsInRange(enumDamageTarget, GetUnitX(whichUnit), GetUnitY(whichUnit), radius, null)
+            call GroupRemoveUnit(enumDamageTarget, whichUnit)
+            set P2=GetOwningPlayer(whichUnit)
+
+            loop
+                set firstUnit=FirstOfGroup(enumDamageTarget)
+                exitwhen firstUnit == null
+
+                if Enemy_Alive_NoStructure(firstUnit) then
+
+                    call DestroyEffect(AddSpecialEffectTarget(targetEffectPath, firstUnit, "origin"))
+                    call DamageUnit(whichUnit , firstUnit , iDamageType , rDamageAmount)
+
+                endif
+                
+                call GroupRemoveUnit(enumDamageTarget, firstUnit)
+            endloop
+            set firstUnit=null
+            call LogoutGroup(enumDamageTarget)
+            set enumDamageTarget=null
+
         endif
     endif
 

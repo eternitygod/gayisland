@@ -217,6 +217,17 @@ library Common
         set durTimer = null
     endfunction
 
+    globals
+        
+        // 魔法
+        constant integer DAMAGE_TYPE_MAGICAL = 1
+        // 物理
+        constant integer DAMAGE_TYPE_PHYSICAL = 2
+        // 纯粹
+        constant integer DAMAGE_TYPE_PURE = 3
+        
+    endglobals
+
     //造成伤害 脚本中除了普攻以外的伤害都由此造成
     function DamageUnit takes unit whichUnit, unit target, integer Type, real amount returns nothing
         if Type == 0 or amount < 0 then
