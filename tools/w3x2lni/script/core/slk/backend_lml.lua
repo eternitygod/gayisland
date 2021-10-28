@@ -6,15 +6,11 @@ local wct
 local wts
 
 local type = type
-local tonumber = tonumber
-local pairs = pairs
 local ipairs = ipairs
 local find = string.find
 local gsub = string.gsub
 local format = string.format
 local rep = string.rep
-local buf
-local lml_table
 
 local sp_rep = setmetatable({}, {
     __index = function (self, k)
@@ -39,28 +35,28 @@ end
 
 local function lml_key(str)
     if type(str) == 'string' then
-        if find(str:match '^%s*(.-)%s*$', "[%s%:%'%c]") then
+        if find(str:match '^[ \t]*(.-)[ \t]*$', "[%s%:%'%c]") then
             str = format("'%s'", gsub(str, "'", "''"))
         end
     end
     return str
 end
 
-local function lml_value(v, sp)
+local function lml_value(buf, v, sp)
     if v[2] then
-        buf[#buf+1] = format('%s%s: %s\n', sp_rep[sp], lml_key(v[1]), lml_string(v[2]))
+        buf[#buf+1] = format('%s%s: %s\r\n', sp_rep[sp], lml_key(v[1]), lml_string(v[2]))
     else
-        buf[#buf+1] = format('%s%s\n', sp_rep[sp], lml_string(v[1]))
+        buf[#buf+1] = format('%s%s\r\n', sp_rep[sp], lml_string(v[1]))
     end
     for i = 3, #v do
-        lml_value(v[i], sp+4)
+        lml_value(buf, v[i], sp+4)
     end
 end
 
 local function convert_lml(tbl)
-    buf = {}
+    local buf = {}
     for i = 3, #tbl do
-        lml_value(tbl[i], 0)
+        lml_value(buf, tbl[i], 0)
     end
     return table.concat(buf)
 end
@@ -84,91 +80,170 @@ local function get_path(path, used, index,  max)
     return path
 end
 
-local function compute_path()
-    if not wtg then
-        return
-    end
-    local dirs = {}
-    local used = {}
-    local map = {}
-    local max = #wtg.categories
-    for index, dir in ipairs(wtg.categories) do
-        dirs[dir.id] = {}
-        map[dir.id] = {}
-        local path = get_path(dir.name, used, index, max)
-        map[dir.id][1] = path
-    end
-    for _, trg in ipairs(wtg.triggers) do
-        table.insert(dirs[trg.category], trg)
-    end
-    for _, dir in ipairs(wtg.categories) do
-        local max = #dirs[dir.id]
+local function read_dirs()
+    local lml = { '', false }
+    local function unpack(childs, dir_data)
+        if wtg.sort then
+            table.sort(childs, function (a, b)
+                return wtg.sort[a] < wtg.sort[b]
+            end)
+        end
         local used = {}
-        for index, trg in ipairs(dirs[dir.id]) do
-            map[dir.id][trg.name] = get_path(trg.name, used, index, max)
+        for i, obj in ipairs(childs) do
+            local result
+            obj.path = get_path(obj.name, used, i, #childs)
+            if obj.obj == 'trigger' then
+                local trg = obj
+                local trg_data = { trg.path, trg.name }
+                if trg.type == 1 then
+                    trg_data[#trg_data+1] = { lang.lml.COMMENT }
+                end
+                if trg.enable == 0 then
+                    trg_data[#trg_data+1] = { lang.lml.DISABLE }
+                end
+                if trg.close == 1 then
+                    trg_data[#trg_data+1] = { lang.lml.CLOSE }
+                end
+                if trg.run == 1 then
+                    trg_data[#trg_data+1] = { lang.lml.RUN }
+                end
+                result = trg_data
+            elseif obj.obj == 'var' then
+                local var = obj
+                local var_data = { var.path, var.name }
+                result = var_data
+            elseif obj.obj == 'category' then
+                result = { obj.path, obj.name }
+                if obj.comment == 1 then
+                    result[#result+1] = { lang.lml.COMMENT }
+                end
+                unpack(obj.childs, result)
+            end
+            dir_data[#dir_data+1] = result
         end
     end
-    return map
+
+    if wtg.format_version then
+        unpack(wtg.root.childs, lml)
+    else
+        local objs = {
+            [0] = {}
+        }
+        for _, dir in ipairs(wtg.categories) do
+            objs[dir.id] = {}
+        end
+        for _, trg in ipairs(wtg.triggers) do
+            table.insert(objs[trg.category], trg)
+        end
+        local used = {}
+        for i, dir in ipairs(wtg.categories) do
+            dir.path = get_path(dir.name, used, i, #wtg.categories)
+            local cate = { dir.path, dir.name }
+            lml[#lml+1] = cate
+            unpack(objs[dir.id], cate)
+        end
+    end
+
+    return convert_lml(lml)
 end
 
-local function read_dirs(map)
-    local dirs = {}
-    for _, dir in ipairs(wtg.categories) do
-        dirs[dir.id] = {}
+local function get_trg_path(map, id, path)
+    local dir = map[id]
+    if not dir then
+        return path
     end
-    for _, trg in ipairs(wtg.triggers) do
-        table.insert(dirs[trg.category], trg)
-    end
-    local lml = { '', false }
-    for i, dir in ipairs(wtg.categories) do
-        local filename = map[dir.id][1]
-        local dir_data = { filename, dir.name }
-        if dir.comment == 1 then
-            dir_data[#dir_data+1] = { lang.lml.COMMENT, false }
-        end
-
-        for i, trg in ipairs(dirs[dir.id]) do
-            local trg_data = { map[dir.id][trg.name], trg.name }
-            if trg.type == 1 then
-                trg_data[#trg_data+1] = { lang.lml.COMMENT }
-            end
-            if trg.enable == 0 then
-                trg_data[#trg_data+1] = { lang.lml.DISABLE }
-            end
-            if trg.close == 1 then
-                trg_data[#trg_data+1] = { lang.lml.CLOSE }
-            end
-            if trg.run == 1 then
-                trg_data[#trg_data+1] = { lang.lml.RUN }
-            end
-            dir_data[#dir_data+1] = trg_data
-        end
-        lml[i+2] = dir_data
-    end
-    return convert_lml(lml)
+    return get_trg_path(map, dir.category, dir.path .. '\\' .. path)
 end
 
 local function read_triggers(files, map)
     if not wtg then
         return
     end
-    local triggers = {}
-    for i, trg in ipairs(wtg.triggers) do
-        local dir = map[trg.category]
-        local path = dir[1] .. '\\' .. dir[trg.name]
+    local wct_index = 0
+    for _, trg in ipairs(wtg.triggers) do
+        local path = get_trg_path(map, trg.category, trg.path)
         if trg.wct == 0 and trg.type == 0 then
             files[path..'.lml'] = convert_lml(trg.trg)
         end
         if #trg.des > 0 then
             files[path..'.txt'] = trg.des
         end
+        -- 在新格式下，只有type = 0的触发器，才会与wct对齐
+        if wtg.format_version then
+            if trg.type == 0 then
+                wct_index = wct_index + 1
+            end
+        else
+            wct_index = wct_index + 1
+        end
         if trg.wct == 1 then
-            local buf = wct.triggers[i]
+            local buf = wct.triggers[wct_index]
             if #buf > 0 then
                 files[path..'.j'] = buf
             end
         end
     end
+    if wtg.format_version then
+        for i, var in ipairs(wtg.vars) do
+            local id = var.id
+            local trgvar = map[id]
+            local path = get_trg_path(map, trgvar.category, trgvar.path)
+            table.insert(var, 3, { var[2], false })
+            files[path..'.v.lml'] = convert_lml(var)
+        end
+    end
+end
+
+local function convert_vars(vars, id)
+    local tbl = { '', false }
+    for _, var in ipairs(vars) do
+        if var.category == id then
+            tbl[#tbl+1] = var
+        end
+    end
+    return convert_lml(tbl)
+end
+
+local function convert_config(wtg)
+    local lines = {}
+    local function add(key, value)
+        lines[#lines+1] = ('%s = %s'):format(key, value)
+    end
+    add('FormatVersion', wtg.format_version)
+    for i = 1, 11 do
+        add('Unknown'..tostring(i), wtg['unknown'..tostring(i)])
+    end
+    return table.concat(lines, '\r\n')
+end
+
+local function read_variables(files, map)
+    local vars = convert_vars(wtg.vars, 0)
+    if #vars > 0 then
+        files['variable.lml'] = vars
+    end
+    for i, dir in ipairs(wtg.categories) do
+        local vars = convert_vars(wtg.vars, dir.id)
+        if #vars > 0 then
+            local path = get_trg_path(map, dir.category, 'variable.lml')
+            files[path] = vars
+        end
+    end
+end
+
+local function build_map()
+    local map = {}
+    for _, cat in ipairs(wtg.categories) do
+        map[cat.id] = cat
+    end
+    if wtg.format_version then
+        for _, trg in ipairs(wtg.triggers) do
+            map[trg.id] = trg
+        end
+        for _, var in ipairs(wtg.trgvars) do
+            map[var.id] = var
+        end
+    end
+    return map
 end
 
 return function (w2l_, wtg_, wct_, wts_)
@@ -179,6 +254,10 @@ return function (w2l_, wtg_, wct_, wts_)
 
     local files = {}
 
+    if wtg.format_version then
+        files['config.lua'] = convert_config(wtg)
+    end
+
     if #wct.custom.comment > 0 then
         files['code.txt'] = wct.custom.comment
     end
@@ -186,19 +265,16 @@ return function (w2l_, wtg_, wct_, wts_)
         files['code.j'] = wct.custom.code
     end
 
-    local vars = convert_lml(wtg.vars)
-    if #vars > 0 then
-        files['variable.lml'] = vars
-    end
-
-    local map = compute_path()
-    
-    local listfile = read_dirs(map)
+    local listfile = read_dirs()
     if #listfile > 0 then
         files['catalog.lml'] = listfile
     end
 
+    local map = build_map()
     read_triggers(files, map)
+    if not wtg.format_version then
+        read_variables(files, map)
+    end
 
     return files
 end

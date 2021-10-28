@@ -1,5 +1,5 @@
-require 'filesystem'
-local registry = require 'registry'
+local fs = require 'bee.filesystem'
+local registry = require 'bee.registry'
 
 local function main()
     local command = (registry.open [[HKEY_CURRENT_USER\SOFTWARE\Classes\YDWEMap\shell\run_war3\command]])['']
@@ -9,6 +9,6 @@ end
 local suc, r = pcall(main)
 if not suc or not r then
     print('需要YDWE关联w3x文件')
-    return
+    return false
 end
 return r

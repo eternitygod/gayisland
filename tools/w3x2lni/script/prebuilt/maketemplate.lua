@@ -1,16 +1,30 @@
 local config = require 'share.config'
 local root = require 'backend.w2l_path'
+local fs = require 'bee.filesystem'
 
-return function (w2l, version, slk)
+return function (w2l, war3, version, slk)
     local template_path = root / 'template' / version
-    w2l:set_setting
-    {
-        data      = config.global.data,
-        data_ui   = config.global.data_ui,
-        data_meta = config.global.data_meta,
-        data_wes  = config.global.data_wes,
-        version   = version,
-    }
+
+    if war3.casc then
+        w2l:set_setting
+        {
+            data      = config.global.data,
+            data_ui   = '${DATA}',
+            data_meta = '${DATA}',
+            data_wes  = '${DATA}',
+            version   = version,
+        }
+    else
+        w2l:set_setting
+        {
+            data      = config.global.data,
+            data_ui   = config.global.data_ui,
+            data_meta = config.global.data_meta,
+            data_wes  = config.global.data_wes,
+            version   = version,
+        }
+    end
+
     w2l.progress:start(0.3)
     slk = slk or w2l:get_default(true)
     w2l.progress:finish()

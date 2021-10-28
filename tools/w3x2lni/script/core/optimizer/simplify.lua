@@ -4,18 +4,26 @@ local lang = require 'lang'
 local ipairs = ipairs
 local pairs = pairs
 
-local jass, report, confuse1, confuse2
+local jass, state, report, confuse1, confuse2
 local current_function, current_line, has_call
 local executes, executed_any, global_variable_any
 local mark_exp, mark_lines, mark_function
 
 local function get_function(name)
-    return jass.functions[name]
+    return state.functions[name]
 end
 
 local function get_arg(name)
-    if current_function and current_function.args then
-        return current_function.args[name]
+    if current_function then
+        local args = current_function.args
+        if args then
+            for i = #args, 1, -1 do
+                local arg = args[i]
+                if arg.name == name then
+                    return arg
+                end
+            end
+        end
     end
 end
 
@@ -34,7 +42,7 @@ local function get_local(name)
 end
 
 local function get_global(name)
-    return jass.globals[name]
+    return state.globals[name]
 end
 
 local function get_var(name)
@@ -82,6 +90,9 @@ function mark_exp(exp)
 end
 
 local function mark_locals(locals)
+    if not locals then
+        return
+    end
     for _, loc in ipairs(locals) do
         if loc[1] then
             current_line = loc.line
@@ -280,11 +291,22 @@ local function fix_globals()
     end
 end
 
+local function can_be_any_executed(func)
+    if not executed_any then
+        return false
+    end
+    -- 带有参数的函数不可能被 execute
+    if func.args then
+        return false
+    end
+    return true
+end
+
 local function mark_executed_used(func)
     if func.used then
         return
     end
-    if executed_any then
+    if can_be_any_executed(func) then
         mark_function(func)
         return
     end
@@ -305,6 +327,9 @@ local function mark_executed_confuse(func)
     if func.native then
         return
     end
+    if can_be_any_executed(func) then
+        return
+    end
     for head in pairs(executes) do
         if name:sub(1, #head) == head then
             func.confused = confuse2(head) .. name:sub(#head+1)
@@ -322,7 +347,7 @@ local function mark_executed()
     for _, func in ipairs(jass.functions) do
         mark_executed_used(func)
     end
-    if not executed_any and confuse1 then
+    if confuse1 then
         for _, func in ipairs(jass.functions) do
             mark_executed_confuse(func)
         end
@@ -341,6 +366,9 @@ local function can_use(name)
     local func = get_function(name)
     if func then
         if func.file ~= 'war3map.j' then
+            return false
+        end
+        if not func.confused then
             return false
         end
         return true
@@ -372,7 +400,7 @@ local function init_confuser(confused, confusion)
     if #chars < 3 then
         report(lang.report.CONFUSE_JASS, lang.report.CONFUSED_FAILED, lang.report.NEED_3_CHARS)
     end
-    
+
     confusion = table.concat(chars)
 
     local count = 0
@@ -406,14 +434,15 @@ local function init_confuser(confused, confusion)
     end
 end
 
-return function (ast, setting, _report)
+return function (ast, _state, config, _report)
     jass = ast
     report = _report
+    state = _state
 
-    init_confuser(setting.confused, setting.confusion)
-    mark_globals()
+    init_confuser(config.confused, config.confusion)
     mark_function(get_function 'config')
     mark_function(get_function 'main')
     mark_executed()
+    mark_globals()
     fix_globals()
 end

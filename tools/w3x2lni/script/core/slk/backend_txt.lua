@@ -1,5 +1,6 @@
 local w3xparser = require 'w3xparser'
 local lang = require 'lang'
+local convertreal = require 'convertreal'
 
 local table_concat = table.concat
 local ipairs = ipairs
@@ -8,7 +9,6 @@ local pairs = pairs
 local table_sort = table.sort
 local table_insert = table.insert
 local math_floor = math.floor
-local wtonumber = w3xparser.tonumber
 local select = select
 local table_unpack = table.unpack
 local os_clock = os.clock
@@ -22,22 +22,39 @@ local keys
 local remove_unuse_object
 local object
 
-local function to_type(tp, value)
+local function to_type(tp, value, reforge)
     if tp == 0 then
-        if not value or value == 0 then
+        if not value then
             return nil
+        end
+        local value = tostring(math_floor(value))
+        if value == '0' then
+            return reforge and 0 or nil
         end
         return value
     elseif tp == 1 or tp == 2 then
-        if not value or value == 0 then
+        if not value then
             return nil
         end
-        return ('%.4f'):format(value):gsub('[0]+$', ''):gsub('%.$', '')
+        if type(value) == 'number' then
+            value = convertreal(value)
+        end
+        if value:find('.', 1, true) then
+            value = value:gsub('0+$', '')
+        end
+        value = value:gsub('%.$', '')
+        if value == '' then
+            return nil
+        end
+        if value == '0' then
+            return reforge and 0 or nil
+        end
+        return value
     elseif tp == 3 then
         if not value then
             return
         end
-        if value:find(',', nil, false) then
+        if tostring(value):find(',', nil, false) then
             value = '"' .. value .. '"'
         end
         return value
@@ -77,7 +94,7 @@ local function add_data(obj, meta, value, keyval)
         if meta.index == 1 then
             local value = get_index_data(meta.type, {obj[meta.key..'_1'], obj[meta.key..'_2']}, 2)
             if not value then
-                if meta.cantempty then
+                if meta.cantempty and not meta.reforge then
                     value = ','
                 else
                     return
@@ -143,10 +160,10 @@ local function add_data(obj, meta, value, keyval)
         end
         value = get_index_data(meta.type, value, #value)
     else
-        value = to_type(meta.type, value)
+        value = to_type(meta.type, value, meta.reforge)
     end
     if not value or value == '' then
-        if meta.cantempty then
+        if meta.cantempty and not meta.reforge then
             value = ','
         else
             return
@@ -157,18 +174,53 @@ local function add_data(obj, meta, value, keyval)
     end
 end
 
-local function create_keyval(obj)
+local function add_extra_data(keyval, key, data)
+    local len = 0
+    for k in pairs(data) do
+        if k > len then
+            len = k
+        end
+    end
+    if len == 0 then
+        return
+    end
+    keyval[#keyval+1] = {key, get_index_data(3, data, len)}
+end
+
+local function sortpairs(tbl)
+    local keys = {}
+    for k in pairs(tbl) do
+        keys[#keys+1] = k
+    end
+    table.sort(keys)
+    local i = 0
+    return function ()
+        i = i + 1
+        local k = keys[i]
+        return k, tbl[k]
+    end
+end
+
+local function create_keyval(obj, txt_obj)
     local keyval = {}
     for _, key in ipairs(keys) do
-        if key ~= 'editorsuffix' and key ~= 'editorname' then
+        if key ~= 'editorsuffix'
+        and key ~= 'editorname' then
             add_data(obj, metadata[key], obj[key], keyval)
+        end
+    end
+    if txt_obj then
+        for k, v in sortpairs(txt_obj) do
+            if k:sub(1, 1) ~= '_' then
+                add_extra_data(keyval, k, v)
+            end
         end
     end
     return keyval
 end
 
-local function stringify_obj(str, obj)
-    local keyval = create_keyval(obj)
+local function stringify_obj(str, obj, txt_obj)
+    local keyval = create_keyval(obj, txt_obj)
     if #keyval == 0 then
         return
     end
@@ -194,30 +246,6 @@ local function stringify_obj(str, obj)
     end
 end
 
-local displaytype = {
-    unit = lang.script.UNIT,
-    ability = lang.script.ABILITY,
-    item = lang.script.ITEM,
-    buff = lang.script.BUFF,
-    upgrade = lang.script.UPGRADE,
-    doodad = lang.script.DOODAD,
-    destructable = lang.script.DESTRUCTABLE,
-}
-
-local function get_displayname(o)
-    local name
-    if o._type == 'buff' then
-        name = o.bufftip or o.editorname or ''
-    elseif o._type == 'upgrade' then
-        name = o.name[1] or ''
-    elseif o._type == 'doodad' or o._type == 'destructable' then
-        name = w2l:get_editstring(o.name or '')
-    else
-        name = o.name or ''
-    end
-    return displaytype[o._type], o._id, (name:sub(1, 100):gsub('\r\n', ' '))
-end
-
 local function report_failed(obj, key, tip, info)
     report.n = report.n + 1
     if not report[tip] then
@@ -226,7 +254,7 @@ local function report_failed(obj, key, tip, info)
     if report[tip][obj._id] then
         return
     end
-    local type, id, name = get_displayname(obj)
+    local type, id, name = w2l:get_displayname(obj)
     report[tip][obj._id] = {
         ("%s %s %s"):format(type, id, name),
         ("%s %s"):format(key, info),
@@ -237,17 +265,48 @@ local function check_string(s)
     return type(s) == 'string' and s:find(',', nil, false) and s:find('"', nil, false)
 end
 
+local function is_same(a, b)
+    local tp1 = type(a)
+    local tp2 = type(b)
+    if tp1 ~= tp2 then
+        return false
+    end
+    if tp1 == 'table' then
+        local used = {}
+        for k, v in pairs(a) do
+            if not is_same(v, b[k]) then
+                return false
+            end
+            used[k] = true
+        end
+        for k in pairs(b) do
+            if not used[k] then
+                return false
+            end
+        end
+        return true
+    else
+        return a == b
+    end
+end
+
 local function prebuild_data(obj, key, r)
     if not obj[key] then
         return
     end
     local name = obj._id
+    local meta = metadata[key]
+    if meta.reforge then
+        if is_same(obj[key], obj[meta.reforge]) then
+            return
+        end
+    end
     if type(obj[key]) == 'table' then
         object[name][key] = {}
         local t = {}
         for k, v in pairs(obj[key]) do
             if check_string(v) then
-                report_failed(obj, metadata[key].field, lang.report.TEXT_CANT_ESCAPE_IN_TXT, v)
+                report_failed(obj, meta.field, lang.report.TEXT_CANT_ESCAPE_IN_TXT, v)
                 object[name][key][k] = v
             else
                 t[k] = v
@@ -259,7 +318,7 @@ local function prebuild_data(obj, key, r)
         r[key] = t
     else
         if check_string(obj[key]) then
-            report_failed(obj, metadata[key].field, lang.report.TEXT_CANT_ESCAPE_IN_TXT, obj[key])
+            report_failed(obj, meta.field, lang.report.TEXT_CANT_ESCAPE_IN_TXT, obj[key])
             object[name][key] = obj[key]
         else
             r[key] = obj[key]
@@ -269,6 +328,9 @@ end
 
 local function prebuild_obj(name, obj)
     if remove_unuse_object and not obj._mark then
+        return
+    end
+    if obj._keep_obj then
         return
     end
     local r = {}
@@ -284,8 +346,8 @@ end
 
 local function prebuild_merge(obj, a, b)
     if a._type ~= b._type then
-        local tp1, _, name1 = get_displayname(a)
-        local tp2, _, name2 = get_displayname(b)
+        local tp1, _, name1 = w2l:get_displayname(a)
+        local tp2, _, name2 = w2l:get_displayname(b)
         w2l.messager.report(lang.report.WARN, 2, (lang.report.OBJECT_ID_CONFLICT):format(obj._id), ('[%s]%s --> [%s]%s'):format(tp1, name1, tp2, name2))
     end
     for k, v in pairs(b) do
@@ -325,20 +387,6 @@ local function prebuild_merge(obj, a, b)
     end
 end
 
-local function sortpairs(tbl)
-    local keys = {}
-    for k in pairs(tbl) do
-        keys[#keys+1] = k
-    end
-    table.sort(keys)
-    local i = 0
-    return function ()
-        i = i + 1
-        local k = keys[i]
-        return k, tbl[k]
-    end
-end
-
 local function prebuild(type, input, output, list)
     for name, obj in sortpairs(input) do
         local r = prebuild_obj(name, obj)
@@ -357,7 +405,7 @@ end
 
 local function update_constant(type)
     metadata = w2l:metadata()[type]
-    keys = w2l:keydata()[type]
+    keys = w2l:keydata()[type] or {}
 end
 
 return function(w2l_, slk, report_, obj)
@@ -366,7 +414,12 @@ return function(w2l_, slk, report_, obj)
     remove_unuse_object = w2l.setting.remove_unuse_object
     local txt = {}
     local list = {}
-    for _, type in ipairs {'ability', 'buff', 'unit', 'item', 'upgrade'} do
+    local type_list = {'ability', 'buff', 'unit', 'item', 'upgrade'}
+    if w2l.setting.slk_doodad then
+        type_list[#type_list+1] = 'doodad'
+        type_list[#type_list+1] = 'destructable'
+    end
+    for _, type in ipairs(type_list) do
         list[type] = {}
         object = obj[type]
         update_constant(type)
@@ -375,12 +428,13 @@ return function(w2l_, slk, report_, obj)
         end
     end
     local r = {}
-    for _, type in ipairs {'ability', 'buff', 'unit', 'item', 'upgrade'} do
+    for _, type in ipairs(type_list) do
         update_constant(type)
         local str = {}
         table_sort(list[type])
         for _, name in ipairs(list[type]) do
-            stringify_obj(str, txt[name:lower()])
+            local lname = name:lower()
+            stringify_obj(str, txt[lname], slk['txt'][lname])
         end
         r[type] = table_concat(str, '\r\n')
     end

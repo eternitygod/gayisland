@@ -1,0 +1,48 @@
+输入路径：C:/Users/mayn/Desktop/GayIsland
+输出路径：C:/Users/mayn/Desktop/GayIsland/Island.w3x
+输入格式：Lni
+输出模式：obj
+结果：0 个错误，3 条警告
+用时：2.055 秒
+==========================
+警告 (3)
+==========================
+插件[模型加密]执行失败 - .\backend\plugin.lua:12: bad argument #1 to 'load' (function expected, got nil)
+stack traceback:
+	[C]: in function 'load'
+	.\backend\plugin.lua:12: in function <.\backend\plugin.lua:10>
+	[C]: in function 'xpcall'
+	.\backend\plugin.lua:10: in upvalue 'load_plugins'
+	.\backend\plugin.lua:37: in function 'backend.plugin'
+	.\backend\convert.lua:119: in function 'backend.convert'
+	.\backend\cli\obj.lua:4: in function 'backend.cli.obj'
+	.\backend\init.lua:12: in main chunk
+	[C]: in function 'require'
+	...ers\mayn\Desktop\GayIsland\tools\w3x2lni\script\main.lua:2: in main chunk
+	[C]: in ?
+插件[本地脚本]执行失败 - .\backend\plugin.lua:12: bad argument #1 to 'load' (function expected, got nil)
+stack traceback:
+	[C]: in function 'load'
+	.\backend\plugin.lua:12: in function <.\backend\plugin.lua:10>
+	[C]: in function 'xpcall'
+	.\backend\plugin.lua:10: in upvalue 'load_plugins'
+	.\backend\plugin.lua:37: in function 'backend.plugin'
+	.\backend\convert.lua:119: in function 'backend.convert'
+	.\backend\cli\obj.lua:4: in function 'backend.cli.obj'
+	.\backend\init.lua:12: in main chunk
+	[C]: in function 'require'
+	...ers\mayn\Desktop\GayIsland\tools\w3x2lni\script\main.lua:2: in main chunk
+	[C]: in ?
+插件[引用声明]执行失败 - .\backend\plugin.lua:12: bad argument #1 to 'load' (function expected, got nil)
+stack traceback:
+	[C]: in function 'load'
+	.\backend\plugin.lua:12: in function <.\backend\plugin.lua:10>
+	[C]: in function 'xpcall'
+	.\backend\plugin.lua:10: in upvalue 'load_plugins'
+	.\backend\plugin.lua:37: in function 'backend.plugin'
+	.\backend\convert.lua:119: in function 'backend.convert'
+	.\backend\cli\obj.lua:4: in function 'backend.cli.obj'
+	.\backend\init.lua:12: in main chunk
+	[C]: in function 'require'
+	...ers\mayn\Desktop\GayIsland\tools\w3x2lni\script\main.lua:2: in main chunk
+	[C]: in ?

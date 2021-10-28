@@ -2,7 +2,8 @@ local lang = require 'lang'
 local w2l
 local wtg
 local wts
-local state1
+local state
+local hex
 
 local pack_eca
 
@@ -43,7 +44,44 @@ local function pack(fmt, ...)
 end
 
 local function pack_head()
-    pack('c4l', 'WTG!', 7)
+    pack('c4', 'WTG!')
+    if wtg.format_version then
+        pack('LLLLLL'
+            , 0x80000004
+            , 7
+            , wtg.unknown1
+            , wtg.unknown2
+            , wtg.unknown3
+            , wtg.unknown4
+        )
+    else
+        pack('L', 7)
+    end
+end
+
+local function pack_counts()
+    local trigger_count = 0
+    local comment_count = 0
+    local script_count = 0
+    for _, trg in ipairs(wtg.triggers) do
+        if trg.type == 0 then
+            trigger_count = trigger_count + 1
+        elseif trg.wct == 1 then
+            script_count = script_count + 1
+        else
+            comment_count = comment_count + 1
+        end
+    end
+
+    pack('LL', #wtg.categories, 0)
+    pack('LL', trigger_count, 0)
+    pack('LL', comment_count, 0)
+    pack('LL', script_count, 0)
+    pack('LL', #wtg.vars, 0)
+    pack('LL'
+        , wtg.unknown5
+        , wtg.unknown6
+    )
 end
 
 local function pack_category()
@@ -71,12 +109,27 @@ local function pack_var(var)
             value = v
         end
     end
-    pack('zzllllz', name, type, unknow, array, size, default, value)
+    pack('zzllllz'
+        , name
+        , type
+        , unknow
+        , array
+        , size
+        , default
+        , value
+    )
+
+    if wtg.format_version then
+        pack('LL'
+            , var.id
+            , var.category
+        )
+    end
 end
 
 local function pack_vars()
-    pack('ll', 2, #wtg.vars-2)
-    for i = 3, #wtg.vars do
+    pack('ll', 2, #wtg.vars)
+    for i = 1, #wtg.vars do
         pack_var(wtg.vars[i])
     end
 end
@@ -203,15 +256,20 @@ function pack_eca(eca, child_id, eca_type)
 end
 
 local function pack_trigger(trg)
-    pack('zzllllll',
-        trg.name,
-        trg.des,
-        trg.type,
-        trg.enable,
-        trg.wct,
-        trg.close,
-        trg.run,
-        trg.category
+    pack('zzl'
+        , trg.name
+        , trg.des
+        , trg.type
+    )
+    if wtg.format_version then
+        pack('L', trg.id)
+    end
+    pack('lllll'
+        , trg.enable
+        , trg.wct
+        , trg.close
+        , trg.run
+        , trg.category
     )
     pack_list(trg.trg, true)
 end
@@ -219,7 +277,59 @@ end
 local function pack_triggers()
     pack('l', #wtg.triggers)
     for i = 1, #wtg.triggers do
-        pack_trigger(wtg.triggers[i])
+        pack_trigger(wtg.triggers[i], i)
+    end
+end
+
+local function pack_category_in_element(cat)
+    pack('llzllL'
+        , 4
+        , cat.id
+        , cat.name
+        , cat.comment
+        , 1
+        , cat.category
+    )
+end
+
+local function pack_var_in_element(var)
+    pack('LLzL'
+        , 64
+        , var.id
+        , var[1]
+        , var.category
+    )
+end
+
+local function pack_trigger_in_element(trg)
+    if trg.type == 0 then
+        pack('L', 8)
+    elseif trg.wct == 1 then
+        pack('L', 32)
+    else
+        pack('L', 16)
+    end
+    pack_trigger(trg)
+end
+
+local function pack_elements()
+    pack('Lllzlll'
+        , 1 + #wtg.objs
+        , wtg.unknown7
+        , wtg.unknown8
+        , w2l.slk and w2l.slk.w3i[lang.w3i.MAP][lang.w3i.MAP_NAME] or 'Unknown'
+        , wtg.unknown9
+        , wtg.unknown10
+        , wtg.unknown11
+    )
+    for _, obj in ipairs(wtg.objs) do
+        if obj.obj == 'category' then
+            pack_category_in_element(obj)
+        elseif obj.obj == 'var' then
+            pack_var_in_element(obj)
+        elseif obj.obj == 'trigger' then
+            pack_trigger_in_element(obj)
+        end
     end
 end
 
@@ -231,9 +341,15 @@ return function (w2l_, wtg_, wts_)
     hex = {}
 
     pack_head()
-    pack_category()
-    pack_vars()
-    pack_triggers()
+    if wtg.format_version then
+        pack_counts()
+        pack_vars()
+        pack_elements()
+    else
+        pack_category()
+        pack_vars()
+        pack_triggers()
+    end
 
     return table.concat(hex)
 end

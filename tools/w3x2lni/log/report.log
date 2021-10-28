@@ -1,227 +1,29 @@
-输入路径：C:\Users\mayn\Desktop\GayIsland
-输出路径：C:\Users\mayn\Desktop\GayIsland\Island.w3x
+输入路径：C:/Users/mayn/Desktop/GayIsland
+输出路径：C:/Users/mayn/Desktop/GayIsland/Island.w3x
 输入格式：Lni
-输出模式：slk
-结果：0 个错误，0 条警告
-用时：2.792 秒
+输出模式：obj
+结果：0 个错误，1 条警告
+用时：3.960 秒
 ==========================
-移除未引用对象 (23)
+警告 (1)
 ==========================
-简化时没有找到对象 'HI3Q' - 脚本里的'HI03'[牧师]引用了它
-简化时没有找到对象 'HI3W' - 脚本里的'HI03'[牧师]引用了它
-简化时没有找到对象 'HI3E' - 脚本里的'HI03'[牧师]引用了它
-简化时没有找到对象 'HI3R' - 脚本里的'HI03'[牧师]引用了它
-简化时没有找到对象 'HA1Q' - 脚本里的'nm05'[巨魔战将]引用了它
-简化时没有找到对象 'HA1W' - 脚本里的'nm05'[巨魔战将]引用了它
-简化时没有找到对象 'HA1E' - 脚本里的'nm05'[巨魔战将]引用了它
-简化时没有找到对象 'HA1R' - 脚本里的'nm05'[巨魔战将]引用了它
-简化时没有找到对象 'HS3Q' - 脚本里的'HS03'[兽族步兵]引用了它
-简化时没有找到对象 'HS3W' - 脚本里的'HS03'[兽族步兵]引用了它
-简化时没有找到对象 'HS3R' - 脚本里的'HS03'[兽族步兵]引用了它
-简化时没有找到对象 'A019' - 脚本里的'IR05'[银月之晶|nMoonShard]引用了它
-简化时没有找到对象 'HS1Q' - 脚本里的'HS01'[圣骑士]引用了它
-简化时没有找到对象 'HS1W' - 脚本里的'HS01'[圣骑士]引用了它
-简化时没有找到对象 'HS1E' - 脚本里的'HS01'[圣骑士]引用了它
-简化时没有找到对象 'HS1R' - 脚本里的'HS01'[圣骑士]引用了它
-简化时没有找到对象 'A03N' - 脚本里的'tcas'[小城堡]引用了它
-简化时没有找到对象 'A01Z' - 脚本里的'tcas'[小城堡]引用了它
-引用未分类对象: 'orbr' - 期望分类：unit
-简化时没有找到对象 'Axt1
-' - 脚本里的'tcas'[小城堡]引用了它
-简化时没有找到对象 'A02N' - 脚本里的'tcas'[小城堡]引用了它
-简化时没有找到对象 'Rewd' - 脚本里的'tcas'[小城堡]引用了它
-简化时没有找到对象 'A00C' - 脚本里的'tcas'[小城堡]引用了它
--------------------------------------------
-简化掉的对象数: 2264/3280
----------------------------------------------------------------------
-保留的默认对象数: 800/2623
----------------------------------------------------------------------
-单位 'uskm' 骷髅魔法师 - 脚本里的'tcas'[小城堡]引用了它
-单位 'osw3' 阴影之狼 - 脚本里的'tcas'[小城堡]引用了它
-单位 'Ewar' 守望者 - 脚本里的'tcas'[小城堡]引用了它
-单位 'owyv' 风骑士 - 脚本里的'tcas'[小城堡]引用了它
-单位 'nsha' 绵羊 - 脚本里的'nmsc'[穆格尔影子法师]引用了它
-单位 'etoe' 永恒之树 - 脚本里的'eaoe'[知识古树]引用了它
-单位 'uaod' 黑暗祭坛 - 脚本里的'tcas'[小城堡]引用了它
-单位 'now2' 猫头鹰侦察者 - 脚本里的'tcas'[小城堡]引用了它
-单位 'ubsp' 破坏者 - 脚本里的'tcas'[小城堡]引用了它
-单位 'hkni' 骑士 - 脚本里的'tcas'[小城堡]引用了它
-技能 'Awar' 粉碎 - 脚本里的'tcas'[小城堡]引用了它
-技能 'ACcw' 冰冻冷箭 - 脚本里的'nvdw'[虚无行者]引用了它
-技能 'AOsf' 野兽幽魂 - 脚本里的'tcas'[小城堡]引用了它
-技能 'AHab' 辉煌光环 - 脚本里的'tcas'[小城堡]引用了它
-技能 'Amim' 魔法免疫 - 脚本里的'Amai'[魔法书]引用了它
-技能 'AEfn' 自然之力 - 脚本里的'tcas'[小城堡]引用了它
-技能 'ACbb' 嗜血术 - 脚本里的'nm01'[食人鬼魔法师]引用了它
-技能 'AOcr' 致命一击 - 脚本里的'tcas'[小城堡]引用了它
-技能 'AEah' 荆棘光环 - 脚本里的'tcas'[小城堡]引用了它
-技能 'AOsh' 震荡波 - 脚本里的'tcas'[小城堡]引用了它
-魔法效果 'Bam2' 反魔法外壳 - 脚本里的'tcas'[小城堡]引用了它
-魔法效果 'BOvc' 巫毒(施法者) - 脚本里的'tcas'[小城堡]引用了它
-魔法效果 'BHfs' 烈焰风暴 - 脚本里的'nm04'[血魔法师]引用了它
-魔法效果 'BOsf' 野兽幽魂 - 脚本里的'tcas'[小城堡]引用了它
-魔法效果 'Bpoi' 毒 - 脚本里的'tcas'[小城堡]引用了它
-魔法效果 'Bapl' 疾病 - 脚本里的'uabo'[憎恶]引用了它
-魔法效果 'BEfn' 自然之力 - 脚本里的'tcas'[小城堡]引用了它
-魔法效果 'Bakb' 战鼓 - 脚本里的'tcas'[小城堡]引用了它
-魔法效果 'BNrf' 火焰雨(区域魔法) - 脚本里的'Uwar'[巫师]引用了它
-魔法效果 'Xesn' 哨兵(效果) - 脚本里的'tcas'[小城堡]引用了它
-科技 'Resc' 哨兵 - 脚本里的'tcas'[小城堡]引用了它
-科技 'Rnam' 珊瑚鳞甲 - 脚本里的'nnmg'[穆格尔掠夺者]引用了它
-科技 'Rers' 抗性皮肤 - 脚本里的'eaoe'[知识古树]引用了它
-可破坏物 'NTtw' 诺森德树木 - 地图上放置的'NTtw'[诺森德树木]引用了它
-可破坏物 'ZTtw' 遗迹树木 - 地图上放置的'ZTtw'[遗迹树木]引用了它
-可破坏物 'LTbx' 木桶 - 地图上放置的'LTbx'[木桶]引用了它
-装饰物 'APms' 蘑菇 - 地图上放置的'APms'[蘑菇]引用了它
-装饰物 'NWfp' 漂浮的厚木板 - 地图上放置的'NWfp'[漂浮的厚木板]引用了它
-装饰物 'LObz' 炽热的火盆 - 地图上放置的'LObz'[炽热的火盆]引用了它
----------------------------------------------------------------------
-简化掉的自定义对象数: 441/657
----------------------------------------------------------------------
-单位 'ncob' 混沌之箭
-单位 'NAM2' 灵魂守卫
-单位 'zsmc' 大兵
-单位 'nvl2' 村民
-单位 'HIM2' 风暴之灵
-单位 'Z000' 我不是基佬HAHA
-单位 'nmgv' 魔法宝箱
-单位 'NA02' 灵魂守卫
-单位 'NS03' 山岭巨人
-单位 'NSM4' 流浪剑客
-技能 'ATl6' 闪现突袭攻速
-技能 'AIil' 幻象物品
-技能 'ATl4' 闪现突袭攻速
-技能 'ATl5' 闪现突袭攻速
-技能 'ASlw' 震荡波
-技能 'Acob' 混乱之箭
-技能 'Axt1' 火刑乾坤劈
-技能 'AT19' 25攻击
-技能 'Apui' 物品拾取
-技能 'AUtb' 恐怖心潮
-物品 'iwbr' 猿粪
-物品 'tfar' |cff87ceeb岩石屏障|r
-物品 'esaz' 埃苏尼之精髓
-物品 'fgfh' 长钉衣领
-物品 'schl' 医疗权杖
-物品 'rat9' 攻击之爪
-物品 'infs' 恶魔岩石
-物品 'skrt' 骸骨宝物
-物品 'cosl' 灵魂之球
-物品 'vamp' 吸血药水
-魔法效果 'BTl4' 亢奋
-魔法效果 'BIil' 幻象
-魔法效果 'BSlb' 嗜血
-魔法效果 'BHHH' 碾压
-魔法效果 'Bdta' 恐惧
-魔法效果 'Base' |cff00ff00消耗之烧|r
-魔法效果 'Bflu' |Cff00ff00振翅|R
-魔法效果 'Bmom' 狂暴
-魔法效果 'Bgsp' 神之力量
-魔法效果 'BbT2' 狂暴
-可破坏物 'Dofw' 力量之墙
-可破坏物 'Dofv' 力量之墙
-装饰物 'D002' 岩石q2
-装饰物 'D004' 蒸汽泡沫2
+插件[资源保护]执行失败 - plugin\资源保护.lua:12: attempt to index a nil value (global 'fs')
+stack traceback:
+	plugin\资源保护.lua:12: in function <plugin\资源保护.lua:10>
+	[C]: in function 'xpcall'
+	.\core\init.lua:243: in method 'call_plugin'
+	.\core\slk/frontend.lua:213: in method 'frontend'
+	.\backend\convert.lua:136: in function 'backend.convert'
+	.\backend\cli\obj.lua:4: in function 'backend.cli.obj'
+	.\backend\init.lua:12: in main chunk
+	[C]: in function 'require'
+	...ers\mayn\Desktop\GayIsland\tools\w3x2lni\script\main.lua:2: in main chunk
+	[C]: in ?
 
 ==========================
-公式计算失败 (38)
+其他 (4)
 ==========================
-技能 A002 嗜血术 - Researchtip: <AomW,DataA1,%>
-技能 A002 嗜血术 - Researchtip: <AomW,DataB1,%>
-技能 A002 嗜血术 - Researchtip: <AomW,DataA2,%>
-技能 A002 嗜血术 - Researchtip: <AomW,DataB2,%>
-技能 A002 嗜血术 - Researchtip: <AomW,DataA3,%>
-技能 A002 嗜血术 - Researchtip: <AomW,DataB3,%>
-技能 A002 嗜血术 - Researchtip: <AomW,DataA4,%>
-技能 A002 嗜血术 - Researchtip: <AomW,DataB4,%>
-技能 A002 嗜血术 - Ubertip: <AomW,DataA1,%>
-技能 A002 嗜血术 - Ubertip: <AomW,DataB1,%>
-技能 A002 嗜血术 - Ubertip: <AomW,Dur1>
-技能 A002 嗜血术 - Ubertip: <AomW,Cool1>
-技能 A002 嗜血术 - Ubertip: <AomW,Rng1>
-技能 A002 嗜血术 - Ubertip: <AomW,DataA2,%>
-技能 A002 嗜血术 - Ubertip: <AomW,DataB2,%>
-技能 A002 嗜血术 - Ubertip: <AomW,Dur2>
-技能 A002 嗜血术 - Ubertip: <AomW,Cool2>
-技能 A002 嗜血术 - Ubertip: <AomW,Rng2>
-技能 A002 嗜血术 - Ubertip: <AomW,DataA3,%>
-技能 A002 嗜血术 - Ubertip: <AomW,DataB3,%>
-技能 A002 嗜血术 - Ubertip: <AomW,Dur3>
-技能 A002 嗜血术 - Ubertip: <AomW,Cool3>
-技能 A002 嗜血术 - Ubertip: <AomW,Rng3>
-技能 A002 嗜血术 - Ubertip: <AomW,DataA4,%>
-技能 A002 嗜血术 - Ubertip: <AomW,DataB4,%>
-技能 A002 嗜血术 - Ubertip: <AomW,Dur4>
-技能 A002 嗜血术 - Ubertip: <AomW,Cool4>
-技能 A002 嗜血术 - Ubertip: <AomW,Rng4>
-技能 A001 火焰爆轰 - Ubertip: <AomQ,Cool1>
-技能 A001 火焰爆轰 - Ubertip: <AomQ,Rng1>
-技能 A001 火焰爆轰 - Ubertip: <AomQ,Cool2>
-技能 A001 火焰爆轰 - Ubertip: <AomQ,Rng2>
-技能 A001 火焰爆轰 - Ubertip: <AomQ,Cool3>
-技能 A001 火焰爆轰 - Ubertip: <AomQ,Rng3>
-技能 A001 火焰爆轰 - Ubertip: <AomQ,Cool4>
-技能 A001 火焰爆轰 - Ubertip: <AomQ,Rng4>
-物品 stwp |cff87ceeb回城卷轴|r - Ubertip: <A03N,DataB1>
-物品 stwp |cff87ceeb回城卷轴|r - Ubertip: <A03N,Cool1>
-
-==========================
-脚本优化 (105)
-==========================
---------------------------------------------------
-混淆脚本 (1)
---------------------------------------------------
-强制引用全部函数 - 第[3085]行：完全动态的ExecuteFunc
---------------------------------------------------
-未引用的全局变量 (69)
---------------------------------------------------
-LIBRARY_Common - 第[3]行：
-ABILITY_STATE_COOLDOWN - 第[5]行：
-ABILITY_DATA_TARGS - 第[7]行：
-ABILITY_DATA_CAST - 第[8]行：
-ABILITY_DATA_DUR - 第[9]行：
-ABILITY_DATA_HERODUR - 第[10]行：
-ABILITY_DATA_COOL - 第[12]行：
-ABILITY_DATA_AREA - 第[13]行：
-ABILITY_DATA_RNG - 第[14]行：
-ABILITY_DATA_DATA_D - 第[18]行：
-ABILITY_DATA_DATA_E - 第[19]行：
-ABILITY_DATA_DATA_F - 第[20]行：
-ABILITY_DATA_DATA_G - 第[21]行：
-ABILITY_DATA_DATA_H - 第[22]行：
-ABILITY_DATA_DATA_I - 第[23]行：
-ABILITY_DATA_HOTKET - 第[26]行：
-ABILITY_DATA_UNHOTKET - 第[27]行：
-ABILITY_DATA_RESEARCH_HOTKEY - 第[28]行：
-ABILITY_DATA_NAME - 第[29]行：
-ABILITY_DATA_ART - 第[30]行：
---------------------------------------------------
-未引用的局部变量 (35)
---------------------------------------------------
-CreateAllItems - 第[6051]行：[itemID]
-CreateBuildingsForPlayer0 - 第[6107]行：[unitID]
-CreateBuildingsForPlayer0 - 第[6108]行：[t]
-CreateBuildingsForPlayer0 - 第[6109]行：[life]
-CreateUnitsForPlayer0 - 第[6116]行：[unitID]
-CreateUnitsForPlayer0 - 第[6117]行：[t]
-CreateUnitsForPlayer0 - 第[6118]行：[life]
-CreateUnitsForPlayer8 - 第[6125]行：[unitID]
-CreateUnitsForPlayer8 - 第[6126]行：[t]
-CreateUnitsForPlayer8 - 第[6127]行：[life]
-CreateUnitsForPlayer10 - 第[6134]行：[unitID]
-CreateUnitsForPlayer10 - 第[6135]行：[t]
-CreateUnitsForPlayer10 - 第[6136]行：[life]
-CreateNeutralHostileBuildings - 第[6199]行：[unitID]
-CreateNeutralHostileBuildings - 第[6200]行：[t]
-CreateNeutralHostileBuildings - 第[6201]行：[life]
-CreateNeutralHostile - 第[6211]行：[unitID]
-CreateNeutralHostile - 第[6212]行：[t]
-CreateNeutralHostile - 第[6213]行：[life]
-CreateNeutralPassiveBuildings - 第[6269]行：[unitID]
-
-==========================
-其他 (3)
-==========================
+使用的插件：[资源保护](地图) - 没有资源目录时，将模型替换为步兵。
 使用的插件：[模型加密](地图) - 将slk格式地图使用的模型进行简单加密。
 使用的插件：[本地脚本](地图) - 让obj格式的地图使用本地的lua脚本。
 使用的插件：[引用声明](地图) - 对只在lua中使用的对象进行引用声明。

@@ -1,8 +1,9 @@
 local w3xparser = require 'w3xparser'
 local lang = require 'share.lang'
-local w2l = w2l
+local w2l
 local slk = w3xparser.slk
 local fixer
+local war3
 local codemapped
 
 local concat_types = {
@@ -167,7 +168,7 @@ local function is_enable(meta, type)
     return true
 end
 
-local characters = {'A','B','C','D','E','F','G','H','I'}
+local characters = {'A','B','C','D','E','F','G','H','I', 'J'}
 
 local function parse_id(w2l, metadata, id, meta, type, has_level)
     local key = meta.field
@@ -244,15 +245,60 @@ end
 
 local function add_special(meta, type)
     if type == 'unit' then
-        meta['missilespeed_1'].default = '{1500,1500}'
-        meta['missilespeed_2'].default = '{1500,1500}'
+        meta['missilespeed_1'].default = "{1500,1500}"
+        meta['missilespeed_2'].default = "{1500,1500}"
+    end
+end
+
+local function find_id(used_id, source_id)
+    local id = 'z' .. source_id:sub(2)
+    local charlist = '1234567890_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    for i = 1, #charlist do
+        if not used_id[id] then
+            break
+        end
+        id = id:sub(1, 3) .. charlist:sub(i, i)
+    end
+    if used_id[id] then
+        error('ID重复')
+    end
+    used_id[id] = true
+    return id
+end
+
+local function copy_reforge_meta(source, used_id, mask, name)
+    local t = {}
+    for k, v in pairs(source) do
+        t[k] = v
+    end
+    t['id'] = find_id(used_id, t['id'])
+    t['key'] = t['key'] .. mask
+    t['field'] = t['field'] .. mask
+    t['reforge'] = name
+    return t
+end
+
+local function add_reforge_special(metas, tbl)
+    if war3.reforge then
+        local used_id = {}
+        for _, meta in pairs(metas) do
+            used_id[meta.id] = true
+        end
+        for name, meta in sortpairs(metas) do
+            if tbl[meta.id]
+            and tbl[meta.id].category == 'art'
+            and tbl[meta.id].slk == 'Profile' then
+                metas[name..':hd'] = copy_reforge_meta(meta, used_id, ':hd', name)
+                metas[name..':sd'] = copy_reforge_meta(meta, used_id, ':sd', name)
+            end
+        end
     end
 end
 
 local function create_metadata(w2l, type, metadata, loader)
     metadata[type] = {}
     local has_level = w2l.info.key.max_level[type]
-    local tbl = slk(loader('units\\' .. w2l.info.metadata[type]) or loader('doodads\\' .. w2l.info.metadata[type]))
+    local tbl = slk(loader('units\\' .. w2l.info.metadata[type]) or loader('doodads\\' .. w2l.info.metadata[type]), w2l.info.metadata[type], true)
     tbl.Ytip = nil
     local has_index = {}
     for k, v in pairs(tbl) do
@@ -276,6 +322,7 @@ local function create_metadata(w2l, type, metadata, loader)
     end
     add_user_metadata(metadata[type], type)
     add_special(metadata[type], type)
+    add_reforge_special(metadata[type], tbl)
 end
 
 local function copy_code(t, template)
@@ -335,13 +382,14 @@ local function get_typedefine(w2l, loader)
     return t
 end
 
-return function(w2l_, fixer_, loader)
+return function(w2l_, fixer_, war3_, loader)
     w2l = w2l_
     fixer = fixer_
+    war3 = war3_
 
     codemapped = get_codemapped(w2l, loader)
     typedefine = get_typedefine(w2l, loader)
-    
+
     local metadata = {}
     for _, type in ipairs {'ability', 'buff', 'unit', 'item', 'upgrade', 'doodad', 'destructable', 'misc'} do
         create_metadata(w2l, type, metadata, loader)

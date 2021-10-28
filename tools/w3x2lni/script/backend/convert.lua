@@ -7,6 +7,7 @@ local check_lni_mark = require 'share.check_lni_mark'
 local unpack_setting = require 'backend.unpack_setting'
 local w2l = core()
 local root = require 'backend.w2l_path'
+local fs = require 'bee.filesystem'
 local setting
 local input_ar
 local output_ar
@@ -102,7 +103,7 @@ return function (mode)
     w2l:set_setting(setting)
     
     w2l.input_ar = input_ar
-    output = setting.output or default_output(setting.input)
+    local output = setting.output or default_output(setting.input)
     setting.output = output
     if w2l.setting.target_storage == 'dir' then
         if not fs.exists(output) then

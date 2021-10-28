@@ -28,7 +28,7 @@ end
 
 function mt:get(key)
     local value = self.data[self._current][key]
-    if type(value) == 'string' and #value > 1023 then
+    if type(value) == 'string' and #value > 255 then
         value = self.self:save_wts(self.wts, value, lang.script.TEXT_TOO_LONG_IN_W3I)
     end
     return value
@@ -39,10 +39,14 @@ function mt:read_head(data, version)
     data.file_ver   = version
     data.map_ver    = self:get(lang.w3i.MAP_VERSION)
     data.editor_ver = self:get(lang.w3i.WE_VERSION)
+    data.war3_ver   = self:get(lang.w3i.WAR3_VERSION)
     data.map_name   = self:get(lang.w3i.MAP_NAME)
     data.author     = self:get(lang.w3i.AUTHOR_NAME)
     data.des        = self:get(lang.w3i.MAP_DESC)
     data.player_rec = self:get(lang.w3i.PLAYER_DESC)
+    data.script_type= self:get(lang.w3i.SCRIPT_TYPE)
+    data.unknown_10 = self:get(lang.w3i.UNKNOWN_10)
+    data.unknown_11 = self:get(lang.w3i.UNKNOWN_11)
 
     self:current(lang.w3i.CAMERA)
     for i = 1, 8 do
@@ -96,7 +100,7 @@ function mt:read_head(data, version)
     data.prologue_screen_title    = self:get(lang.w3i.TITLE)
     data.prologue_screen_subtitle = self:get(lang.w3i.SUBTITLE)
 
-    if version == 25 then
+    if version >= 25 then
         self:current(lang.w3i.FOG)
         data.terrain_fog = self:get(lang.w3i.TYPE)
         data.fog_start_z = self:get(lang.w3i.START_Z)
@@ -136,6 +140,8 @@ function mt:read_player(data)
         player.start_y        = self:get(lang.w3i.START_POSITION)[2]
         player.ally_low_flag  = pack_flag(self:get(lang.w3i.ALLY_LOW_FLAG))
         player.ally_high_flag = pack_flag(self:get(lang.w3i.ALLY_HIGH_FLAG))
+        player.unknown_12     = self:get(lang.w3i.UNKNOWN_12)
+        player.unknown_13     = self:get(lang.w3i.UNKNOWN_13)
     end
 end
 
@@ -257,7 +263,11 @@ function mt:read_randomitem(data)
 end
 
 function mt:add_head(data, version)
-    self:add('lllzzzz', version, data.map_ver, data.editor_ver, data.map_name, data.author, data.des, data.player_rec)
+    self:add('lll', version, data.map_ver, data.editor_ver)
+    if version >= 28 then
+        self:add('llll', table.unpack(data.war3_ver))
+    end
+    self:add('zzzz', data.map_name, data.author, data.des, data.player_rec)
 
     self:add('ffffffff', data.camera_bound_1, data.camera_bound_2, data.camera_bound_3, data.camera_bound_4, data.camera_bound_5, data.camera_bound_6, data.camera_bound_7, data.camera_bound_8)
 
@@ -265,7 +275,7 @@ function mt:add_head(data, version)
 
     self:add('lllc1', data.map_width, data.map_height, data.map_flag, data.map_main_ground_type)
 
-    if version == 25 then
+    if version >= 25 then
         self:add('lzzzz', data.loading_screen_id, data.loading_screen_path, data.loading_screen_text, data.loading_screen_title, data.loading_screen_subtitle)
 
         self:add('l', data.game_data_set)
@@ -277,6 +287,14 @@ function mt:add_head(data, version)
         self:add('c4zc1', data.weather_id, data.sound_environment, data.light_environment)
 
         self:add('BBBB', data.water_red, data.water_green, data.water_blue, data.water_alpha)
+        if version >= 28 then
+            self:add('l', data.script_type:lower() == 'lua' and 1 or 0)
+        end
+
+        if version >= 31 then
+            self:add('l', data.unknown_10)
+            self:add('l', data.unknown_11)
+        end
     elseif version == 18 then
         self:add('lzzz', data.loading_screen_id, data.loading_screen_text, data.loading_screen_title, data.loading_screen_subtitle)
 
@@ -284,7 +302,7 @@ function mt:add_head(data, version)
     end
 end
 
-function mt:add_player(data)
+function mt:add_player(data, version)
     self:add('l', data.player_count)
 
     for i = 1, data.player_count do
@@ -293,7 +311,11 @@ function mt:add_player(data)
         --player.ally_low_flag = player.ally_low_flag | ((1 << data.player_count) - 1)
         --player.ally_high_flag = player.ally_high_flag | ((1 << data.player_count) - 1)
 
-        self:add('llllzffLL', player.id, player.type, player.race, player.start_position, player.name, player.start_x, player.start_y, player.ally_low_flag, player.ally_high_flag)
+        if version >= 31 then
+            self:add('llllzffLLll', player.id, player.type, player.race, player.start_position, player.name, player.start_x, player.start_y, player.ally_low_flag, player.ally_high_flag, player.unknown_12, player.unknown_13)
+        else
+            self:add('llllzffLL', player.id, player.type, player.race, player.start_position, player.name, player.start_x, player.start_y, player.ally_low_flag, player.ally_high_flag)
+        end
     end
 end
 
@@ -321,7 +343,7 @@ end
 
 function mt:add_tech(data)
     self:add('l', data.tech_count)
-    
+
     for i = 1, data.tech_count do
         local tech = data.techs[i]
 
@@ -338,7 +360,7 @@ function mt:add_randomgroup(data)
         self:add('lz', group.id, group.name)
 
         self:add('l', group.position_count)
-        
+
         for i = 1, group.position_count do
             self:add('l', group.positions[i])
         end
@@ -390,7 +412,7 @@ return function (self, data, wts)
 
     local data = {}
     local version = tbl.data[lang.w3i.MAP][lang.w3i.FILE_VERSION]
-    if version == 25 then
+    if version >= 25 then
         tbl:read_head(data, version)
         tbl:read_player(data)
         tbl:read_force(data)
@@ -398,9 +420,9 @@ return function (self, data, wts)
         tbl:read_tech(data)
         tbl:read_randomgroup(data)
         tbl:read_randomitem(data)
-    
+
         tbl:add_head(data, version)
-        tbl:add_player(data)
+        tbl:add_player(data, version)
         tbl:add_force(data)
         tbl:add_upgrade(data)
         tbl:add_tech(data)
@@ -413,9 +435,9 @@ return function (self, data, wts)
         tbl:read_upgrade(data)
         tbl:read_tech(data)
         tbl:read_randomgroup(data)
-    
+
         tbl:add_head(data, version)
-        tbl:add_player(data)
+        tbl:add_player(data, version)
         tbl:add_force(data)
         tbl:add_upgrade(data)
         tbl:add_tech(data)

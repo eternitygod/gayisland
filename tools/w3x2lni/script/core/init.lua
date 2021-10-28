@@ -12,8 +12,6 @@ local pairs = pairs
 
 local mt = {}
 
-local keydata
-
 local function load_file(path)
     local f = io.open(path)
     if f then
@@ -25,7 +23,7 @@ local function load_file(path)
 end
 
 function mt:parse_lni(buf, filename, ...)
-    return lni.classics(buf, filename, ...)
+    return lni(buf, filename, ...)
 end
 
 function mt:parse_lml(buf)
@@ -46,27 +44,38 @@ end
 
 function mt:metadata()
     if not self.cache_metadata then
-        self.cache_metadata = lni.classics(load_file 'defined\\metadata.ini')
+        if self.setting.data_meta == '${DEFAULT}' then
+            self.cache_metadata = lni(load_file 'defined\\metadata.ini')
+        else
+            self.cache_metadata = lni(self:data_load('prebuilt\\metadata.ini'))
+        end
     end
     return self.cache_metadata
 end
 
-function mt:we_metadata()
-    if not self.cache_we_metadata then
-        if self.setting.data_meta == '${DEFAULT}' then
-            self.cache_we_metadata = self.cache_metadata
-        else
-            self.cache_we_metadata = lni.classics(self:data_load('prebuilt\\metadata.ini'))
-        end
+function mt:keydata()
+    if not self.cache_keydata then
+        self.cache_keydata = lni(assert(self:data_load('prebuilt\\keydata.ini')))
     end
-    return self.cache_we_metadata
+    -- 兼容旧版lni
+    if self.cache_keydata.root then
+        for k, v in pairs(self.cache_keydata.root) do
+            self.cache_keydata[k] = v
+        end
+        self.cache_keydata.root = nil
+    end
+    return self.cache_keydata
 end
 
-function mt:keydata()
-    if not keydata then
-        keydata = lni.classics(self:data_load('prebuilt\\keydata.ini'))
+function mt:slktitle()
+    if not self.cache_slktitle then
+        self.cache_slktitle = lni(assert(self:data_load('prebuilt\\slktitle.ini')))
     end
-    return keydata
+    return self.cache_slktitle
+end
+
+function mt:isreforge()
+    return not not self:data_load('prebuilt\\reforge.ini')
 end
 
 function mt:get_editstring(source)
@@ -119,7 +128,7 @@ local function create_default(w2l)
     for _, name in ipairs {'ability', 'buff', 'unit', 'item', 'upgrade', 'doodad', 'destructable', 'txt', 'misc'} do
         local str = w2l:data_load(('prebuilt\\%s\\%s.ini'):format(w2l.setting.version, name))
         if str then
-            default[name] = lni.classics(str)
+            default[name] = lni(str)
         else
             need_build = true
             break
@@ -231,13 +240,13 @@ end
 function mt:call_plugin(event, ...)
     for _, plugin in ipairs(self.plugins) do
         if plugin[event] then
-            local ok, res = pcall(plugin[event], plugin, self, ...)
+            local ok, res = xpcall(plugin[event], debug.traceback, plugin, self, ...)
             if ok then
                 if res ~= nil then
                     return res
                 end
             else
-                self.messager.report(lang.report.OTHER, 2, lang.report.PLUGIN_FAILED:format(plugin.info.name), res)
+                self.messager.report(lang.report.WARN, 2, lang.report.PLUGIN_FAILED:format(plugin.info.name), res)
             end
         end
     end
@@ -250,14 +259,14 @@ function mt:init_proxy()
     self.inited_proxy = true
     self.input_proxy = proxy(self, self.input_ar, self.input_mode, 'input')
     self.output_proxy = proxy(self, self.output_ar, self.setting.mode, 'output')
-    
+
     if self:file_load('w3x2lni', 'locale\\w3i.lng') then
         lang:set_lng_file('w3i', self:file_load('w3x2lni', 'locale\\w3i.lng'))
     end
     if self:file_load('w3x2lni', 'locale\\lml.lng') then
         lang:set_lng_file('lml', self:file_load('w3x2lni', 'locale\\lml.lng'))
     end
-    
+
     if self.setting.mode == 'lni' then
         self:file_save('w3x2lni', 'locale\\w3i.lng', lang:get_lng_file 'w3i')
         self:file_save('w3x2lni', 'locale\\lml.lng', lang:get_lng_file 'lml')
@@ -308,6 +317,30 @@ function mt:failed(msg)
     os.exit(1, true)
 end
 
+local displaytype = {
+    unit = lang.script.UNIT,
+    ability = lang.script.ABILITY,
+    item = lang.script.ITEM,
+    buff = lang.script.BUFF,
+    upgrade = lang.script.UPGRADE,
+    doodad = lang.script.DOODAD,
+    destructable = lang.script.DESTRUCTABLE,
+}
+
+function mt:get_displayname(o)
+    local name
+    if o._type == 'buff' then
+        name = o.bufftip or o.editorname or ''
+    elseif o._type == 'upgrade' then
+        name = o.name[1] or ''
+    elseif o._type == 'doodad' or o._type == 'destructable' then
+        name = self:get_editstring(o.name or '')
+    else
+        name = o.name or ''
+    end
+    return displaytype[o._type], o._id, (tostring(name):sub(1, 100):gsub('\r\n', ' '))
+end
+
 mt.setting = {}
 
 local function toboolean(v)
@@ -341,6 +374,7 @@ function mt:set_setting(setting)
     choose('data')
     choose('data_meta')
     choose('data_wes')
+    choose('data_ui')
     dir = default[setting.mode]
     choose('read_slk', toboolean)
     choose('find_id_times', math.tointeger)
@@ -355,10 +389,13 @@ function mt:set_setting(setting)
     choose('target_storage')
     choose('computed_text', toboolean)
     choose('export_lua', toboolean)
-    
+
     self.setting = setting
-    
+
     self.mpq_path = mpq_path()
+    if not self.setting.version then
+        self.setting.version = 'Custom'
+    end
     if self.setting.version == 'Custom' then
         self.mpq_path:open 'Custom_V1'
     end

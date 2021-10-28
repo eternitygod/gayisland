@@ -1,6 +1,7 @@
 local messagebox = require 'ffi.messagebox'
 local lang = require 'share.lang'
 local cl = require 'share.changelog'
+local fs = require 'bee.filesystem'
 
 local root = fs.absolute(fs.path '..')
 local errmessage = io.stdin:read 'a'
@@ -30,4 +31,7 @@ if f then
     f:write(errorlog)
     f:close()
 end
-messagebox(lang.ui.ERROR, '%s', errorlog)
+
+if arg[1] ~= '-s' then
+    messagebox(lang.ui.ERROR, '%s', errorlog)
+end

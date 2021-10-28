@@ -29,6 +29,7 @@
 
 
 globals
+	/*
 	// Generated
 	rect gg_rct_TriggerTiny = null
 	rect gg_rct_1_0_Movie_OgreMagi1 = null
@@ -82,6 +83,7 @@ globals
 	unit gg_unit_Hpal_0268 = null
 	unit gg_unit_ospw_0050 = null
 	unit gg_unit_hbew_0052 = null
+	*/
 
 	region WorldRegion = null
 
@@ -519,116 +521,12 @@ native DzFrameGetParent takes integer frame returns integer
 //*
 //***************************************************************************
 
-function InitSounds takes nothing returns nothing
-	set gg_snd_OgreYesAttack3 = CreateSound("Units\\Creeps\\Ogre\\OgreYesAttack3.wav", false, false, false, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_OgreYesAttack3, "OgreYesAttack")
-	call SetSoundDuration(gg_snd_OgreYesAttack3, 1094)
-	call SetSoundChannel(gg_snd_OgreYesAttack3, 0)
-	call SetSoundVolume(gg_snd_OgreYesAttack3, 120)
-
-	set gg_snd_ShouSiJuHua = CreateSound("war3mapImported\\ShouSiJuHua.wav", false, false, false, 10, 10, "")
-	call SetSoundDuration(gg_snd_ShouSiJuHua, 1498)
-	call SetSoundChannel(gg_snd_ShouSiJuHua, 0)
-	call SetSoundVolume(gg_snd_ShouSiJuHua, 127)
-	call SetSoundPitch(gg_snd_ShouSiJuHua, 1.0)
-	set gg_snd_FootmanYes1 = CreateSound("Units\\Human\\Footman\\FootmanYes1.wav", false, true, true, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_FootmanYes1, "FootmanYes")
-	call SetSoundDuration(gg_snd_FootmanYes1, 883)
-	set gg_snd_PeasantPissed3 = CreateSound("Units\\Human\\Peasant\\PeasantPissed3.wav", false, true, true, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_PeasantPissed3, "PeasantPissed")
-	call SetSoundDuration(gg_snd_PeasantPissed3, 2601)
-	set gg_snd_SkeletonYes1 = CreateSound("Units\\Undead\\Skeleton\\SkeletonYes1.wav", false, true, true, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_SkeletonYes1, "SkeletonYes")
-	call SetSoundDuration(gg_snd_SkeletonYes1, 2785)
-	set gg_snd_ForestTrollYesAttack2 = CreateSound("Units\\Creeps\\ForestTroll\\ForestTrollYesAttack2.wav", false, true, true, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_ForestTrollYesAttack2, "ForestTrollYesAttack")
-	call SetSoundDuration(gg_snd_ForestTrollYesAttack2, 914)
-	set gg_snd_ForestTrollWarcry1 = CreateSound("Units\\Creeps\\ForestTroll\\ForestTrollWarcry1.wav", false, true, true, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_ForestTrollWarcry1, "ForestTrollWarcry")
-	call SetSoundDuration(gg_snd_ForestTrollWarcry1, 1532)
-	set gg_snd_PriestYesAttack1 = CreateSound("Units\\Human\\Priest\\PriestYesAttack1.wav", false, true, true, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_PriestYesAttack1, "PriestYesAttack")
-	call SetSoundDuration(gg_snd_PriestYesAttack1, 1863)
-	set gg_snd_ArthasPissed4 = CreateSound("Units\\Human\\Arthas\\ArthasPissed4.wav", false, true, true, 10, 10, "HeroAcksEAX")
-	call SetSoundParamsFromLabel(gg_snd_ArthasPissed4, "ArthasPissed")
-	call SetSoundDuration(gg_snd_ArthasPissed4, 2000)
-	set gg_snd_NecromancerPissed4 = CreateSound("Units\\Undead\\Necromancer\\NecromancerPissed4.wav", false, true, true, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_NecromancerPissed4, "NecromancerPissed")
-	call SetSoundDuration(gg_snd_NecromancerPissed4, 3413)
-	set gg_snd_NecromancerWhat1 = CreateSound("Units\\Undead\\Necromancer\\NecromancerWhat1.wav", false, true, true, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_NecromancerWhat1, "NecromancerWhat")
-	call SetSoundDuration(gg_snd_NecromancerWhat1, 1727)
-	set gg_snd_pl_impact_stun = CreateSound("war3mapImported\\pl_impact_stun.mp3", false, false, false, 10, 10, "")
-	call SetSoundDuration(gg_snd_pl_impact_stun, 1340)
-	call SetSoundChannel(gg_snd_pl_impact_stun, 0)
-	call SetSoundVolume(gg_snd_pl_impact_stun, 127)
-	call SetSoundPitch(gg_snd_pl_impact_stun, 1.0)
-	set gg_snd_JuHuaXiao = CreateSound("war3mapImported\\JuHuaXiao.wav", false, false, false, 10, 10, "DefaultEAXON")
-	call SetSoundDuration(gg_snd_JuHuaXiao, 1661)
-	call SetSoundChannel(gg_snd_JuHuaXiao, 0)
-	call SetSoundVolume(gg_snd_JuHuaXiao, 127)
-	call SetSoundPitch(gg_snd_JuHuaXiao, 1.0)
-	set gg_snd_HeroLichReady1 = CreateSound("Units\\Undead\\HeroLich\\HeroLichReady1.wav", false, true, true, 10, 10, "HeroAcksEAX")
-	call SetSoundParamsFromLabel(gg_snd_HeroLichReady1, "HeroLichReady")
-	call SetSoundDuration(gg_snd_HeroLichReady1, 3233)
-	set gg_snd_S03Illidan45 = CreateSound("Sound\\Dialogue\\NightElfExpCamp\\NightElf03x\\S03Illidan45.mp3", false, false, false, 10, 10, "")
-	call SetSoundParamsFromLabel(gg_snd_S03Illidan45, "S03Illidan45")
-	call SetSoundDuration(gg_snd_S03Illidan45, 10448)
-	set gg_snd_JuHuaWuGu = CreateSound("war3mapImported\\JuHuaWuGu.wav", false, false, false, 10, 10, "")
-	call SetSoundDuration(gg_snd_JuHuaWuGu, 3720)
-	call SetSoundChannel(gg_snd_JuHuaWuGu, 0)
-	call SetSoundVolume(gg_snd_JuHuaWuGu, 127)
-	call SetSoundPitch(gg_snd_JuHuaWuGu, 1.0)
-	set gg_snd_FlashBack1Second = CreateSound("Sound\\Ambient\\DoodadEffects\\FlashBack1Second.wav", false, false, false, 10, 10, "DefaultEAXON")
-	call SetSoundParamsFromLabel(gg_snd_FlashBack1Second, "FlashBack1Second")
-	call SetSoundDuration(gg_snd_FlashBack1Second, 2178)
-	set gg_snd_BigSven_u = CreateSound("war3mapImported\\BigSven!.wav", false, false, false, 10, 10, "DefaultEAXON")
-	call SetSoundDuration(gg_snd_BigSven_u, 2281)
-	call SetSoundChannel(gg_snd_BigSven_u, 0)
-	call SetSoundVolume(gg_snd_BigSven_u, 127)
-	call SetSoundPitch(gg_snd_BigSven_u, 1.0)
-	set gg_snd_Sven_sevn_u = CreateSound("war3mapImported\\Sven!sevn!.wav", false, false, false, 10, 10, "")
-	call SetSoundDuration(gg_snd_Sven_sevn_u, 10000)
-	call SetSoundChannel(gg_snd_Sven_sevn_u, 0)
-	call SetSoundVolume(gg_snd_Sven_sevn_u, 127)
-	call SetSoundPitch(gg_snd_Sven_sevn_u, 1.0)
-	set gg_snd_LongZhu_u = CreateSound("war3mapImported\\LongZhu!.wav", false, false, false, 10, 10, "DefaultEAXON")
-	call SetSoundDuration(gg_snd_LongZhu_u, 4276)
-	call SetSoundChannel(gg_snd_LongZhu_u, 0)
-	call SetSoundVolume(gg_snd_LongZhu_u, 100)
-	call SetSoundPitch(gg_snd_LongZhu_u, 1.0)
-	set gg_snd_WoKaoJuQingSha = CreateSound("war3mapImported\\WoKaoJuQingSha.wav", false, false, false, 10, 10, "")
-	call SetSoundDuration(gg_snd_WoKaoJuQingSha, 2086)
-	call SetSoundChannel(gg_snd_WoKaoJuQingSha, 0)
-	call SetSoundVolume(gg_snd_WoKaoJuQingSha, 127)
-	call SetSoundPitch(gg_snd_WoKaoJuQingSha, 1.0)
-	set gg_snd_Ai_o_u = CreateSound("war3mapImported\\Ai~o~.wav", false, false, false, 10, 10, "DefaultEAXON")
-	call SetSoundDuration(gg_snd_Ai_o_u, 2090)
-	call SetSoundChannel(gg_snd_Ai_o_u, 0)
-	call SetSoundVolume(gg_snd_Ai_o_u, 127)
-	call SetSoundPitch(gg_snd_Ai_o_u, 1.0)
-	set gg_snd_LZGL = CreateSound("war3mapImported\\LZGL.wav", false, false, false, 10, 10, "")
-	call SetSoundDuration(gg_snd_LZGL, 2541)
-	call SetSoundChannel(gg_snd_LZGL, 0)
-	call SetSoundVolume(gg_snd_LZGL, 127)
-	call SetSoundPitch(gg_snd_LZGL, 1.0)
-	set gg_snd_PursuitTheme = "Sound\\Music\\mp3Music\\PursuitTheme.mp3"
-	set gg_snd_LJDTtth = CreateSound("war3mapImported\\LJDTtth.wav", false, false, false, 10, 10, "")
-	call SetSoundDuration(gg_snd_LJDTtth, 1736)
-	call SetSoundChannel(gg_snd_LJDTtth, 0)
-	call SetSoundVolume(gg_snd_LJDTtth, 127)
-	call SetSoundPitch(gg_snd_LJDTtth, 1.0)
-	set gg_snd_MaLiuDXiu = CreateSound("war3mapImported\\MaLiuDXiu.wav", false, false, false, 10, 10, "")
-	call SetSoundDuration(gg_snd_MaLiuDXiu, 1325)
-	call SetSoundChannel(gg_snd_MaLiuDXiu, 0)
-	call SetSoundVolume(gg_snd_MaLiuDXiu, 127)
-	call SetSoundPitch(gg_snd_MaLiuDXiu, 1.0)
-endfunction
 //***************************************************************************
 //*
 //*  Items
 //*
 //***************************************************************************
+/*
 function CreateAllItems takes nothing returns nothing
 	local integer itemID
 	//
@@ -678,12 +576,14 @@ function CreateAllItems takes nothing returns nothing
 	call EXCreateItem('tkno', - 24627.6, - 24720.4)
 	call EXCreateItem('tkno', 352.5, - 2455.5)
 endfunction
+*/
+
 //***************************************************************************
 //*
 //*  Unit Creation
 //*
 //***************************************************************************//===========================================================================
-function CreateBuildingsForPlayer0 takes nothing returns nothing
+/*function CreateBuildingsForPlayer0 takes nothing returns nothing
 	local player p = Player(0)
 	local unit u
 	local integer unitID
@@ -890,7 +790,7 @@ function CreateAllUnits takes nothing returns nothing
 	call CreateNeutralHostile()
 	call CreateNeutralPassive()
 	call CreatePlayerUnits()
-endfunction
+endfunction*/
 
 
 //***************************************************************************
@@ -935,6 +835,7 @@ endfunction
 //*  Regions
 //*
 //***************************************************************************
+/*
 function CreateRegions takes nothing returns nothing
 	local weathereffect we
 	set gg_rct_TriggerTiny = Rect(- 13248.0, - 14208.0, - 12896.0, - 13920.0)
@@ -954,12 +855,13 @@ function CreateRegions takes nothing returns nothing
 	set gg_rct_1_0_Movie_injoker1 = Rect(- 22720.0, - 25952.0, - 22592.0, - 25824.0)
 	set gg_rct_1_0_Movie_injoker2 = Rect(- 23488.0, - 25216.0, - 23360.0, - 25088.0)
 	set gg_rct_SB = Rect(- 16640.0, - 27584.0, - 16128.0, - 27392.0)
-endfunction
+endfunction*/
 //***************************************************************************
 //*
 //*  Cameras
 //*
 //***************************************************************************
+/*
 function CreateCameras takes nothing returns nothing
 	set gg_cam_OrgeInitialPoint = CreateCameraSetup()
 	call CameraSetupSetField(gg_cam_OrgeInitialPoint, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
@@ -971,6 +873,7 @@ function CreateCameras takes nothing returns nothing
 	call CameraSetupSetField(gg_cam_OrgeInitialPoint, CAMERA_FIELD_FARZ, 5000.0, 0.0)
 	call CameraSetupSetDestPosition(gg_cam_OrgeInitialPoint, - 24726.6, - 25375.9, 0.0)
 endfunction
+*/
 //***************************************************************************
 //*
 //*  Custom Script Code
@@ -1519,9 +1422,10 @@ endfunction
 
 //! endinject
 
+/*
 function main takes nothing returns nothing
 endfunction
-
+*/
 //***************************************************************************
 //*
 //*  Map Configuration
@@ -1533,6 +1437,7 @@ endfunction
 //*  Players
 //*
 //***************************************************************************
+/*
 function InitCustomPlayerSlots takes nothing returns nothing
 	local player whichPlayer
 	local integer loop_index = 0
@@ -1612,6 +1517,7 @@ function InitCustomTeams takes nothing returns nothing
 	call SetPlayerAllianceStateAllyBJ(Player(10), Player(8), true)
 endfunction
 
+
 function config takes nothing returns nothing
 	local integer i = 0
 	call SetMapName("基佬之岛v1.15")
@@ -1630,7 +1536,7 @@ function config takes nothing returns nothing
 	//不需要联盟优先权
 	//call InitAllyPriorities()
 endfunction
-
+*/
 
 
 

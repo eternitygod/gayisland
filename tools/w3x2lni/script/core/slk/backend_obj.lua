@@ -8,6 +8,7 @@ local string_char  = string.char
 local math_type    = math.type
 local math_floor   = math.floor
 local wtonumber = w3xparser.tonumber
+local float2bin = w3xparser.float2bin
 local type = type
 local pairs = pairs
 local setmetatable = setmetatable
@@ -20,30 +21,6 @@ local default
 local hexs
 local wts
 local ttype
-
-local displaytype = {
-    unit = lang.script.UNIT,
-    ability = lang.script.ABILITY,
-    item = lang.script.ITEM,
-    buff = lang.script.BUFF,
-    upgrade = lang.script.UPGRADE,
-    doodad = lang.script.DOODAD,
-    destructable = lang.script.DESTRUCTABLE,
-}
-
-local function get_displayname(o)
-    local name
-    if o._type == 'buff' then
-        name = o.bufftip or o.editorname or ''
-    elseif o._type == 'upgrade' then
-        name = o.name[1] or ''
-    elseif o._type == 'doodad' or o._type == 'destructable' then
-        name = w2l:get_editstring(o.name or '')
-    else
-        name = o.name or ''
-    end
-    return o._id, (name:sub(1, 100):gsub('\r\n', ' '))
-end
 
 local function format_value(value)
     if type(value) == 'table' then
@@ -60,7 +37,7 @@ local function format_value(value)
 end
 
 local function report(reason, obj, key, tip)
-    w2l.messager.report(reason, 6, ('%s %s %s'):format(displaytype[ttype], get_displayname(obj)), ('[%s]: %s'):format(key, format_value(tip)))
+    w2l.messager.report(reason, 6, ('%s %s %s'):format(w2l:get_displayname(obj)), ('[%s]: %s'):format(key, format_value(tip)))
 end
 
 local function write(format, ...)
@@ -81,10 +58,7 @@ local function write_value(meta, level, obj, value)
         end
         write('l', value)
     elseif tp == 1 or tp == 2 then
-        if type(value) ~= 'number' then
-            value = wtonumber(value)
-        end
-        write('f', value)
+        write('c4', float2bin(value)) -- obj 的浮点数用api转换为二进制
     else
         if type(value) ~= 'string' then
             value = ''
@@ -253,8 +227,13 @@ local function sort_chunk(chunk, remove_unuse_object)
             end
         end
     end
-    table_sort(origin)
-    table_sort(user)
+    -- 大写ID的对象必须在小写ID的对象前面，否则同ID单位时，英雄的数据会出错
+    table_sort(origin, function (id1, id2)
+        return id1 > id2
+    end)
+    table_sort(user, function (id1, id2)
+        return id1 > id2
+    end)
     return origin, user
 end
 
@@ -269,7 +248,7 @@ return function (w2l_, type, data, wts_)
     wts = wts_
     ttype = type
     has_level = w2l.info.key.max_level[type]
-    metadata = w2l:we_metadata()
+    metadata = w2l:metadata()
     default = w2l:get_default()[type]
     
     local origin_id, user_id = sort_chunk(data, w2l.setting.remove_unuse_object)

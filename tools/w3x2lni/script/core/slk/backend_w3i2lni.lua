@@ -70,10 +70,14 @@ function mt:add_head(data)
     self:value(lang.w3i.FILE_VERSION)
     self:value(lang.w3i.MAP_VERSION)
     self:value(lang.w3i.WE_VERSION)
+    self:value(lang.w3i.WAR3_VERSION)
     self:value(lang.w3i.MAP_NAME)
     self:value(lang.w3i.AUTHOR_NAME)
     self:value(lang.w3i.MAP_DESC)
     self:value(lang.w3i.PLAYER_DESC)
+    self:value(lang.w3i.SCRIPT_TYPE)
+    self:value(lang.w3i.UNKNOWN_10)
+    self:value(lang.w3i.UNKNOWN_11)
 
     self:title(lang.w3i.CAMERA, data)
     self:value(lang.w3i.CAMERA_BOUND)
@@ -153,6 +157,8 @@ function mt:add_player(data)
         self:value(lang.w3i.START_POSITION)
         self:value(lang.w3i.ALLY_LOW_FLAG)
         self:value(lang.w3i.ALLY_HIGH_FLAG)
+        self:value(lang.w3i.UNKNOWN_12)
+        self:value(lang.w3i.UNKNOWN_13)
     end
 end
 

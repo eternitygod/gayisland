@@ -1,30 +1,6 @@
 local lang = require 'lang'
 local w2l
 
-local displaytype = {
-    unit = lang.script.UNIT,
-    ability = lang.script.ABILITY,
-    item = lang.script.ITEM,
-    buff = lang.script.BUFF,
-    upgrade = lang.script.UPGRADE,
-    doodad = lang.script.DOODAD,
-    destructable = lang.script.DESTRUCTABLE,
-}
-
-local function get_displayname(o)
-    local name
-    if o._type == 'buff' then
-        name = o.bufftip or o.editorname or ''
-    elseif o._type == 'upgrade' then
-        name = o.name[1] or ''
-    elseif o._type == 'doodad' or o._type == 'destructable' then
-        name = w2l:get_editstring(o.name or '')
-    else
-        name = o.name or ''
-    end
-    return displaytype[o._type], o._id, name:sub(1, 100):gsub('\r\n', ' ')
-end
-
 local function get_displayname_by_id(slk, id)
     local o = slk.ability[id]
            or slk.unit[id]
@@ -36,7 +12,7 @@ local function get_displayname_by_id(slk, id)
     if not o then
         return lang.script.UNKNOW, id, '<unknown>'
     end
-    return get_displayname(o)
+    return w2l:get_displayname(o)
 end
 
 local function get_value(t, key)
@@ -85,6 +61,10 @@ end
 local function computed_value(slk, str, name, field)
     -- TODO: 魔兽计算这个太特殊了，我想我放弃完全模拟了
     local id, key, per = table.unpack(split(str))
+    if not id or not key then
+        w2l.messager.report(lang.report.COMPUTED_TEXT_FAILED, 5, ('%s %s %s'):format(get_displayname_by_id(slk, name)), ('%s: <%s>'):format(field, str))
+        return
+    end
     id = id:sub(1, 4)
     local o = slk.ability[id]
            or slk.unit[id]
@@ -115,8 +95,9 @@ local function computed_value(slk, str, name, field)
             return get_value(o, key)
         end
     }
-    if type(res) == 'number' then
-        if per == '%' then
+    res = tonumber(res)
+    if res then
+        if per == '%'then
             res = res * 100
         end
         return around_integer(res)

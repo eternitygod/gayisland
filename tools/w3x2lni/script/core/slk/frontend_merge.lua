@@ -68,7 +68,7 @@ local function fill_and_merge(a, b, lv, meta)
         end
     else
         for i = 1, lv do
-            c[i] = b[i] or a[i] 
+            c[i] = b[i] or a[i]
         end
     end
     if not is_remove_exceeds_level then
@@ -84,7 +84,10 @@ end
 
 local function copy_obj(a, b)
     local c = {}
-    local lv = b._max_level or a._max_level
+    local lv = tonumber(b._max_level or a._max_level)
+    if lv and lv > 10000 then
+        lv = 10000
+    end
     if b._code and a._code ~= b._code then
         w2l.messager.report(lang.report.INVALID_OBJECT_DATA, 6, lang.report.ABILITY_CODE_ERROR:format(b._id, b._code), lang.report.DEFAULT_IS:format(a._code))
         return nil
@@ -106,8 +109,7 @@ local function copy_obj(a, b)
         end
     end
     for k, v in pairs(b) do
-        -- 不应该会有等级数据
-        assert(type(v) ~= 'table')
+        -- txt中读取出来的数据有等级
         c[k] = v
     end
     return c
@@ -116,6 +118,9 @@ end
 local function fill_obj(a)
     local c = {}
     local lv = a._max_level
+    if lv and lv > 10000 then
+        lv = 10000
+    end
     for k, v in pairs(a) do
         if type(v) == 'table' then
             c[k] = fill_and_copy(v, lv)

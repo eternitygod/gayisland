@@ -1,4 +1,5 @@
 local lang = require 'lang'
+local convertreal = require 'convertreal'
 local table_insert = table.insert
 local table_sort = table.sort
 local math_type = math.type
@@ -30,7 +31,7 @@ local function format_value(tp, value)
     if tp == 0 then
         return ('%d'):format(math.floor(value))
     elseif tp == 1 or tp == 2 then
-        return ('%.4f'):format(value)
+        return convertreal(value)
     elseif tp == 3 then
         value = w2l:get_editstring(value)
         if value:match '[\n\r]' then
@@ -72,11 +73,8 @@ local function write_data(meta, data, lines)
     end
 
     local values = {}
-    local is_string
+    local is_string = meta.type == 3
     for i = 1, len do
-        if type(data[i]) == 'string' then
-            is_string = true
-        end
         if len >= 10 then
             values[i] = ('%d = %s'):format(i, format_value(meta.type, data[i]))
         else

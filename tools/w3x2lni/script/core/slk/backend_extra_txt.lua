@@ -1,3 +1,5 @@
+local w2l
+
 local function format_keyval(key, val)
     if val == '' then
         return nil
@@ -22,9 +24,6 @@ local function format_value(val)
 end
 
 local function add_data(lines, key, data)
-    if key:find '[^%w_]' then
-        key = ('%q'):format(key)
-    end
     local len = 0
     for k in pairs(data) do
         if k > len then
@@ -79,9 +78,33 @@ local function add_chunk(lines, tbl)
     end
 end
 
-return function (w2l, tbl)
+local function make_marked_ids(slk)
+    local marked = {}
+    local type_list = {'ability', 'buff', 'unit', 'item', 'upgrade', 'doodad'}
+    for _, type in ipairs(type_list) do
+        if slk[type] then
+            for name, obj in pairs(slk[type]) do
+                if obj._mark then
+                    marked[name:lower()] = true
+                end
+            end
+        end
+    end
+    return marked
+end
+
+return function (w2l_, tbl, slk)
+    w2l = w2l_
     if not tbl then
         return
+    end
+    if w2l.setting.remove_unuse_object then
+        local marked = make_marked_ids(slk)
+        for lname in pairs(tbl) do
+            if not marked[lname] then
+                tbl[lname] = nil
+            end
+        end
     end
     local lines = {}
 

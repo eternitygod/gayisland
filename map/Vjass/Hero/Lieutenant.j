@@ -148,9 +148,7 @@ function Stomp takes nothing returns nothing
 	endif
 endfunction
 
-function DragonSlave_Filter takes nothing returns boolean
-	return Enemy_Alive_NoStructure_NoImmune(GetFilterUnit())
-endfunction
+
 
 function AbstinenceIsGoodMedicineEffect takes nothing returns boolean
 	local trigger trig = GetTriggeringTrigger()

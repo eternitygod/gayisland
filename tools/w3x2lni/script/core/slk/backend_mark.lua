@@ -32,12 +32,14 @@ local mustuse =  {
         -- 移动
         'Amov',
         -- 开火
-        'Afir','Afih','Afio','Afin','Afiu'
+        'Afir','Afih','Afio','Afin','Afiu',
+        -- 命令光环
+        'ACac',
     },
     buff = {
         'BPSE','BSTN','Btlf','Bdet',
         'Bvul','Bspe','Bfro','Bsha',
-        'Btrv','Xbdt','Xbli','Xdis', 
+        'Btrv','Xbdt','Xbli','Xdis',
         -- 建筑物伤害
         'Xfhs','Xfhm','Xfhl',
         'Xfos','Xfom','Xfol',
@@ -90,20 +92,6 @@ local report_once = {}
 local report_cache = {}
 local current_root = {'', '%s%s'}
 
-local function get_displayname(o)
-    local name
-    if o._type == 'buff' then
-        name = o.bufftip or o.editorname or ''
-    elseif o._type == 'upgrade' then
-        name = o.name[1] or ''
-    elseif o._type == 'doodad' or o._type == 'destructable' then
-        name = w2l:get_editstring(o.name or '')
-    else
-        name = o.name or ''
-    end
-    return o._id, (name:sub(1, 100):gsub('\r\n', ' '))
-end
-
 local function get_displayname_by_id(slk, id)
     local o = slk.ability[id]
            or slk.unit[id]
@@ -115,7 +103,8 @@ local function get_displayname_by_id(slk, id)
     if not o then
         return id, '<unknown>'
     end
-    return get_displayname(o)
+    local _, id, name = w2l:get_displayname(o)
+    return id, name
 end
 
 local function format_marktip(slk, marktip)
@@ -288,7 +277,6 @@ local function mark_marketplace(slk, flag)
     for _, obj in pairs(slk.unit) do
         -- 是否使用了市场
         if obj._mark and obj._name == 'marketplace' then
-            search_marketplace = true
             report_cache[#report_cache+1] = {lang.report.RETAIN_MARKET, lang.report.RETAIN_MARKET_HINT:format(obj.name, obj._id)}
             for _, obj in pairs(slk.item) do
                 if obj.pickrandom == 1 and obj.sellable == 1 then
@@ -308,9 +296,8 @@ local function mark_doo(w2l, slk)
     end
     for name in pairs(destructable) do
         current_root = {name, lang.report.REFERENCE_BY_PLACING}
-        if not mark_known_type(slk, 'destructable', name) then
-            mark_known_type(slk, 'doodad', name)
-        end
+        mark_known_type(slk, 'destructable', name)
+        mark_known_type(slk, 'doodad', name)
     end
     for name in pairs(doodad) do
         current_root = {name, lang.report.REFERENCE_BY_PLACING}

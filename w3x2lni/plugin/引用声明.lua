@@ -9,7 +9,44 @@ mt.info = {
 
 local list = {}
 
---list['Anei'] = true
+for x = 1, 4 do
+    for y = 1, 5 do
+        list['AX'..x..y] = true
+        list['AS'..x..y] = true
+    end
+end
+
+for x = 0, 9 do
+    for y = 0, 6 do
+        list['A0'..x..y] = true
+        list['AL'..x..y] = true
+        list['AT'..x..y] = true
+        list['AD'..x..y] = true
+        list['IT'..x..y] = true
+        list['ID'..x..y] = true
+    end
+end
+
+for x = 1, 4 do
+    list['AF0'..x] = true
+end
+
+for x = 0, 3 do
+    list['A20'..x] = true
+end
+
+list['A028'] = true
+list['A888'] = true
+list['A889'] = true
+list['A01H'] = true
+list['A00V'] = true
+list['A00E'] = true
+list['AZ00'] = true
+list['AB31'] = true
+list['A01K'] = true
+list['A01G'] = true
+list['A01W'] = true
+list['A007'] = true
 list['AInv'] = true
 
 local firsts = 'ehbnH'

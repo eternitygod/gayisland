@@ -2,15 +2,6 @@ local lang = require 'lang'
 local os_clock = os.clock
 local w2l
 
-local output = {
-    unit    = 'units\\campaignunitstrings.txt',
-    ability = 'units\\campaignabilitystrings.txt',
-    buff    = 'units\\commonabilitystrings.txt',
-    upgrade = 'units\\campaignupgradestrings.txt',
-    item    = 'units\\itemstrings.txt',
-    txt     = 'units\\itemabilitystrings.txt',
-}
-
 local function to_lni(w2l, slk)
     --转换物编
     local count = 0
@@ -61,14 +52,15 @@ local function convert_wtg(w2l)
     w2l.progress:start(0.5)
     if wtg and wct then
         if w2l.setting.mode == 'lni' then
-            xpcall(function ()
+            local ok, err = xpcall(function ()
                 wtg_data = w2l:frontend_wtg(wtg)
                 wct_data = w2l:frontend_wct(wct)
                 w2l:file_remove('map', 'war3map.wtg')
                 w2l:file_remove('map', 'war3map.wct')
-            end, function (msg)
-                w2l.messager.report(lang.report.WARN, 2, lang.report.NO_CONVERT_WTG, msg:match('%.lua:%d+: (.*)'))
-            end)
+            end, debug.traceback)
+            if not ok then
+                w2l.messager.report(lang.report.WARN, 2, lang.report.NO_CONVERT_WTG, err:match('%.lua:%d+: (.*)'))
+            end
         end
     else
         local version = w2l:file_load('w3x2lni', 'version\\lml')
@@ -77,18 +69,21 @@ local function convert_wtg(w2l)
         elseif version == '1' then
             w2l.frontend_lml = w2l.frontend_lml_v1
         end
+        local filenames = {}
         wtg_data, wct_data = w2l:frontend_lml(function (filename)
             local buf = w2l:file_load('trigger', filename)
             if buf then
-                w2l:file_remove('trigger', filename)
+                filenames[#filenames+1] = filename
             end
             return buf
         end)
+        for _, filename in ipairs(filenames) do
+            w2l:file_remove('trigger', filename)
+        end
         w2l:file_remove('w3x2lni', 'version\\lml')
     end
     w2l.progress:finish()
     w2l.progress:start(1)
-    local need_convert_wtg = true
     if wtg_data and wct_data and not w2l.setting.remove_we_only then
         if w2l.setting.mode == 'lni' then
             w2l:file_save('w3x2lni', 'version\\lml', '2')
@@ -98,47 +93,20 @@ local function convert_wtg(w2l)
             end
         else
             local wtg_buf, wct_buf
-            local suc, err = pcall(function ()
+            local suc, err = xpcall(function ()
                 wtg_buf = w2l:backend_wtg(wtg_data, w2l.slk.wts)
                 wct_buf = w2l:backend_wct(wct_data)
-            end)
+            end, debug.traceback)
             if suc then
                 w2l:file_save('map', 'war3map.wtg', wtg_buf)
                 w2l:file_save('map', 'war3map.wct', wct_buf)
-                need_convert_wtg = false
             else
                 w2l.messager.report(lang.report.ERROR, 1, lang.report.SAVE_WTG_FAILED, err:match('%.lua:%d+: (.*)'))
             end
         end
     end
     w2l.progress:finish()
-    if need_convert_wtg then
-        w2l:backend_convertwtg(w2l.slk.wts)
-    end
-end
-
-local displaytype = {
-    unit = lang.script.UNIT,
-    ability = lang.script.ABILITY,
-    item = lang.script.ITEM,
-    buff = lang.script.BUFF,
-    upgrade = lang.script.UPGRADE,
-    doodad = lang.script.DOODAD,
-    destructable = lang.script.DESTRUCTABLE,
-}
-
-local function get_displayname(o)
-    local name
-    if o._type == 'buff' then
-        name = o.bufftip or o.editorname or ''
-    elseif o._type == 'upgrade' then
-        name = o.name[1] or ''
-    elseif o._type == 'doodad' or o._type == 'destructable' then
-        name = w2l:get_editstring(o.name or '')
-    else
-        name = o.name or ''
-    end
-    return o._id, (name:sub(1, 100):gsub('\r\n', ' '))
+    w2l:backend_convertwtg(w2l.slk.wts)
 end
 
 local function get_displayname_by_id(slk, id)
@@ -152,7 +120,8 @@ local function get_displayname_by_id(slk, id)
     if not o then
         return id, '<unknown>'
     end
-    return get_displayname(o)
+    local _, id, name = w2l:get_displayname(o)
+    return id, name
 end
 
 local function format_marktip(slk, marktip)
@@ -160,7 +129,7 @@ local function format_marktip(slk, marktip)
 end
 
 local function report_object(slk, type, o)
-    w2l.messager.report(lang.report.REMOVE_UNUSED_OBJECT, 4, ('%s \'%s\' %s'):format(displaytype[type], get_displayname(o)), o._mark and format_marktip(slk, o._mark)) 
+    w2l.messager.report(lang.report.REMOVE_UNUSED_OBJECT, 4, ('%s \'%s\' %s'):format(w2l:get_displayname(o)), o._mark and format_marktip(slk, o._mark))
 end
 
 local function report_list(slk, list, type, n)
@@ -204,7 +173,7 @@ local function remove_unuse(w2l, slk)
             mustuse[type][id] = true
         end
     end
-    
+
     local total_custom = 0
     local total_origin = 0
     local unuse_custom = 0
@@ -263,9 +232,22 @@ end
 local function to_slk(w2l, slk)
     local report = { n = 0 }
     local object = {}
-    local slk_list = {'ability', 'buff', 'unit', 'item', 'upgrade', 'destructable'}
+    local slk_list = {'ability', 'buff', 'unit', 'item', 'upgrade'}
     if w2l.setting.slk_doodad then
         slk_list[#slk_list+1] = 'doodad'
+        slk_list[#slk_list+1] = 'destructable'
+    else
+        for _, type in ipairs {'doodad', 'destructable'} do
+            for _, obj in pairs(slk[type]) do
+                obj._keep_obj = true
+            end
+        end
+    end
+    -- 一些特殊处理
+    for id, obj in pairs(slk.ability) do
+        if id ~= 'ACac' and obj._parent == 'ACac' then
+            obj._keep_obj = true
+        end
     end
     for _, type in ipairs(slk_list) do
         local data = slk[type]
@@ -283,9 +265,16 @@ local function to_slk(w2l, slk)
     for _, filename in ipairs(w2l.info.txt) do
         w2l:file_save('map', filename, '')
     end
+    if w2l:isreforge() then
+        for _, filename in ipairs(w2l.info.reforge) do
+            w2l:file_save('map', filename, '')
+        end
+    end
     local txt = w2l:backend_txt(slk, report, object)
-    for _, type in ipairs {'ability', 'buff', 'unit', 'item', 'upgrade'} do
-        w2l:file_save('map', output[type], txt[type])
+    for _, type in ipairs {'ability', 'buff', 'unit', 'item', 'upgrade', 'destructable', 'doodad'} do
+        if txt[type] then
+            w2l:file_save('map', w2l.info.txt_out[type], txt[type])
+        end
     end
 
     for _, type in ipairs {'ability', 'buff', 'unit', 'item', 'upgrade', 'destructable', 'doodad', 'misc'} do
@@ -296,9 +285,9 @@ local function to_slk(w2l, slk)
         end
     end
 
-    local content = w2l:backend_extra_txt(slk['txt'])
+    local content = w2l:backend_extra_txt(slk['txt'], slk)
     if content then
-        w2l:file_save('map', output['txt'], content)
+        w2l:file_save('map', w2l.info.txt_out['txt'], content)
     end
 
     if report.n > 0 then
@@ -385,7 +374,7 @@ return function (w2l_, slk)
     w2l.progress:start(0.5)
     w2l:backend_cleanobj(slk)
     w2l.progress:finish()
-    
+
     w2l.progress:start(0.7)
     w2l.messager.text(lang.script.CONVERT_OBJ)
     if w2l.setting.mode == 'lni' then

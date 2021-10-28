@@ -1,4 +1,5 @@
 local path_filter = require 'map-builder.path_filter'
+local fs = require 'bee.filesystem'
 
 local ignore = {}
 for _, name in ipairs {'.git', '.svn', '.vscode', '.gitignore'} do
@@ -37,6 +38,9 @@ local function loaded_name(name)
 end
 
 local function scan_dir(dir, callback)
+    if not fs.exists(dir) then
+        return
+    end
     for path in dir:list_directory() do
         if not ignore[path:filename():string()] then
             if fs.is_directory(path) then

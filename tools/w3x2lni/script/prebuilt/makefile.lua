@@ -1,6 +1,9 @@
 local lang = require 'share.lang'
 local config = require 'share.config'
 local root = require 'backend.w2l_path'
+local convertreal = require 'core.convertreal'
+local fs = require 'bee.filesystem'
+local math_type = math.type
 
 local function sortpairs(t)
     local sort = {}
@@ -27,7 +30,11 @@ local function format_value(value)
         return tostring(value)
     end
     if tp == 'number' then
-        return tostring(value)
+        if math_type(value) == 'integer' then
+            return tostring(value)
+        else
+            return convertreal(value)
+        end
     end
     if tp == 'string' then
         return ('%q'):format(value)
@@ -57,7 +64,7 @@ local function write_data(f, k, v)
     end
 end
 
-function writer(t)
+local function writer(t)
     local f = {}
     for i, o in sortpairs(t) do
         f[#f+1] = ('[%s]'):format(i)
@@ -69,17 +76,29 @@ function writer(t)
     return table.concat(f, '\r\n')
 end
 
-return function (w2l, version)
+return function (w2l, war3, version)
     w2l.messager.text(lang.script.CONVERT_ONE .. version)
 
-    w2l:set_setting
-    {
-        data      = config.global.data,
-        data_ui   = config.global.data_ui,
-        data_meta = config.global.data_meta,
-        data_wes  = config.global.data_wes,
-        version   = version,
-    }
+    if war3.casc then
+        w2l:set_setting
+        {
+            data      = config.global.data,
+            data_ui   = '${DATA}',
+            data_meta = '${DATA}',
+            data_wes  = '${DATA}',
+            version   = version,
+        }
+    else
+        w2l:set_setting
+        {
+            data      = config.global.data,
+            data_ui   = config.global.data_ui,
+            data_meta = config.global.data_meta,
+            data_wes  = config.global.data_wes,
+            version   = version,
+        }
+    end
+
     local prebuilt_path = root / 'data' / config.global.data / 'prebuilt' / version
     fs.create_directories(prebuilt_path)
 
