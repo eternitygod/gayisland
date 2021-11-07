@@ -10,7 +10,7 @@ scope UnitEnterMapEvent initializer Init
         local integer typeId = GetUnitTypeId(u)
         if GetUnitAbilityLevel(GetFilterUnit(), 'Aloc') <= 0 then //受伤事件
             call TriggerRegisterUnitEvent(DamageEventTrigger, u, EVENT_UNIT_DAMAGED)
-            call InitUnitBonus(u)
+            // call InitUnitBonus(u)
         endif
         if IsUnitType(u, UNIT_TYPE_HERO) then
             call QueuedUnitRestoreAdd(u)

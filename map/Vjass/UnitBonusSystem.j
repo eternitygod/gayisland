@@ -1,6 +1,19 @@
 
 scope UnitBonusSystem 
 
+    globals
+        //ObjectData
+        constant integer BONUS_DAMAGE = 0   //攻击
+        constant integer BONUS_ARMOR = 1 //护甲
+        constant integer BONUS_ATTACK = 2    //攻速
+        constant integer BONUS_LIFE = 3 //最大生命
+        constant integer BONUS_MANA = 4 //最大魔法
+        constant integer BONUS_STR = 5
+        constant integer BONUS_AGI = 6
+        constant integer BONUS_INT = 7
+        constant integer BONUS_MOVESPEED = 8   //移动速度
+    endglobals
+
     //设置单位生命恢复速度 这里GetHandleId用了三次 待优化
     function UnitSetLifeRestore takes unit whichUnit, real newValue returns nothing
         local integer h = GetHandleId(whichUnit)
@@ -38,6 +51,9 @@ scope UnitBonusSystem
     //升级并降低技能等级以此达到刷新属性的目的
     function UnitAddAttackSpeedBonus takes unit whichUnit, real value returns nothing
         local integer h = GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIsx')
+        endif
         set value = LoadReal(UnitData, h, BONUS_ATTACK) + value
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, value)
         call IncUnitAbilityLevel(whichUnit, 'AIsx' ) 
@@ -46,6 +62,9 @@ scope UnitBonusSystem
     endfunction
     function UnitReduceAttackSpeedBonus takes unit whichUnit, real value returns nothing
         local integer h = GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIsx')
+        endif
         set value = LoadReal(UnitData, h, BONUS_ATTACK) - value
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, value)
         call IncUnitAbilityLevel(whichUnit, 'AIsx' ) 
@@ -53,6 +72,9 @@ scope UnitBonusSystem
         call SaveReal(UnitData, h, BONUS_ATTACK, value)
     endfunction
     function UnitSetAttackSpeedBonus takes unit whichUnit, real newValue returns nothing
+        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIsx')
+        endif
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, newValue)
         call IncUnitAbilityLevel(whichUnit, 'AIsx' )
         call DecUnitAbilityLevel(whichUnit, 'AIsx' )
@@ -62,6 +84,9 @@ scope UnitBonusSystem
 
     function UnitAddArmorBonus takes unit whichUnit, real value returns nothing
         local integer h = GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AId1')
+        endif
         set value = LoadReal(UnitData, h, BONUS_ARMOR) + value
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, value)
         call IncUnitAbilityLevel(whichUnit, 'AId1' ) 
@@ -70,6 +95,9 @@ scope UnitBonusSystem
     endfunction
     function UnitReduceArmorBonus takes unit whichUnit, real value returns nothing
         local integer h = GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AId1')
+        endif
         set value = LoadReal(UnitData, h, BONUS_ARMOR) - value
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, value)
         call IncUnitAbilityLevel(whichUnit, 'AId1' ) 
@@ -77,6 +105,9 @@ scope UnitBonusSystem
         call SaveReal(UnitData, h, BONUS_ARMOR, value)
     endfunction
     function UnitSetArmorBonus takes unit whichUnit, real newValue returns nothing
+        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AId1')
+        endif
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, newValue)
         call IncUnitAbilityLevel(whichUnit, 'AId1' )
         call DecUnitAbilityLevel(whichUnit, 'AId1' )
@@ -86,6 +117,9 @@ scope UnitBonusSystem
     //增加单位移动速度
     function UnitAddMoveSpeedBonus takes unit whichUnit, real value returns nothing
         local integer h = GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIms')
+        endif
         set value = LoadReal(UnitData, h, BONUS_MOVESPEED) + value
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, value)
         call IncUnitAbilityLevel(whichUnit, 'AIms' ) 
@@ -95,6 +129,9 @@ scope UnitBonusSystem
     //减少单位移动速度
     function UnitReduceMoveSpeedBonus takes unit whichUnit, real value returns nothing
         local integer h = GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIms')
+        endif
         set value = LoadReal(UnitData, h, BONUS_MOVESPEED) - value
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, value)
         call IncUnitAbilityLevel(whichUnit, 'AIms' ) 
@@ -103,6 +140,9 @@ scope UnitBonusSystem
     endfunction
     //设置单位移动速度
     function UnitSetMoveSpeedBonus takes unit whichUnit, real newValue returns nothing
+        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIms')
+        endif
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, newValue)
         call IncUnitAbilityLevel(whichUnit, 'AIms' )
         call DecUnitAbilityLevel(whichUnit, 'AIms' )
@@ -111,6 +151,9 @@ scope UnitBonusSystem
 
     function UnitAddDamageBonus takes unit whichUnit, real value returns nothing
         local integer h = GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIat')
+        endif
         set value = LoadReal(UnitData, h, BONUS_DAMAGE) + value
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, value)
         call IncUnitAbilityLevel(whichUnit, 'AIat' ) 
@@ -119,6 +162,9 @@ scope UnitBonusSystem
     endfunction
     function UnitReduceDamageBonus takes unit whichUnit, real value returns nothing
         local integer h = GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIat')
+        endif
         set value = LoadReal(UnitData, h, BONUS_DAMAGE) - value
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, value)
         call IncUnitAbilityLevel(whichUnit, 'AIat' ) 
@@ -126,6 +172,9 @@ scope UnitBonusSystem
         call SaveReal(UnitData, h, BONUS_DAMAGE, value)
     endfunction
     function UnitSetDamageBonus takes unit whichUnit, real newValue returns nothing
+        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'AIat')
+        endif
         call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, newValue)
         call IncUnitAbilityLevel(whichUnit, 'AIat' )
         call DecUnitAbilityLevel(whichUnit, 'AIat' )
@@ -135,6 +184,9 @@ scope UnitBonusSystem
     function UnitAddStrBonus takes unit whichUnit, integer value returns nothing
         local integer h = GetHandleId(whichUnit)
         local ability abAamk = EXGetUnitAbility(whichUnit, 'Aamk')
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'Aamk')
+        endif
         set value = LoadInteger(UnitData, h, BONUS_STR) + value
         call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, value)
         call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(UnitData, h, BONUS_INT))
@@ -147,6 +199,9 @@ scope UnitBonusSystem
     function UnitReduceStrBonus takes unit whichUnit, integer value returns nothing
         local integer h = GetHandleId(whichUnit)
         local ability abAamk = EXGetUnitAbility(whichUnit, 'Aamk')
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'Aamk')
+        endif
         set value = LoadInteger(UnitData, h, BONUS_STR) - value
         call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, value)
         call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(UnitData, h, BONUS_INT))
@@ -159,6 +214,9 @@ scope UnitBonusSystem
     function UnitSetStrBonus takes unit whichUnit, integer newValue returns nothing
         local integer h = GetHandleId(whichUnit)
         local ability abAamk = EXGetUnitAbility(whichUnit, 'Aamk')
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'Aamk')
+        endif
         call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, newValue)
         call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(UnitData, h, BONUS_INT))
         call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, LoadInteger(UnitData, h, BONUS_AGI))
@@ -232,6 +290,9 @@ scope UnitBonusSystem
         local integer str = LoadInteger(UnitData, h, BONUS_STR) + LoadInteger(ObjectData, itemId, BONUS_STR)
         local integer agi = LoadInteger(UnitData, h, BONUS_AGI) + LoadInteger(ObjectData, itemId, BONUS_AGI)
         local integer int = LoadInteger(UnitData, h, BONUS_INT) + LoadInteger(ObjectData, itemId, BONUS_INT)
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'Aamk')
+        endif
         call SaveInteger(UnitData, h, BONUS_STR, str)
         call SaveInteger(UnitData, h, BONUS_AGI, agi)
         call SaveInteger(UnitData, h, BONUS_INT, int)
@@ -246,6 +307,9 @@ scope UnitBonusSystem
         local integer str = LoadInteger(UnitData, h, BONUS_STR) - LoadInteger(ObjectData, itemId, BONUS_STR)
         local integer agi = LoadInteger(UnitData, h, BONUS_AGI) - LoadInteger(ObjectData, itemId, BONUS_AGI)
         local integer int = LoadInteger(UnitData, h, BONUS_INT) - LoadInteger(ObjectData, itemId, BONUS_INT)
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit, 'Aamk')
+        endif
         call SaveInteger(UnitData, h, BONUS_STR, str)
         call SaveInteger(UnitData, h, BONUS_AGI, agi)
         call SaveInteger(UnitData, h, BONUS_INT, int)
@@ -256,36 +320,78 @@ scope UnitBonusSystem
         call DecUnitAbilityLevel(whichUnit, 'Aamk' )
     endfunction
 
-    //初始化单位属性
-function InitUnitBonus takes unit whichUnit returns nothing
-	local ability abAamk = null
-	if not IsInitUnit then
-		call EXSetAbilityDataReal(EXGetUnitAbility(BonusDummy, 'AIat'), 1, ABILITY_DATA_DATA_A, 0)
-		call EXSetAbilityDataReal(EXGetUnitAbility(BonusDummy, 'AId1'), 1, ABILITY_DATA_DATA_A, 0)
-		call EXSetAbilityDataReal(EXGetUnitAbility(BonusDummy, 'AIsx'), 1, ABILITY_DATA_DATA_A, 0)
-		call EXSetAbilityDataReal(EXGetUnitAbility(BonusDummy, 'AIms'), 1, ABILITY_DATA_DATA_A, 0)
-	endif
-	//给单位添加额外属性
-	//攻击
-	call UnitAddPermanentAbility(whichUnit, 'AIat')
-	//防御
-	call UnitAddPermanentAbility(whichUnit, 'AId1')
-	//攻速
-	call UnitAddPermanentAbility(whichUnit, 'AIsx')
-	//移速
-	call UnitAddPermanentAbility(whichUnit, 'AIms')
-	if IsUnitType(whichUnit, UNIT_TYPE_HERO) then
-		//三围
-		if not IsInitUnit then
-			set abAamk = EXGetUnitAbility(BonusDummy, 'Aamk')
-			call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, 0)
-			call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, 0)
-			call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, 0)
-			set abAamk = null
-		endif
-		call UnitAddPermanentAbility(whichUnit, 'Aamk')
-	endif
-endfunction
+    function GetUnitStateBonus takes unit whichUnit, integer iBonusType returns real
+        return LoadReal(UnitData, GetHandleId(whichUnit), iBonusType)
+    endfunction
+
+    // 通过句柄来查单位的额外属性加成 会被内联
+    function GetUnitStateBonusByHandleId takes integer whichHandleId, integer iBonusType returns real
+        return LoadReal(UnitData, whichHandleId, iBonusType)
+    endfunction
+
+    // 同步镜像与本体的属性
+    function SyncIllusionUnitState takes unit hIllusionUnit, unit hMasterUnit returns nothing
+        local real value = 0.
+        local ability hAbilityAamk
+        local integer iMasterUnitHandleId = GetHandleId(hMasterUnit)
+        // 攻击力
+        set value = GetUnitStateBonusByHandleId(iMasterUnitHandleId, BONUS_DAMAGE)
+        call UnitSetDamageBonus(hIllusionUnit, value)
+        // 护甲
+        set value = GetUnitStateBonusByHandleId(iMasterUnitHandleId, BONUS_ARMOR)
+        call UnitSetArmorBonus(hIllusionUnit, value) 
+        // 攻速
+        set value = GetUnitStateBonusByHandleId(iMasterUnitHandleId, BONUS_ATTACK)
+        call UnitAddAttackSpeedBonus(hIllusionUnit, value)
+        // 如果AHer ＞ 0 就是英雄单位镜像
+        if GetUnitAbilityLevel(hIllusionUnit, 'AHer') > 0 and GetUnitAbilityLevel(hMasterUnit, 'Aamk') > 0 then
+            set hAbilityAamk = EXGetUnitAbility(hIllusionUnit, 'Aamk')
+            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_C, GetUnitStateBonusByHandleId(iMasterUnitHandleId, BONUS_STR))
+            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_B, GetUnitStateBonusByHandleId(iMasterUnitHandleId, BONUS_INT))
+            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_A, GetUnitStateBonusByHandleId(iMasterUnitHandleId, BONUS_AGI))
+            set hAbilityAamk = null
+            call IncUnitAbilityLevel(hIllusionUnit, 'Aamk' )
+            call DecUnitAbilityLevel(hIllusionUnit, 'Aamk' )
+            // 生命值和魔法值默认同步 但如果修改了额外属性可能会导致不一致
+            // 最大生命值
+            set value = GetUnitState(hMasterUnit, UNIT_STATE_MAX_LIFE)
+            call SetUnitState(hIllusionUnit, UNIT_STATE_MAX_LIFE, value)
+            // 最大魔法值
+            set value = GetUnitState(hMasterUnit, UNIT_STATE_MAX_MANA)
+            call SetUnitState(hIllusionUnit, UNIT_STATE_MAX_MANA, value)
+        endif
+    endfunction
+
+    //初始化单位属性 暂时弃用 (因为每个单位要加出生直接多4个技能太浪费了)
+    /*function InitUnitBonus takes unit whichUnit returns nothing
+    local ability abAamk = null
+    if not IsInitUnit then
+        call EXSetAbilityDataReal(EXGetUnitAbility(BonusDummy, 'AIat'), 1, ABILITY_DATA_DATA_A, 0)
+        call EXSetAbilityDataReal(EXGetUnitAbility(BonusDummy, 'AId1'), 1, ABILITY_DATA_DATA_A, 0)
+        call EXSetAbilityDataReal(EXGetUnitAbility(BonusDummy, 'AIsx'), 1, ABILITY_DATA_DATA_A, 0)
+        call EXSetAbilityDataReal(EXGetUnitAbility(BonusDummy, 'AIms'), 1, ABILITY_DATA_DATA_A, 0)
+    endif
+    //给单位添加额外属性
+    //攻击
+    call UnitAddPermanentAbility(whichUnit, 'AIat')
+    //防御
+    call UnitAddPermanentAbility(whichUnit, 'AId1')
+    //攻速
+    call UnitAddPermanentAbility(whichUnit, 'AIsx')
+    //移速
+    call UnitAddPermanentAbility(whichUnit, 'AIms')
+    if IsUnitType(whichUnit, UNIT_TYPE_HERO) then
+        //三围
+        if not IsInitUnit then
+            set abAamk = EXGetUnitAbility(BonusDummy, 'Aamk')
+            call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, 0)
+            call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, 0)
+            call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, 0)
+            set abAamk = null
+        endif
+        call UnitAddPermanentAbility(whichUnit, 'Aamk')
+    endif
+endfunction */
 
 endscope
 

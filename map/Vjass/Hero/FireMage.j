@@ -223,6 +223,7 @@ scope CopperAlchemist
 		return false
 	endfunction*/
 
+	// 偷懒直接在筛选里面加特效
 	private function DragonSlave_Filter takes nothing returns boolean
 		local unit hFilterUnit = GetFilterUnit()
 		if Enemy_Alive_NoStructure(hFilterUnit) then

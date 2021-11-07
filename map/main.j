@@ -166,16 +166,6 @@ globals
 	constant integer UNIT_LIFERESTORE = 103
 	constant integer UNIT_MANARESTORE = 104
 	
-	//ObjectData
-	constant integer BONUS_DAMAGE = 0   //攻击
-	constant integer BONUS_ARMOR = 1 //护甲
-	constant integer BONUS_ATTACK = 2    //攻速
-	constant integer BONUS_LIFE = 3 //最大生命
-	constant integer BONUS_MANA = 4 //最大魔法
-	constant integer BONUS_STR = 5
-	constant integer BONUS_AGI = 6
-	constant integer BONUS_INT = 7
-	constant integer BONUS_MOVESPEED = 8   //移动速度
 
 
 	//技能事件的哈希表key
@@ -967,7 +957,7 @@ function YDWEAnyUnitDamagedTriggerAction takes nothing returns boolean
 			if c != .0 then
 				call SetUnitCriticalStrike(c, isAttackTarget)//先一步把暴击运行了 因为这会改变伤害值
 			endif
-			//这里是判断一下该单位是否是普通攻击的目标(排除溅射伤害)
+			// 这里是判断一下该单位是否是普通攻击的目标(排除溅射伤害)
 			if isAttackTarget then
 				if CommonAttackEffectFilter(Tmp_DamageSource, Tmp_DamageInjured) then
 					call TraversalDamagedEvent(1)
@@ -1333,7 +1323,7 @@ endfunction
 	call InitSounds()
 	call CreateRegions()
 	call CreateCameras()
-	call CreateAllItems()
+	//call CreateAllItems()
 
     //其他的调用可能会在这里
 
@@ -1393,7 +1383,7 @@ endfunction
 	//任意单位受伤事件
 	call YDWESyStemAnyUnitDamagedRegistTrigger()
 	//创建单位
-	call CreateAllUnits()
+	//call CreateAllUnits()
 	//创建所有任务
 	call CreateAllQuest()
 	set IsInitUnit = false

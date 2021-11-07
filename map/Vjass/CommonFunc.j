@@ -679,6 +679,37 @@ library Common
     endfunction
 
     globals
+        unit LastGetMasterUnit = null
+        unit LastSummonedUnit = null
+        key KEY_MASTERUNIT
+    endglobals
+
+    function SummonUnit takes unit whichUnit, integer iUnitTypeId, real x, real y, real face, integer iBuffId, real dur returns unit
+        local unit hSummonedUnit = CreateUnit(GetOwningPlayer(whichUnit), iUnitTypeId, x, y, face)
+        call UnitAddType(hSummonedUnit, UNIT_TYPE_SUMMONED)
+        call SaveUnitHandle(HT, GetHandleId(hSummonedUnit), KEY_MASTERUNIT, hSummonedUnit)
+        if dur > 0 then
+            if iBuffId == 0 then
+                call Debug("Error", "错误的BuffId，召唤单位"+GetObjectName(iUnitTypeId)+"时没有正确的生命周期BuffId。")
+            else
+                call UnitApplyTimedLife(hSummonedUnit, iBuffId, dur)
+            endif
+        endif
+        set LastSummonedUnit = hSummonedUnit
+        set hSummonedUnit = null
+        return LastSummonedUnit
+    endfunction
+
+    // 一般对蝗虫马甲单位或召唤单位使用 获取召唤他的单位之类
+    function GetMasterUnit takes unit whichUnit returns unit
+        set LastGetMasterUnit = LoadUnitHandle(HT, GetHandleId(whichUnit), KEY_MASTERUNIT)
+        if LastGetMasterUnit == null then
+            return null
+        endif
+        return LastGetMasterUnit
+    endfunction
+
+    globals
         key UnitDelayedStandingKey
     endglobals
 

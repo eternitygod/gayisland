@@ -95,7 +95,7 @@ function BlightPower takes nothing returns nothing
 endfunction
 
 function BlackEpidermis takes nothing returns nothing
-	call EnabledAttackEffect(3, 0)
+	call EnabledAttackEffect(3, 0.)
 endfunction
 
 function JumpShipRun takes nothing returns nothing
@@ -147,10 +147,8 @@ function JumpShipRun takes nothing returns nothing
 			call KillUnit(smallBear)
 		else
 			call RemoveUnit(smallBear)
-			set smallBear = CreateUnit(GetOwningPlayer(shipUnit), 'nfrl', GetUnitX(smallBear), GetUnitY(smallBear), angle)
-			call SaveUnitHandle(HT, GetHandleId(smallBear), 0, LoadUnitHandle(HT, iHandleId, 3))
+			set smallBear = SummonUnit(LoadUnitHandle(HT, iHandleId, 3), 'nfrl', GetUnitX(smallBear), GetUnitY(smallBear), angle, 'BTLF', 20.)
 			call SetUnitVertexColor(smallBear, 255, 255, 255, 100)
-			call UnitApplyTimedLife(smallBear, 'BTLF', 20.)
 		endif
 		call FlushChildHashtable(HT, iHandleId)
 		call ClearTrigger(trig)
@@ -274,7 +272,7 @@ endfunction
 function SmallBearAttackEffect takes nothing returns nothing
 	local unit soureUnit
 	if GetUnitTypeId(Tmp_DamageSource) == 'nfrl' then
-		set soureUnit = LoadUnitHandle(HT, GetHandleId(Tmp_DamageSource), 0)
+		set soureUnit = GetMasterUnit(Tmp_DamageSource)
 		call UnitRestoreMana( soureUnit, 10)
 		call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Undead\\ReplenishMana\\SpiritTouchTarget.mdl", soureUnit, "origin"))
 		set soureUnit = null
