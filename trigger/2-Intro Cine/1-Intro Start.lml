@@ -1,0 +1,796 @@
+事件
+条件
+动作
+    SetVariable
+        变量: InCinematic
+        常量: true
+    CinematicFadeBJ
+        预设: FadeTypeOptionFadeOut
+        常量: 0.00
+        预设: CineFilterTextureWhite
+        常量: 0
+        常量: 0
+        常量: 0
+        常量: 0
+    SetSkyModel
+        预设: SkyModelSky04
+    UseTimeOfDayBJ
+        预设: OnOffOff
+    SetTerrainFogExBJ
+        预设: FogStyleLinear
+        常量: 950.00
+        常量: 3500.00
+        常量: 0
+        常量: 45.00
+        常量: 50.00
+        常量: 45.00
+    CinematicModeBJ
+        预设: OnOffOn
+        函数: GetPlayersAll
+    VolumeGroupResetBJ
+    TriggerExecute
+        变量: gg_trg_Init_IntroCine
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__OrgeInitialPoint
+        预设: CameraApply
+        常量: 0
+    PolledWait
+        常量: 1.00
+    CinematicFadeBJ
+        预设: FadeTypeOptionFadeIn
+        常量: 2.00
+        预设: CineFilterTextureWhite
+        常量: 0
+        常量: 0
+        常量: 0
+        常量: 0
+    YDWEActivateTrigger
+        变量: gg_trg_Intro_Skipped
+        预设: OnOffOn
+    CommentString
+        常量: 允许跳过电影
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    SetDestructableAnimationBJ
+        变量: IntroCinePortal
+        常量: Birth
+    SetSoundVolumeBJ
+        变量: gg_snd_ShimmeringPortalBirth
+        常量: 80.00
+    PlaySoundBJ
+        变量: gg_snd_ShimmeringPortalBirth
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__PortalCloseUp
+        预设: CameraApply
+        常量: 13.00
+    PolledWait
+        常量: 6.80
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    PlaySoundBJ
+        变量: gg_snd_CityScapeMagicRunesLoop1
+    PolledWait
+        常量: 0.50
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    PlaySoundAtPointBJ
+        变量: gg_snd_ShimmeringPortalEntrance
+        常量: 100
+        函数: GetRectCenter
+            变量: gg_rct_Intro__OrgeBirth1
+        常量: 480.00
+    PolledWait
+        常量: 0.50
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    CommentString
+        常量: 菊花坠落
+    ShowUnit
+        变量: OgreMagi
+        预设: ShowHideShow
+    SetUnitFlyHeightBJ
+        变量: OgreMagi
+        函数: GetUnitDefaultFlyHeight
+            变量: OgreMagi
+        常量: 1500.00
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: OgreMagi
+        函数: GetUnitName
+            变量: OgreMagi
+        预设: SoundNull
+        常量: 妮玛哟！妮玛哟！！
+        预设: AddSetToSet
+        常量: 4.00
+        预设: WaitDontDont
+    PolledWait
+        常量: 0.30
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    CommentString
+        常量: 砸出个坑
+    TerrainDeformationCraterBJ
+        常量: 0.25
+        预设: CraterTypePermanent
+        函数: GetUnitLoc
+            变量: OgreMagi
+        常量: 256.00
+        常量: 32.00
+    DestroyEffectBJ
+        函数: AddSpecialEffectLoc
+            常量: Abilities\Spells\Orc\WarStomp\WarStompCaster.mdl
+            函数: GetUnitLoc
+                变量: OgreMagi
+    PolledWait
+        常量: 2.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    KillDestructable
+        变量: IntroCinePortal
+    StopSoundBJ
+        变量: gg_snd_CityScapeMagicRunesLoop1
+        预设: FadeDontFade
+    PlaySoundBJ
+        变量: gg_snd_ShimmeringPortalDeath
+    PolledWait
+        常量: 2.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__OrgeCloseUp
+        预设: CameraApply
+        常量: 8.00
+    CommentString
+        常量: '起身 左看看右看看然后再前进'
+    SetUnitAnimation
+        变量: OgreMagi
+        常量: birth
+    QueueUnitAnimationBJ
+        变量: OgreMagi
+        常量: stand
+    SetVariable
+        数组: TempArryUnit
+            常量: 1
+        函数: CreateUnit
+            预设: PlayerNP
+            常量: ndum
+            函数: GetRectCenterX
+                变量: gg_rct_Intro__OrgeLookPos1
+            函数: GetRectCenterY
+                变量: gg_rct_Intro__OrgeLookPos1
+            常量: 0
+    SetVariable
+        数组: TempArryUnit
+            常量: 2
+        函数: CreateUnit
+            预设: PlayerNP
+            常量: ndum
+            函数: GetRectCenterX
+                变量: gg_rct_Intro__OrgeLookPos2
+            函数: GetRectCenterY
+                变量: gg_rct_Intro__OrgeLookPos2
+            常量: 0
+    CommentString
+        常量: '略坑啊 蓝胖左边的头竟没节点 要改模型'
+    SetUnitLookAt
+        变量: OgreMagi
+        预设: UnitFacingBoneHead
+        数组: TempArryUnit
+            常量: 1
+        常量: 0
+        常量: 0
+        常量: 90
+    PolledWait
+        常量: 0.50
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    CustomScriptCode
+        常量: 'call SetUnitLookAt(udg_OgreMagi, "Left Head", udg_TempArryUnit[2], 0, 0, 90)'
+    PolledWait
+        常量: 1.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    ResetUnitLookAt
+        变量: OgreMagi
+    PolledWait
+        常量: 1.50
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    IssuePointOrderLoc
+        变量: OgreMagi
+        预设: UnitOrderMove
+        函数: GetRectCenter
+            变量: gg_rct_Intro__OrgeMove1
+    PolledWait
+        常量: 1.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: OgreMagi
+        函数: GetUnitName
+            变量: OgreMagi
+        预设: SoundNull
+        常量: 哦.....这是什么地方，我感受到了一股熟悉的力量。
+        预设: AddSetToSet
+        常量: 5.00
+        预设: WaitDontDont
+    PolledWait
+        常量: 3.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    IssuePointOrderLoc
+        变量: Kael
+        预设: UnitOrderMove
+        函数: GetRectCenter
+            变量: gg_rct_Intro__KaelMove1
+    PolledWait
+        常量: 1.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__Talk1
+        预设: CameraApply
+        常量: 0.00
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__Talk2
+        预设: CameraApply
+        常量: 11.00
+    PolledWait
+        常量: 1.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    SetUnitFacingToFaceUnitTimed
+        变量: OgreMagi
+        变量: Kael
+        常量: 1.00
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: Kael
+        函数: GetUnitName
+            变量: Kael
+        预设: SoundNull
+        常量: 菊花？你怎么在这里。
+        预设: AddSetToSet
+        常量: 4.00
+        预设: WaitDontDont
+    PolledWait
+        常量: 4.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: OgreMagi
+        函数: GetUnitName
+            变量: OgreMagi
+        预设: SoundNull
+        常量: 我刚刚打败了一个非常阴暗的存在，就来到了这里。这是哪里？
+        预设: AddSetToSet
+        常量: 5.50
+        预设: WaitDontDont
+    PolledWait
+        常量: 5.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    CinematicFadeBJ
+        预设: FadeTypeOptionFadeOut
+        常量: 0.50
+        预设: CineFilterTextureWhite
+        常量: 0
+        常量: 0
+        常量: 0
+        常量: 0
+    PolledWait
+        常量: 0.50
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    CinematicFadeBJ
+        预设: FadeTypeOptionFadeIn
+        常量: 0.50
+        预设: CineFilterTextureWhite
+        常量: 0
+        常量: 0
+        常量: 0
+        常量: 0
+    SetUnitPositionLoc
+        变量: Kael
+        函数: GetRectCenter
+            变量: gg_rct_Intro__KaelBirth2
+    SetUnitPositionLoc
+        变量: OgreMagi
+        函数: GetRectCenter
+            变量: gg_rct_Intro__OrgeBirth2
+    SetUnitFacingToFaceUnitTimed
+        变量: Kael
+        变量: OgreMagi
+        常量: 0
+    SetUnitFacingToFaceUnitTimed
+        变量: OgreMagi
+        变量: Kael
+        常量: 0
+    禁用: IssueTargetDestructableOrder
+        变量: gg_unit_nhew_0013
+        预设: UnitOrderHarvestDestructible
+        变量: gg_dest_ZTtw_2470
+    IssueTargetDestructableOrder
+        变量: gg_unit_nhew_0025
+        预设: UnitOrderHarvestDestructible
+        变量: gg_dest_ZTtw_1356
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__Talk3
+        预设: CameraApply
+        常量: 0.00
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__Talk4
+        预设: CameraApply
+        常量: 10.00
+    CommentString
+        常量: 动画
+    SetUnitAnimation
+        数组: TempArryUnit
+            常量: 3
+        常量: decay
+    SetUnitAnimation
+        数组: TempArryUnit
+            常量: 4
+        常量: birth
+    SetUnitAnimation
+        数组: TempArryUnit
+            常量: 5
+        常量: birth
+    SetUnitAnimation
+        数组: TempArryUnit
+            常量: 6
+        常量: birth
+    SetUnitAnimation
+        变量: gg_unit_hlum_0017
+        常量: birth
+    SetUnitAnimation
+        变量: gg_unit_nbee_0014
+        常量: 'stand work'
+    SetUnitAnimation
+        变量: gg_unit_nhew_0010
+        常量: 'stand work lumber'
+    PolledWait
+        常量: 0.10
+    SetUnitAnimation
+        变量: gg_unit_nhew_0015
+        常量: 'stand work'
+    SetUnitAnimation
+        变量: gg_unit_nhew_0088
+        常量: 'stand work'
+    PolledWait
+        常量: 0.20
+    SetUnitAnimation
+        变量: gg_unit_nhew_0018
+        常量: 'stand work'
+    SetUnitAnimation
+        变量: gg_unit_nhew_0013
+        常量: 'stand work'
+    CommentString
+        常量: --------
+    PolledWait
+        常量: 0.20
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: Kael
+        函数: GetUnitName
+            变量: Kael
+        预设: SoundNull
+        常量: 长话短说，我们公司遭遇了变故，组织架构分崩离析。员工们被亡灵围攻，被迫开启了“神秘通道”。但通道太久没有被维护了，在我和剩下的人进入时，通道出了差错，传到了这里。
+        预设: AddSetToSet
+        常量: 10.00
+        预设: WaitDontDont
+    PolledWait
+        常量: 3.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    IssuePointOrderLoc
+        变量: Kael
+        预设: UnitOrderMove
+        函数: GetRectCenter
+            变量: gg_rct_Intro__KaelMove2
+    PolledWait
+        常量: 1.20
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    IssuePointOrderLoc
+        变量: OgreMagi
+        预设: UnitOrderMove
+        函数: GetRectCenter
+            变量: gg_rct_Intro__OrgeMove2
+    SetUnitFacingToFaceUnitTimed
+        变量: Kael
+        数组: Elevators
+            常量: 1
+        常量: 1.00
+    PolledWait
+        常量: 1.50
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    SetUnitFacingToFaceUnitTimed
+        变量: OgreMagi
+        数组: Elevators
+            常量: 1
+        常量: 1.00
+    PolledWait
+        常量: 3.30
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: Kael
+        函数: GetUnitName
+            变量: Kael
+        预设: SoundNull
+        常量: 在传送完我们后，这边的“神秘通道”也损坏了，我们的工程师对这种远古造物完全没有头绪，幸运的是你来了。
+        预设: AddSetToSet
+        常量: 10.00
+        预设: WaitDontDont
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__Talk5
+        预设: CameraApply
+        常量: 0.00
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__Talk6
+        预设: CameraApply
+        常量: 13.00
+    PolledWait
+        常量: 3.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    SetUnitFacingToFaceUnitTimed
+        变量: Kael
+        变量: OgreMagi
+        常量: 1.20
+    PolledWait
+        常量: 1.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    SetUnitFacingToFaceUnitTimed
+        变量: OgreMagi
+        变量: Kael
+        常量: 1.20
+    PolledWait
+        常量: 2.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    SetUnitLookAt
+        变量: Kael
+        预设: UnitFacingBoneHead
+        数组: Elevators
+            常量: 1
+        常量: 0
+        常量: 0
+        常量: 90
+    PolledWait
+        常量: 3.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    ResetUnitLookAt
+        变量: Kael
+    PolledWait
+        常量: 1.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: OgreMagi
+        函数: GetUnitName
+            变量: OgreMagi
+        预设: SoundNull
+        常量: 没有专业的配套工具，这种程度的损伤我也没有办法修复，不过通常神秘通道不会单独存在一个地方，这里应该还有一处通道。
+        预设: AddSetToSet
+        常量: 8.00
+        预设: WaitDontDont
+    PolledWait
+        常量: 8.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: Kael
+        函数: GetUnitName
+            变量: Kael
+        预设: SoundNull
+        常量: 我们可以一部分人出去探索这个地方，但得有人留守营地，还有一些没有战斗能力的人需要保护。在这之前，你可以认识一下这些人，他们也是因为被迫使用了通道而来到这里的。
+        预设: AddSetToSet
+        常量: 10.00
+        预设: WaitDontDont
+    PolledWait
+        常量: 8.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    PolledWait
+        常量: 2.00
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__Talk7
+        预设: CameraApply
+        常量: 7.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    TransmissionFromUnitWithNameBJ
+        函数: GetPlayersAll
+        变量: OgreMagi
+        函数: GetUnitName
+            变量: OgreMagi
+        预设: SoundNull
+        常量: 好吧，但这么多人会同时出现在这里，你不感觉很诡异吗。
+        预设: AddSetToSet
+        常量: 4.50
+        预设: WaitDontDont
+    PolledWait
+        常量: 2.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    IssuePointOrderLoc
+        变量: OgreMagi
+        预设: UnitOrderMove
+        函数: GetRectCenter
+            变量: gg_rct_Intro__KaelBirth2
+    PolledWait
+        常量: 1.00
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    PolledWait
+        常量: 0.50
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    IssuePointOrderLoc
+        变量: gg_unit_nm03_0022
+        预设: UnitOrderMove
+        函数: GetRectCenter
+            变量: gg_rct_Intro__LieutenantMove1
+    PolledWait
+        常量: 0.30
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    IssuePointOrderLoc
+        变量: gg_unit_nm05_0023
+        预设: UnitOrderMove
+        函数: GetRectCenter
+            变量: gg_rct_Intro__TrollMove1
+    PolledWait
+        常量: 0.20
+    IfThenElse
+        条件: OperatorCompareBoolean
+            变量: IsSkipCinematic
+            预设: OperatorEqualENE
+            常量: true
+        动作: ReturnAction
+        动作: DoNothing
+    IssuePointOrderLoc
+        变量: gg_unit_nm06_0024
+        预设: UnitOrderMove
+        函数: GetRectCenter
+            变量: gg_rct_Intro__DeterminedExterminatorMove1
+    PolledWait
+        常量: 0.50
+    CommentString
+        常量: 电影结束
+    DisableTrigger
+        变量: gg_trg_Intro_Skipped
+    CommentString
+        常量: --------
+    CinematicFadeBJ
+        预设: FadeTypeOptionFadeOut
+        常量: 1.00
+        预设: CineFilterTextureWhite
+        常量: 0
+        常量: 0
+        常量: 0
+        常量: 0
+    PolledWait
+        常量: 1.00
+    CommentString
+        常量: 清理单位动画之类的
+    TriggerExecute
+        变量: gg_trg_Intro_Cleanup
+    CommentString
+        常量: --------
+    PolledWait
+        常量: 1.00
+    CinematicModeBJ
+        预设: OnOffOff
+        函数: GetPlayersAll
+    CinematicFadeBJ
+        预设: FadeTypeOptionFadeIn
+        常量: 1.00
+        预设: CineFilterTextureWhite
+        常量: 0
+        常量: 0
+        常量: 0
+        常量: 0
+    PolledWait
+        常量: 1.00
+    CommentString
+        常量: 结束电影
+    SetVariable
+        变量: InCinematic
+        常量: true
+    CommentString
+        常量: 清除触发器
+    DestroyTrigger
+        变量: gg_trg_Intro_Start
+    DestroyTrigger
+        变量: gg_trg_Intro_Skipped
+    DestroyTrigger
+        变量: gg_trg_Init_IntroCine
+    CommentString
+        常量: 游戏开始
+    PolledWait
+        常量: 1.00
+    TriggerExecute
+        变量: gg_trg_GameStart

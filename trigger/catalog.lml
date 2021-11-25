@@ -1,1 +1,9 @@
-1-神秘之岛: 神秘之岛
+1-1-神秘之岛: 1-神秘之岛
+'2-Intro Cine': 'Intro Cine'
+    '1-Intro Start': 'Intro Start'
+    '2-Init IntroCine': 'Init IntroCine'
+    '3-Intro Skipped': 'Intro Skipped'
+    '4-Intro Cleanup': 'Intro Cleanup'
+    5-GameStart: GameStart
+3-Quest: Quest
+    1-InitQuest: InitQuest

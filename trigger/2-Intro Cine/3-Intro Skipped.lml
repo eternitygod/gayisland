@@ -1,0 +1,65 @@
+事件
+    YDWEDisableRegister
+    TriggerRegisterPlayerEventEndCinematic
+        预设: PlayerALL
+条件
+动作
+    DisableTrigger
+        变量: gg_trg_Intro_Skipped
+    SetVariable
+        变量: IsSkipCinematic
+        常量: true
+    CustomScriptCode
+        常量: 'call CancelCineSceneBJ()'
+    CommentString
+        常量: 淡出淡入
+    CinematicFadeBJ
+        预设: FadeTypeOptionFadeOut
+        常量: 0.50
+        预设: CineFilterTextureWhite
+        常量: 0
+        常量: 0
+        常量: 0
+        常量: 0
+    PolledWait
+        常量: 0.50
+    CommentString
+        常量: 清理单位动画之类的
+    TriggerExecute
+        变量: gg_trg_Intro_Cleanup
+    PolledWait
+        常量: 1.00
+    CommentString
+        常量: 然后再淡入
+    CinematicModeBJ
+        预设: OnOffOff
+        函数: GetPlayersAll
+    CinematicFadeBJ
+        预设: FadeTypeOptionFadeIn
+        常量: 0.50
+        预设: CineFilterTextureWhite
+        常量: 0
+        常量: 0
+        常量: 0
+        常量: 0
+    PolledWait
+        常量: 0.50
+    CommentString
+        常量: 结束电影
+    SetVariable
+        变量: InCinematic
+        常量: false
+    CommentString
+        常量: 清除触发器
+    DestroyTrigger
+        变量: gg_trg_Intro_Start
+    DestroyTrigger
+        变量: gg_trg_Intro_Skipped
+    DestroyTrigger
+        变量: gg_trg_Init_IntroCine
+    CommentString
+        常量: 游戏开始
+    PolledWait
+        常量: 1.00
+    TriggerExecute
+        变量: gg_trg_GameStart

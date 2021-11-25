@@ -1,8 +1,22 @@
 
 
 scope UnitSummonEvent initializer Init
+
+    globals
+        key IllusionUnitDataB
+        key IllusionUnitDataC
+    endglobals
     
     function SummonIllusionUnit takes unit hIllusionUnit, unit hMasterUnit returns nothing
+        local integer iHandleId
+        // 判断单位是否在施法镜像 如果是 则设置镜像的属性和位置
+        if LoadBoolean(UnitBuff, GetHandleId(hMasterUnit), UnitIsSummoningIllusions) then
+            set iHandleId = GetHandleId(hIllusionUnit)
+            call SaveReal(UnitData, iHandleId, IllusionUnitDataB, Tmp__ArrayReal['B'])
+            call SaveReal(UnitData, iHandleId, IllusionUnitDataC, Tmp__ArrayReal['C'])
+            call SetUnitX(hIllusionUnit, Tmp__ArrayReal['X'])
+            call SetUnitY(hIllusionUnit, Tmp__ArrayReal['Y'])
+        endif
         call SyncIllusionUnitState(hIllusionUnit, hMasterUnit)
     endfunction
 
@@ -29,3 +43,4 @@ scope UnitSummonEvent initializer Init
     endfunction
 
 endscope
+

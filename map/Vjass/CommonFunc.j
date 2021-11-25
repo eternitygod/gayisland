@@ -1,5 +1,5 @@
 
-library Common
+library Common requires InitSetUp
 
     //常量
     globals
@@ -106,6 +106,10 @@ library Common
         constant integer EVENT_DAMAGE_DATA_WEAPON_TYPE = 5 
         //攻击类型
         constant integer EVENT_DAMAGE_DATA_ATTACK_TYPE = 6 
+
+
+        // Last
+        trigger          bj_lastCreatedTrigger     = null
     endglobals
 
     globals
@@ -652,8 +656,8 @@ library Common
         call YDWEUnitTransform(whichUnit, unitType)
     endfunction
     //设置单位阴影，参数可填 Shadow 或 _ ,会进行一次逆变身
-    function SetUnitShadow takes unit whichUnit, integer whichType, string modelName returns nothing
-        call EXSetUnitString(whichType, 0x13, modelName)
+    function SetUnitShadow takes unit whichUnit, string modelName returns nothing
+        call EXSetUnitString(GetUnitTypeId(whichUnit), 0x13, modelName)
         call RefreshUnitModel(whichUnit)
     endfunction
 
@@ -687,10 +691,10 @@ library Common
     function SummonUnit takes unit whichUnit, integer iUnitTypeId, real x, real y, real face, integer iBuffId, real dur returns unit
         local unit hSummonedUnit = CreateUnit(GetOwningPlayer(whichUnit), iUnitTypeId, x, y, face)
         call UnitAddType(hSummonedUnit, UNIT_TYPE_SUMMONED)
-        call SaveUnitHandle(HT, GetHandleId(hSummonedUnit), KEY_MASTERUNIT, hSummonedUnit)
+        call SaveUnitHandle(HT, GetHandleId(hSummonedUnit), KEY_MASTERUNIT, whichUnit)
         if dur > 0 then
             if iBuffId == 0 then
-                call Debug("Error", "错误的BuffId，召唤单位"+GetObjectName(iUnitTypeId)+"时没有正确的生命周期BuffId。")
+                call Debug("Error", "错误的BuffId，召唤单位" + GetObjectName(iUnitTypeId)+ "时没有正确的生命周期BuffId。")
             else
                 call UnitApplyTimedLife(hSummonedUnit, iBuffId, dur)
             endif
@@ -754,6 +758,73 @@ library Common
         return bj_lastCreatedTrigger
     endfunction
 
+    
+    //检查玩家对单位的可见性
+    function UnitVisibleToPlayer takes unit whichUnit, player whichPlayer returns boolean //GetUnitAbilityLevel(u,'A1HX')== 0
+        return IsUnitVisible(whichUnit, whichPlayer) or ( IsUnitAlly(whichUnit, whichPlayer) )
+    endfunction
+
+    //***************************************************************************
+    //*
+    //*  Text Tag Utility Functions
+    //*
+    //***************************************************************************
+
+
+    //暴击漂浮文字 只会出现一次
+    function CriticalStrikeTextTag takes unit whichUnit, real damage returns nothing
+        local texttag t = CreateTextTag()
+        call SetTextTagText(t, I2S(R2I(damage)) + "!", 0.025)	//文字 字体大小
+        call SetTextTagPos(t, GetUnitX(whichUnit), GetUnitY(whichUnit), .0)	//高度偏移
+        call SetTextTagColor(t, 255, 0, 0, 255)
+        call SetTextTagVelocity(t, 0, .04)
+        call SetTextTagFadepoint(t, 2) //淡入时间
+        call SetTextTagPermanent(t, false)	//永久性
+        call SetTextTagLifespan(t, 5) //生命周期
+        call SetTextTagVisibility(t, UnitVisibleToPlayer(whichUnit, LocalPlayer))
+        set t = null
+    endfunction
+
+    //通用漂浮文字
+    function CommonTextTag takes string msg, real lifespan, unit whichUnit, real height, integer r, integer g, integer b, integer a, integer heightOffset returns nothing
+        local texttag t = CreateTextTag()
+        call SetTextTagText(t, msg, height)	//文字 字体大小
+        call SetTextTagPosUnit(t, whichUnit, heightOffset)	//高度偏移
+        call SetTextTagColor(t, r, g, b, a)
+        call SetTextTagVelocity(t, 0, .0355)
+        call SetTextTagFadepoint(t, 2) //淡入时间
+        call SetTextTagPermanent(t, false)	//永久性
+        call SetTextTagLifespan(t, lifespan) //生命周期
+        //call SetTextTagVisibility(tt,TYV(U,GetLocalPlayer())or RBX(GetLocalPlayer()))
+        set t = null
+    endfunction
+
+    //黄金漂浮文字
+    function GoldTextTag takes player sourcePlayer, unit whichUnit, integer goldAmount returns nothing
+        local texttag tag
+        local string effectPath = ""
+        local boolean islocalPlayer = LocalPlayer== sourcePlayer
+        set tag = CreateTextTag()
+        if GetHandleId(tag)> 0 then
+            call SetTextTagText(tag, "+" + I2S(goldAmount), .025)
+            call SetTextTagPosUnit(tag, whichUnit, - 0.4)
+            if islocalPlayer then
+                call SetTextTagColor(tag, 255, 220, 0, 255)
+            endif
+            call SetTextTagVelocity(tag, 0, .03)
+            call SetTextTagVisibility(tag, islocalPlayer)
+            call SetTextTagFadepoint(tag, 2)
+            call SetTextTagLifespan(tag, 3)
+            call SetTextTagPermanent(tag, false)
+        else
+            call DestroyTextTag(tag)
+        endif
+        if islocalPlayer then
+            set effectPath = "UI\\Feedback\\GoldCredit\\GoldCredit.mdl"
+        endif
+        call DestroyEffect(AddSpecialEffectTarget(effectPath, whichUnit, "overhead"))
+        set tag = null
+    endfunction
 
 endlibrary
 

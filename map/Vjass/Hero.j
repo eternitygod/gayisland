@@ -1,10 +1,10 @@
 
 
-//! import "Hero\Lieutenant.j"
-//! import "Hero\FireMage.j"
-//! import "Hero\DeterminedExterminator.j"
-//! import "Hero\ModelCitizen.j"
-//! import "Hero\StormSpirit.j"
-//! import "Hero\PikeMan.j"
+#include "Hero\Lieutenant.j"
+#include "Hero\FireMage.j"
+#include "Hero\DeterminedExterminator.j"
+#include "Hero\ModelCitizen.j"
+#include "Hero\StormSpirit.j"
+#include "Hero\PikeMan.j"
 
 

@@ -1,5 +1,6 @@
 
 
-//! import "UI\UnitInfoPanel.j"
-//! import "UI\InitUI.j"
+#include "UI\UnitInfoPanel.j"
+
+#include "UI\InitUI.j"
 

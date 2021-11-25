@@ -11,7 +11,6 @@ end
 
 require 'war3.id'
 
-
 local hook = require "jass.hook"
 local slk = require "jass.slk"
 
@@ -39,8 +38,4 @@ function hook.AbilityId2String(s)
     end
     return nil
 end
-
-
-
-
 

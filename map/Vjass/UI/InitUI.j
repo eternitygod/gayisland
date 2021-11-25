@@ -107,7 +107,7 @@ function SetInit__GameEndFrame takes nothing returns nothing
 	
 endfunction
 
-//! import "UI\PickHeroUI.j"
+#include "PickHeroUI.j"
 
 function InitUIFrame takes nothing returns boolean
 	local integer i = 0

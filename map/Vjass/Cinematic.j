@@ -1,4 +1,4 @@
 
 
-//! import "Cinematic\IntroCinematic.j"
+#include "Cinematic\IntroCinematic.j"
 

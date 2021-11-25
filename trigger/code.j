@@ -3,4 +3,4 @@
 
 
 
-//! import "map\main.j"
+#include "map\main.j"

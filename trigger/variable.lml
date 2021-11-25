@@ -1,0 +1,16 @@
+IsSkipCinematic: boolean
+InCinematic: boolean
+OgreMagi: unit
+Kael: unit
+IntroCinePortal: destructable
+TempArryUnit: unit
+    数组: 1
+Elevators: unit
+    数组: 1
+MainQuest: quest
+    数组: 1
+SideQuest: quest
+    数组: 1
+Tavern: unit
+    数组: 1
+CinematicUnitsGroup: group

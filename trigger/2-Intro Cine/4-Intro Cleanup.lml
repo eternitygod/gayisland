@@ -1,0 +1,147 @@
+事件
+条件
+动作
+    SetSkyModel
+        预设: SkyModelNone
+    UseTimeOfDayBJ
+        预设: OnOffOn
+    ResetTerrainFogBJ
+    CameraSetupApplyForceDuration
+        变量: gg_cam_Intro__GameStart
+        预设: CameraApply
+        常量: 0
+    ResetUnitAnimation
+        数组: TempArryUnit
+            常量: 3
+    ResetUnitAnimation
+        数组: TempArryUnit
+            常量: 4
+    ResetUnitAnimation
+        数组: TempArryUnit
+            常量: 5
+    ResetUnitAnimation
+        数组: TempArryUnit
+            常量: 6
+    SetUnitColor
+        数组: TempArryUnit
+            常量: 3
+        预设: Color03
+    SetUnitColor
+        数组: TempArryUnit
+            常量: 4
+        预设: Color03
+    SetUnitColor
+        数组: TempArryUnit
+            常量: 5
+        预设: Color03
+    SetUnitColor
+        数组: TempArryUnit
+            常量: 6
+        预设: Color03
+    SetUnitColor
+        变量: gg_unit_hlum_0017
+        预设: Color03
+    ResetUnitAnimation
+        变量: gg_unit_hlum_0017
+    ResetUnitAnimation
+        变量: gg_unit_nbee_0014
+    ResetUnitAnimation
+        变量: gg_unit_nhew_0010
+    ResetUnitAnimation
+        变量: gg_unit_nhew_0015
+    ResetUnitAnimation
+        变量: gg_unit_nhew_0088
+    ResetUnitAnimation
+        变量: gg_unit_nhew_0018
+    ResetUnitAnimation
+        变量: gg_unit_nhew_0013
+    StopSoundBJ
+        变量: gg_snd_ShimmeringPortalBirth
+        预设: FadeDontFade
+    StopSoundBJ
+        变量: gg_snd_CityScapeMagicRunesLoop1
+        预设: FadeDontFade
+    IfThenElseMultiple
+        条件
+            OperatorCompareBoolean
+                函数: IsDestructableAliveBJ
+                    变量: IntroCinePortal
+                预设: OperatorEqualENE
+                常量: true
+        动作
+            RemoveDestructable
+                变量: IntroCinePortal
+    YDWEEnumUnitsInRangeMultiple
+        函数: GetRectCenterX
+            变量: gg_rct_Intro__OrgeMove2
+        函数: GetRectCenterY
+            变量: gg_rct_Intro__OrgeMove2
+        常量: 1200.00
+        动作
+            IfThenElseMultiple
+                条件
+                    OperatorCompareUnitCode
+                        函数: GetUnitTypeId
+                            函数: GetEnumUnit
+                        预设: OperatorEqualENE
+                        常量: nhew
+                动作
+                    IssueTargetOrder
+                        函数: GetEnumUnit
+                        预设: UnitOrderSmartUnit
+                        数组: Tavern
+                            常量: 1
+                动作
+                    IfThenElseMultiple
+                        条件
+                            OperatorCompareBoolean
+                                函数: IsUnitInGroup
+                                    函数: GetEnumUnit
+                                    变量: CinematicUnitsGroup
+                                预设: OperatorEqualENE
+                                常量: true
+                        动作
+                            PauseUnit
+                                函数: GetEnumUnit
+                                预设: PauseUnpauseOptionPause
+                            ShowUnit
+                                函数: GetEnumUnit
+                                预设: ShowHideHide
+    IssueTargetOrder
+        变量: gg_unit_nbee_0014
+        预设: UnitOrderSmartUnit
+        数组: Tavern
+            常量: 1
+    YDWERegisterTriggerMultiple
+        函数: CreateTrigger
+        事件
+            TriggerRegisterTimerEventSingle
+                常量: 10.00
+            TriggerRegisterUnitInRangeSimple
+                常量: 200.00
+                函数: YDWECustomScriptCode
+                    常量: udg_Tavern[1]
+        动作
+        动作
+            IfThenElseMultiple
+                条件
+                    OperatorCompareUnitCode
+                        函数: GetUnitTypeId
+                            函数: GetTriggerUnit
+                        预设: OperatorEqualENE
+                        常量: nhew
+                动作
+                    RemoveUnit
+                        函数: GetTriggerUnit
+                动作
+                    IfThenElseMultiple
+                        条件
+                            OperatorCompareBoolean
+                                函数: YDWEIsTriggerEventId
+                                    预设: ID_EVENT_GAME_TIMER_EXPIRED
+                                预设: OperatorEqualENE
+                                常量: true
+                        动作
+                            YDWERegisterTriggerFlush
+    DestroyTrigger
+        变量: gg_trg_Intro_Cleanup

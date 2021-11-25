@@ -1,31 +1,37 @@
+// 初始化的函数
+#include "Vjass\InitSetUp.j"
 
 // 大部分的常用函数
-//! import "Vjass\CommonFunc.j"
+#include "Vjass\CommonFunc.j"
 // 单位选取的过滤条件
-//! import "Vjass\Filter.j"
+#include "Vjass\Filter.j"
 
-//! import "Vjass\Cinematic.j"
+// #include "Vjass\Cinematic.j"
 
-//! import "Vjass\UnitRestore.j"
+#include "Vjass\UnitRestore.j"
 
-//! import "Vjass\UnitStateRefresh.j"
+#include "Vjass\UnitStateRefresh.j"
 
-//! import "Vjass\UnitBonusSystem.j"
+#include "Vjass\UnitBonusSystem.j"
 
 // 一些通用技能模板
-//! import "Vjass\AbilityTemplate.j"
+#include "Vjass\AbilityTemplate.j"
 
-//! import "Vjass\ItemSystem.j"
+#include "Vjass\ItemSystem.j"
 
 // 物品相关事件包含在ItemSystem.j
-//! import "Vjass\Event.j"
+#include "Vjass\Event.j"
 
 // 英雄尽量在后面加载
-//! import "Vjass\Hero.j"
-//! import "Vjass\Boss.j"
+#include "Vjass\Hero.j"
+
+#include "Vjass\Boss.j"
 
 // UI在英雄后面加载
-//! import "Vjass\UI.j"
+#include "Vjass\UI.j"
+
+
+
 
 
 globals
@@ -92,7 +98,7 @@ globals
 
 	
 
-	
+
 	
 	
 	trigger array DamageEventQueue
@@ -144,7 +150,11 @@ globals
 	integer Tmp_SpellAbilityLevel
 	real Tmp_SpellTargetX
 	real Tmp_SpellTargetY
-
+	// 数组
+	integer array Tmp__ArrayInt
+	real array Tmp__ArrayReal
+	//中转用的变量
+	unit TmpUnit2 = null
 
 	integer Tmp_DummyAmount = 0
 
@@ -252,7 +262,6 @@ globals
 	//===================================
 	unit Romantic = null
 endglobals
-
 
 // 获取鼠标在游戏内的坐标X
 native DzGetMouseTerrainX takes nothing returns real
@@ -788,7 +797,7 @@ endfunction*/
 //*  Quest
 //*
 //***************************************************************************
-
+/*
 function CreateAllQuest takes nothing returns nothing
 	local string qusetTitle
 	local string qusetDescription
@@ -814,9 +823,8 @@ function CreateAllQuest takes nothing returns nothing
 	set qusetDescription = "海滩附近发现蟹皇，现在他奄奄一息。"
 	set questIconPath = "ReplaceableTextures\\CommandButtons\\BTNSpiderCrab.blp"
 	set SideQuest[2] = CreateQuestBJ(false, false, qusetTitle, qusetDescription, questIconPath)
-
 endfunction
-
+*/
 
 
 
@@ -1298,8 +1306,6 @@ function TestEsc takes nothing returns boolean
 	return false
 endfunction
 
-
-
 //! inject main
 
     //一些函数调用可能会在这里
@@ -1323,7 +1329,7 @@ endfunction
 	call InitSounds()
 	call CreateRegions()
 	call CreateCameras()
-	//call CreateAllItems()
+	call CreateAllItems()
 
     //其他的调用可能会在这里
 
@@ -1336,7 +1342,8 @@ endfunction
 	set DamageEventCondition = Condition(function YDWEAnyUnitDamagedTriggerAction)
 	
 	call InitBlizzard()
-
+    //call InitGlobals(  )
+    call InitCustomTriggers(  )
 
 
 	if M_OnlinePlayerAmount == 1 then
@@ -1373,7 +1380,7 @@ endfunction
 	//给马甲单位添加这些会被改变数据的技能
 
 	//事先创建电影马甲单位
-	call CreateMovieDummyUnit()
+	// call CreateMovieDummyUnit()
 
 	//将vJass初始化放置在此处，注意，结构优先被初始化，然后是库初始化 
 	//! dovjassinit
@@ -1383,9 +1390,9 @@ endfunction
 	//任意单位受伤事件
 	call YDWESyStemAnyUnitDamagedRegistTrigger()
 	//创建单位
-	//call CreateAllUnits()
+	call CreateAllUnits()
 	//创建所有任务
-	call CreateAllQuest()
+	// call CreateAllQuest()
 	set IsInitUnit = false
 	call InitBoss()
 
@@ -1400,6 +1407,7 @@ endfunction
 	//call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_DECAY)
 	//call TriggerAddCondition(trig, Condition(function UnitDecayEvnetActions))
 
+	call TriggerExecute(gg_trg_Intro_Start)
 
 
 	//初始化UI

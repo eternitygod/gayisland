@@ -2,28 +2,60 @@
 输出路径：C:/Users/mayn/Desktop/GayIsland/Island.w3x
 输入格式：Lni
 输出模式：obj
-结果：0 个错误，1 条警告
-用时：3.960 秒
+结果：0 个错误，4 条警告
+用时：3.513 秒
 ==========================
-警告 (1)
+警告 (4)
 ==========================
-插件[资源保护]执行失败 - plugin\资源保护.lua:12: attempt to index a nil value (global 'fs')
+插件[资源保护]执行失败 - .\backend\plugin.lua:12: bad argument #1 to 'load' (function expected, got nil)
 stack traceback:
-	plugin\资源保护.lua:12: in function <plugin\资源保护.lua:10>
+	[C]: in function 'load'
+	.\backend\plugin.lua:12: in function <.\backend\plugin.lua:10>
 	[C]: in function 'xpcall'
-	.\core\init.lua:243: in method 'call_plugin'
-	.\core\slk/frontend.lua:213: in method 'frontend'
-	.\backend\convert.lua:136: in function 'backend.convert'
+	.\backend\plugin.lua:10: in upvalue 'load_plugins'
+	.\backend\plugin.lua:37: in function 'backend.plugin'
+	.\backend\convert.lua:120: in function 'backend.convert'
 	.\backend\cli\obj.lua:4: in function 'backend.cli.obj'
 	.\backend\init.lua:12: in main chunk
 	[C]: in function 'require'
 	...ers\mayn\Desktop\GayIsland\tools\w3x2lni\script\main.lua:2: in main chunk
 	[C]: in ?
-
-==========================
-其他 (4)
-==========================
-使用的插件：[资源保护](地图) - 没有资源目录时，将模型替换为步兵。
-使用的插件：[模型加密](地图) - 将slk格式地图使用的模型进行简单加密。
-使用的插件：[本地脚本](地图) - 让obj格式的地图使用本地的lua脚本。
-使用的插件：[引用声明](地图) - 对只在lua中使用的对象进行引用声明。
+插件[模型加密]执行失败 - .\backend\plugin.lua:12: bad argument #1 to 'load' (function expected, got nil)
+stack traceback:
+	[C]: in function 'load'
+	.\backend\plugin.lua:12: in function <.\backend\plugin.lua:10>
+	[C]: in function 'xpcall'
+	.\backend\plugin.lua:10: in upvalue 'load_plugins'
+	.\backend\plugin.lua:37: in function 'backend.plugin'
+	.\backend\convert.lua:120: in function 'backend.convert'
+	.\backend\cli\obj.lua:4: in function 'backend.cli.obj'
+	.\backend\init.lua:12: in main chunk
+	[C]: in function 'require'
+	...ers\mayn\Desktop\GayIsland\tools\w3x2lni\script\main.lua:2: in main chunk
+	[C]: in ?
+插件[本地脚本]执行失败 - .\backend\plugin.lua:12: bad argument #1 to 'load' (function expected, got nil)
+stack traceback:
+	[C]: in function 'load'
+	.\backend\plugin.lua:12: in function <.\backend\plugin.lua:10>
+	[C]: in function 'xpcall'
+	.\backend\plugin.lua:10: in upvalue 'load_plugins'
+	.\backend\plugin.lua:37: in function 'backend.plugin'
+	.\backend\convert.lua:120: in function 'backend.convert'
+	.\backend\cli\obj.lua:4: in function 'backend.cli.obj'
+	.\backend\init.lua:12: in main chunk
+	[C]: in function 'require'
+	...ers\mayn\Desktop\GayIsland\tools\w3x2lni\script\main.lua:2: in main chunk
+	[C]: in ?
+插件[引用声明]执行失败 - .\backend\plugin.lua:12: bad argument #1 to 'load' (function expected, got nil)
+stack traceback:
+	[C]: in function 'load'
+	.\backend\plugin.lua:12: in function <.\backend\plugin.lua:10>
+	[C]: in function 'xpcall'
+	.\backend\plugin.lua:10: in upvalue 'load_plugins'
+	.\backend\plugin.lua:37: in function 'backend.plugin'
+	.\backend\convert.lua:120: in function 'backend.convert'
+	.\backend\cli\obj.lua:4: in function 'backend.cli.obj'
+	.\backend\init.lua:12: in main chunk
+	[C]: in function 'require'
+	...ers\mayn\Desktop\GayIsland\tools\w3x2lni\script\main.lua:2: in main chunk
+	[C]: in ?

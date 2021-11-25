@@ -1,0 +1,150 @@
+事件
+条件
+动作
+    CommentString
+        常量: 改变所属
+    YDWEEnumUnitsInRangeMultiple
+        函数: GetRectCenterX
+            变量: gg_rct_Intro__OrgeMove2
+        函数: GetRectCenterY
+            变量: gg_rct_Intro__OrgeMove2
+        常量: 1200.00
+        动作
+            SetUnitOwner
+                函数: GetEnumUnit
+                预设: Player06
+                预设: ChangeColorFalse
+    CommentString
+        常量: 建筑
+    SetVariable
+        数组: TempArryUnit
+            常量: 3
+        函数: CreateUnitAtLoc
+            预设: Player06
+            常量: n003
+            函数: GetRectCenter
+                变量: gg_rct_Intro__Build1
+            常量: 220.00
+    SetVariable
+        数组: TempArryUnit
+            常量: 4
+        函数: CreateUnitAtLoc
+            预设: Player06
+            常量: hwtw
+            函数: GetRectCenter
+                变量: gg_rct_Intro__Build2
+            常量: 136.00
+    SetVariable
+        数组: TempArryUnit
+            常量: 5
+        函数: CreateUnitAtLoc
+            预设: Player06
+            常量: nefm
+            函数: GetRectCenter
+                变量: gg_rct_Intro__Build3
+            常量: 270.00
+    SetVariable
+        数组: TempArryUnit
+            常量: 6
+        函数: CreateUnitAtLoc
+            预设: Player06
+            常量: nefm
+            函数: GetRectCenter
+                变量: gg_rct_Intro__Build4
+            常量: 60.00
+    SetVariable
+        数组: Elevators
+            常量: 1
+        函数: CreateUnitAtLoc
+            预设: PlayerNP
+            常量: n000
+            函数: GetRectCenter
+                变量: gg_rct_Elevators_01
+            预设: RealUnitFacing
+    SetVariable
+        数组: Tavern
+            常量: 1
+        变量: gg_unit_n001_0016
+    CommentString
+        常量: 创建物体
+    SetVariable
+        变量: IntroCinePortal
+        函数: CreateDestructableZ
+            常量: B000
+            函数: GetRectCenterX
+                变量: gg_rct_Intro__PortalBirth
+            函数: GetRectCenterY
+                变量: gg_rct_Intro__PortalBirth
+            常量: 600.00
+            常量: 235.00
+            常量: 1
+            常量: 0
+    SetVariable
+        变量: OgreMagi
+        函数: CreateUnit
+            预设: Player06
+            常量: nm01
+            函数: GetRectCenterX
+                变量: gg_rct_Intro__OrgeBirth1
+            函数: GetRectCenterY
+                变量: gg_rct_Intro__OrgeBirth1
+            常量: 45.00
+    ShowUnit
+        变量: OgreMagi
+        预设: ShowHideHide
+    YDWEFlyEnable
+        变量: OgreMagi
+    SetUnitFlyHeightBJ
+        变量: OgreMagi
+        常量: 480.00
+        常量: 0.00
+    SetUnitAnimation
+        变量: OgreMagi
+        常量: death
+    SetVariable
+        变量: Kael
+        函数: CreateUnit
+            预设: Player03
+            常量: nm02
+            函数: GetRectCenterX
+                变量: gg_rct_Intro__KaelBirth1
+            函数: GetRectCenterY
+                变量: gg_rct_Intro__KaelBirth1
+            常量: 228.15
+    CommentString
+        常量: 添加进单位组
+    SetVariable
+        变量: CinematicUnitsGroup
+        函数: CreateGroup
+    GroupAddUnit
+        变量: CinematicUnitsGroup
+        变量: gg_unit_nm05_0023
+    GroupAddUnit
+        变量: CinematicUnitsGroup
+        变量: gg_unit_nm06_0024
+    GroupAddUnit
+        变量: CinematicUnitsGroup
+        变量: gg_unit_nm03_0022
+    GroupAddUnit
+        变量: CinematicUnitsGroup
+        变量: OgreMagi
+    GroupAddUnit
+        变量: CinematicUnitsGroup
+        变量: Kael
+    CommentString
+        常量: 不忽略警戒点会乱跑
+    RemoveGuardPosition
+        变量: OgreMagi
+    RemoveGuardPosition
+        变量: Kael
+    CommentString
+        常量: 初始化音乐
+    ClearMapMusicBJ
+    PolledWait
+        常量: 0.01
+    PlayThematicMusic
+        预设: MusicThemeComradeship
+    SetMapMusic
+        预设: MusicFileMusic
+        预设: EnableDisableDisable
+        常量: 0

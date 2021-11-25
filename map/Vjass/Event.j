@@ -1,9 +1,10 @@
 
 
 
-//! import "Event\UnitAttackEvent.j"
-//! import "Event\UnitDeathEvent.j"
-//! import "Event\UnitAbilityEvent.j"
-//! import "Event\UnitEnterMapEvent.j"
-//! import "Event\HeroLevelUp.j"
-//! import "Event\UnitSummonEvent.j"
+#include "Event\UnitAttackEvent.j"
+#include "Event\UnitDeathEvent.j"
+#include "Event\UnitAbilityEvent.j"
+#include "Event\UnitEnterMapEvent.j"
+#include "Event\HeroLevelUp.j"
+#include "Event\UnitSummonEvent.j"
+

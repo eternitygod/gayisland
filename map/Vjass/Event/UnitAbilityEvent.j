@@ -43,7 +43,7 @@ scope UnitAbilityEvent initializer Init
         call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Ast3', "OverloadLearn1")
 
         //枪兵 PikeMan
-        
+        call SaveStr(ObjectData, SPELL_EFFECT, 'Apm1', "BattleImago")
         call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Apm2', "BattleSpiralLearn1")
 
         //屠夫 Pudge

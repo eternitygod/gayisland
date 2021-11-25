@@ -3,15 +3,15 @@ scope UnitBonusSystem
 
     globals
         //ObjectData
-        constant integer BONUS_DAMAGE = 0   //攻击
-        constant integer BONUS_ARMOR = 1 //护甲
-        constant integer BONUS_ATTACK = 2    //攻速
-        constant integer BONUS_LIFE = 3 //最大生命
-        constant integer BONUS_MANA = 4 //最大魔法
-        constant integer BONUS_STR = 5
-        constant integer BONUS_AGI = 6
-        constant integer BONUS_INT = 7
-        constant integer BONUS_MOVESPEED = 8   //移动速度
+        key BONUS_DAMAGE// = 0   //攻击
+        key BONUS_ARMOR// = 1 //护甲
+        key BONUS_ATTACK// = 2    //攻速
+        key BONUS_LIFE// = 3 //最大生命
+        key BONUS_MANA// = 4 //最大魔法
+        key BONUS_STR// = 5
+        key BONUS_AGI// = 6
+        key BONUS_INT// = 7
+        key BONUS_MOVESPEED// = 8   //移动速度
     endglobals
 
     //设置单位生命恢复速度 这里GetHandleId用了三次 待优化
@@ -282,7 +282,6 @@ scope UnitBonusSystem
             call SetUnitState(whichUnit, UNIT_STATE_MANA, GetUnitState(whichUnit, UNIT_STATE_MANA) * (newVal / maxmana) )
         endif
     endfunction
-
 
     //仅用作物品刷新属性
     function UnitAddAttribute takes unit whichUnit, integer itemId returns nothing

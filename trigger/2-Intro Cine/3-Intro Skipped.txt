@@ -1,0 +1,3 @@
+因为修改了bj 按ESC不会立即结束电影
+
+使用CancelCineSceneBJ()来结束电影
