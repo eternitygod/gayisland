@@ -195,6 +195,10 @@ library InitSetUp initializer Init
         endloop
     endfunction
 
+    // 获取当前游戏进行的时间
+    function GetGameTime takes nothing returns real
+        return TimerGetElapsed(GameTimer)
+    endfunction
 
     //========================================================
     //TriggerClear
@@ -212,7 +216,7 @@ library InitSetUp initializer Init
         call DisableTrigger(t)
         set DestroyQueueNumber = DestroyQueueNumber + 1
         set DestroyQueue[DestroyQueueNumber]= t
-        set ElapsedTime[DestroyQueueNumber]= (TimerGetElapsed(GameTimer) ) + 60
+        set ElapsedTime[DestroyQueueNumber]= (GetGameTime() ) + 60
         if DestroyQueueNumber > 8000 then
             call destroy_error("8k")
         endif
@@ -229,7 +233,7 @@ library InitSetUp initializer Init
     endfunction
 
     function TimedCleanupTrigger takes nothing returns boolean
-        local real r = TimerGetElapsed(GameTimer) 
+        local real r = GetGameTime() 
         local integer i
         set i = 1
         loop
@@ -575,7 +579,7 @@ library InitSetUp initializer Init
     private function Init takes nothing returns nothing
         call InitPrd()
         set LocalPlayer = GetLocalPlayer()
-        // 使用 TimerGetElapsed(GameTimer) 获取游戏逝去时间
+        // 使用 GetGameTime() 获取游戏逝去时间
         call TimerStart(GameTimer, 99999., false, null)
         // 定期清触发器
         call CreateTimerEventTrigger(15, true, function TimedCleanupTrigger)

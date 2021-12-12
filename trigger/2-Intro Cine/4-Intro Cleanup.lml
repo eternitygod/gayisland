@@ -89,7 +89,7 @@
                     IssueTargetOrder
                         函数: GetEnumUnit
                         预设: UnitOrderSmartUnit
-                        数组: Tavern
+                        数组: TavernUnit
                             常量: 1
                 动作
                     IfThenElseMultiple
@@ -110,7 +110,7 @@
     IssueTargetOrder
         变量: gg_unit_nbee_0014
         预设: UnitOrderSmartUnit
-        数组: Tavern
+        数组: TavernUnit
             常量: 1
     YDWERegisterTriggerMultiple
         函数: CreateTrigger
@@ -120,7 +120,7 @@
             TriggerRegisterUnitInRangeSimple
                 常量: 200.00
                 函数: YDWECustomScriptCode
-                    常量: udg_Tavern[1]
+                    常量: udg_TavernUnit[1]
         动作
         动作
             IfThenElseMultiple

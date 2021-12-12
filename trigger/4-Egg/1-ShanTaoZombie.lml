@@ -1,0 +1,21 @@
+事件
+    YDWEDisableRegister
+    TriggerRegisterEnterRectSimple
+        变量: gg_rct_Egg__ShanTaoZombie
+条件
+    OperatorCompareBoolean
+        函数: IsUnitType
+            函数: GetEnteringUnit
+            预设: UnitTypeHero
+        预设: OperatorEqualENE
+        常量: true
+动作
+    DisableTrigger
+        函数: GetTriggeringTrigger
+    DisplayTextToPlayer
+        函数: GetTriggerPlayer
+        常量: 0
+        常量: 0
+        常量: 上面写着《山桃僵尸》
+    DestroyTrigger
+        函数: GetTriggeringTrigger

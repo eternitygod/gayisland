@@ -7,49 +7,53 @@ scope UnitAbilityEvent initializer Init
         trigger UnitSpellEffectTrigger = null
     endglobals
 
-    private function InitAbilityFunctions takes nothing returns nothing
+    private function SetSkillEvent takes integer eventType, integer skillId, string evnetfunc returns nothing
+        call SaveStr(ObjectData, eventType, skillId, evnetfunc)
+    endfunction
 
+    private function InitAbilityFunctions takes nothing returns nothing
+ 
         //中尉 Lieutenant
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Alc1', "Crosskill")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Alc2', "EnchantEquipment")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Alc2', "EnchantEquipment_Learn1")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Alc3', "CriticalStrikeAura_Learn1")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Alc4', "Stomp")
+        call SetSkillEvent(SPELL_EFFECT, 'Alc1', "Crosskill")
+        call SetSkillEvent(SPELL_EFFECT, 'Alc2', "EnchantEquipment")
+        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Alc2', "EnchantEquipment_Learn1")
+        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Alc3', "CriticalStrikeAura_Learn1")
+        call SetSkillEvent(SPELL_EFFECT, 'Alc4', "Stomp")
 
         //火魔法师 FireMage
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ahy0', "AbstinenceIsGoodMedicine")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ahy1', "DragonSlave")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ahy2', "LightStrikeArray")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Ahy3', "FierySoul")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ahy4', "LagunaBlade")
+        call SetSkillEvent(SPELL_EFFECT, 'Ahy0', "AbstinenceIsGoodMedicine")
+        call SetSkillEvent(SPELL_EFFECT, 'Ahy1', "DragonSlave")
+        call SetSkillEvent(SPELL_EFFECT, 'Ahy2', "LightStrikeArray")
+        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Ahy3', "FierySoul")
+        call SetSkillEvent(SPELL_EFFECT, 'Ahy4', "LagunaBlade")
 
         //铁心灭绝者 DeterminedExterminator
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Acs1', "Assassination")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Acs2', "BlightPower")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Acs3', "BlackEpidermis")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Acs4', "LearnGhostShip")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Acs4', "GhostShip")
+        call SetSkillEvent(SPELL_EFFECT, 'Acs1', "Assassination")
+        call SetSkillEvent(SPELL_EFFECT, 'Acs2', "BlightPower")
+        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Acs3', "BlackEpidermis")
+        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Acs4', "LearnGhostShip")
+        call SetSkillEvent(SPELL_EFFECT, 'Acs4', "GhostShip")
 
         //模范公民 ModelCitizen / TaxStealer
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ats0', "Shinyboy")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ats1', "Transmute")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ats2', "WeMedia")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ats4', "GrandNarrative")
+        call SetSkillEvent(SPELL_EFFECT, 'Ats0', "Shinyboy")
+        call SetSkillEvent(SPELL_EFFECT, 'Ats1', "Transmute")
+        call SetSkillEvent(SPELL_EFFECT, 'Ats2', "WeMedia")
+        call SetSkillEvent(SPELL_EFFECT, 'Ats4', "GrandNarrative")
 
         //风暴之灵 StormSpirit
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ast1', "StaticRremnant")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ast2', "ElectricVortex")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ast0', "BallLightning")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Ast3', "OverloadLearn1")
+        call SetSkillEvent(SPELL_EFFECT, 'Ast1', "StaticRremnant")
+        call SetSkillEvent(SPELL_EFFECT, 'Ast2', "ElectricVortex")
+        call SetSkillEvent(SPELL_EFFECT, 'Ast0', "BallLightning")
+        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Ast3', "OverloadLearn1")
 
         //枪兵 PikeMan
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Apm1', "BattleImago")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Apm2', "BattleSpiralLearn1")
+        call SetSkillEvent(SPELL_EFFECT, 'Apm1', "BattleImago")
+        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Apm2', "BattleSpiralLearn1")
 
         //屠夫 Pudge
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Apg1', "Pudge_MeatHook")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'A005', "Pudge_Rot")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'A006', "Pudge_Dismember")
+        call SetSkillEvent(SPELL_EFFECT, 'Apg1', "Pudge_MeatHook")
+        call SetSkillEvent(SPELL_EFFECT, 'A005', "Pudge_Rot")
+        call SetSkillEvent(SPELL_EFFECT, 'A006', "Pudge_Dismember")
     endfunction
 
 

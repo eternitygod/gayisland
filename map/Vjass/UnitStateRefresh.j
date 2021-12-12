@@ -49,14 +49,12 @@ library UnitStateRefresh requires Common
         local integer i
         call SetUnitState(u, UNIT_STATE_ARMOR, newValue)
         //刷新基础攻击力
-        set value = GetUnitPrimaryValue(u)
+        set value = GetHeroPrimaryValue(u)
         set newValue = value + LoadInteger(UnitData, h, UNIT_BASE_DAMAGE)
         call SetUnitState(u, UNIT_STATE_ATTACK1_DAMAGE_BASE, newValue)
         //刷新 生命/魔法恢复速度
         call RefreshUnitRestore(u)
-        if IsMirage then
-            call Debug("log",GetUnitName(u) + "生命/魔法 恢复：" + R2S(LoadReal(UnitData, h, UNIT_LIFERESTORE) + GetHeroStr(u, true)* 0.04) + "/" + R2S(LoadReal(UnitData, h, UNIT_MANARESTORE) + GetHeroInt(u, true)* 0.03) )
-        endif
+        debug    call Debug("log",GetUnitName(u) + "生命/魔法 恢复：" + R2S(LoadReal(UnitData, h, UNIT_LIFERESTORE) + GetHeroStr(u, true)* 0.04) + "/" + R2S(LoadReal(UnitData, h, UNIT_MANARESTORE) + GetHeroInt(u, true)* 0.03) )
         //同时刷新面板
         //call UnitStateUpdateCallback()
     endfunction

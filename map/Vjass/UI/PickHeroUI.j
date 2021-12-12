@@ -1,6 +1,7 @@
 
 globals
 	//选英雄的背景
+	group AllHerosGroup = CreateGroup()
 	integer PickHeroFrame
 	integer PickHeroReturnFrame
 	integer PickHeroBackDrop
@@ -66,12 +67,13 @@ function PickHeroSync takes nothing returns boolean
 	endif
 	if AllHeroTypeId[frameId] > 0 then
 
-		set newHero = CreateUnit(syncPlayer, AllHeroTypeId[frameId], - 24940.0, - 25225.7, 89.893)
+		set newHero = CreateUnit(syncPlayer, AllHeroTypeId[frameId], GetRectCenterX( udg_TavernHeroBirthRect[1] ), GetRectCenterY( udg_TavernHeroBirthRect[1] ), 90)
 		if LocalPlayer == syncPlayer then
 			call SelectUnit(newHero, true)
 		endif
 		call InitHeroTriggerById(newHero)
 		set PlayerHeroUnit[GetUnitPointValue(newHero)] = newHero
+		call GroupAddUnit( AllHerosGroup, newHero )
 		set newHero = null
 	endif
 	call DisableHeroUI(frameId, true)
@@ -180,7 +182,7 @@ function InitPickHerosUI takes nothing returns nothing
 		set heroCount = heroCount + 1
 	endloop
 
-	set PickHeroFrame = DzCreateSimpleFrame("PickHeroButtonTemplate", DzSimpleFrameFindByName("SimpleInfoPanelIconFood", 4), 0)
+	set PickHeroFrame = DzCreateSimpleFrame("PickHeroButtonTemplate", ConsoleUI, 0)
 	call DzFrameSetAbsolutePoint(PickHeroFrame, 4, 0.42, 0.15)
 	call DzFrameShow(PickHeroFrame , false)
 	call DzFrameShow(PickHeroFrame , true)

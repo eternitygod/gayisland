@@ -3,6 +3,7 @@
 
 scope PickMan
 
+    // 战斗螺旋  反击螺旋缝合战斗饥渴
     function BattleSpiralActions takes nothing returns boolean
         local unit whichUnit = GetTriggerUnit()
         local unit hAttacker = GetAttacker()
@@ -31,7 +32,6 @@ scope PickMan
                 call SetUnitAnimation(whichUnit, "spin")
                 call DestroyEffect(AddSpecialEffectTarget(spinEffectPath, whichUnit, "origin"))
                 call UnitDelayedStanding(whichUnit, 0.6)
-
 
                 set enumDamageTarget = LoginGroup()
                 call GroupEnumUnitsInRange(enumDamageTarget, GetUnitX(whichUnit), GetUnitY(whichUnit), radius, null)
@@ -76,6 +76,81 @@ scope PickMan
         set trig = null
     endfunction
 
+    // 口嗨
+    function CallSbNames takes nothing returns nothing
+        local unit whichUnit = M_GetSpellAbilityUnit()
+        local group enumUnits = LoginGroup()
+        local unit firstUnit
+        local real radius = 525
+
+        local real armoarValue = 5
+
+        call GroupEnumUnitsInRange( enumUnits, GetUnitX(whichUnit), GetUnitY(whichUnit), radius, null )
+        call GroupRemoveUnit( enumUnits, whichUnit )
+
+        set P2 = GetOwningPlayer(whichUnit)
+        loop
+
+            set firstUnit = FirstOfGroup( enumUnits )
+        exitwhen firstUnit == null
+            call GroupRemoveUnit( enumUnits, firstUnit )
+            // 友军 存活 非建筑 英雄
+            if Ally_Alive_NoStructure_IsHero( firstUnit ) then
+                // 把友军的护甲给吃瓜
+                call UnitReduceArmorBonus( firstUnit, armoarValue )
+                call UnitAddArmorBonus( whichUnit, armoarValue )
+            endif
+
+        endloop
+        set firstUnit = null
+        call LogoutGroup( enumUnits )
+        set enumUnits = null
+
+        set whichUnit = null
+    endfunction
+
+    // 战斗咆哮 狂战士的怒吼+淘汰之刃
+    function BattleRoar takes nothing returns nothing
+        local unit whichUnit = M_GetSpellAbilityUnit()
+
+        local group enumUnits = LoginGroup()
+        local unit firstUnit
+        local real radius = 525
+        local string effectPath = ""
+
+        local real criticalValue = 300
+        local integer killCount = 0
+
+        call GroupEnumUnitsInRange( enumUnits, GetUnitX(whichUnit), GetUnitY(whichUnit), radius, null )
+
+        set P2 = GetOwningPlayer(whichUnit)
+        loop
+            set firstUnit = FirstOfGroup( enumUnits )
+        exitwhen firstUnit == null
+            call GroupRemoveUnit( enumUnits, firstUnit )
+            // 敌对 存活 非建筑
+            if Enemy_Alive_NoStructure( firstUnit ) then
+                // 超过生命临界点就斩杀
+                if GetWidgetLife( firstUnit ) < criticalValue then
+                    if UnitKillTarget( whichUnit, firstUnit ) then
+                        // 斩杀成功后的动作
+                        call DestroyEffect(AddSpecialEffectTarget(effectPath, firstUnit, "origin"))
+                        set killCount = killCount + 1
+                    endif
+                endif
+            endif
+        endloop
+
+        //再根据斩杀计数来做动作
+
+        set firstUnit = null
+        call LogoutGroup( enumUnits )
+        set enumUnits = null
+
+        set whichUnit = null
+    endfunction
+
+    /*
     function BattleImago takes nothing returns nothing
         local unit whichUnit = M_GetSpellAbilityUnit()
         local string sSpecialArt = "Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl"
@@ -85,6 +160,6 @@ scope PickMan
 
         set whichUnit = null
     endfunction
-
+    */
 endscope
 

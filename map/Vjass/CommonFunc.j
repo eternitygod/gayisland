@@ -123,31 +123,55 @@ library Common requires InitSetUp
         endif
     endfunction
 
-    function GetBuffSlkData takes integer Id, string data returns string
-        set SlkType = "buff"
-        set SlkdataType = data
-        return AbilityId2String(Id)
+
+
+    function GetPlayerSelectedUnit takes nothing returns unit
+        return GetDetectedUnit()
     endfunction
-    
-    //与lua交互获得Slk数据
-    function GetUnitSlkData takes integer Id, string data returns string
-        set SlkType = "unit"
-        set SlkdataType = data
-        return AbilityId2String(Id)
+
+    // 与lua交互获得Slk数据
+    function GetObjectDataBySlk takes integer objectId, string tableName, string dataType returns string
+        set SlkType = tableName
+        set SlkdataType = dataType
+        return AbilityId2String(objectId) // lua hook了此函数 调用slk库
+    endfunction
+
+    function GetUnitSlkData takes integer objectId, string dataType returns string
+        return GetObjectDataBySlk( objectId, "unit", dataType )
     endfunction
 
     //获取英雄单位的主属性 primary: 1 == str  2 == int  3 = agi 
-    function GetUnitPrimaryById takes integer whichType returns string
-        return GetUnitSlkData(whichType, "Primary")
+    function GetHeroPrimaryById takes integer whichType returns string
+        return GetObjectDataBySlk(whichType, "unit", "Primary")
     endfunction
 
-    function GetUnitPrimary takes unit whichUnit returns string
-        local integer i = GetUnitTypeId(whichUnit)
-        return GetUnitSlkData(i, "Primary")
+    globals
+        // 哈希表KEY 技能需求等级
+	    key OBJ_KEY_HERO_PRIMARY
+        key OBJ_KEY_UNIT_SHADOW
+    endglobals
+
+    function GetHeroPrimary takes unit whichUnit returns string
+        local integer whichType = GetUnitTypeId(whichUnit)
+        local string data = LoadStr( ObjectData, OBJ_KEY_HERO_PRIMARY, whichType )
+        if data == null then
+            set data = GetObjectDataBySlk(whichType, "unit", "Primary")
+        endif
+        return data
     endfunction
 
-    function GetUnitPrimaryValue takes unit whichUnit returns integer
-        local string data = GetUnitPrimary(whichUnit)
+    // 原生的阴影 还是从slk库中获取
+    function GetUnitOriginShadow takes unit whichUnit returns string
+        local integer whichType = GetUnitTypeId(whichUnit)
+        local string data = LoadStr( ObjectData, OBJ_KEY_UNIT_SHADOW, whichType )
+        if data == null then
+            set data = GetObjectDataBySlk(whichType, "unit", "Primary")
+        endif
+        return data
+    endfunction
+
+    function GetHeroPrimaryValue takes unit whichUnit returns integer
+        local string data = GetHeroPrimary(whichUnit)
         if data == "STR" then
             return GetHeroStr(whichUnit, true)
         elseif data == "AGI" then
@@ -257,82 +281,12 @@ library Common requires InitSetUp
         endif
     endfunction
 
-
+    // 斩杀单位
+    function UnitKillTarget takes unit whichUnit, unit target returns boolean
+        call UnitRemoveBuffs(target, true, true)
+        return UnitDamageTarget(whichUnit, target, 10000000, false, false, ATTACK_TYPE_PIERCE, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+    endfunction
     
-    //模拟行为限制
-    //模拟晕眩
-    //EXPauseUnit内部自带计数 为true时+1 false时-1 计数 <=0 时单位不再晕眩
-    //移除晕眩
-    function UnitRemoveStun takes unit u returns boolean
-        local integer h
-        local integer uh = GetHandleId(u)
-        local timer t = null
-        if HaveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN) then
-            set t = LoadTimerHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-            set h = GetHandleId(t)
-            call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-            call RemoveSavedHandle(HT, h, 0)
-            call DestroyTimer(t)
-            call EXPauseUnit(u, false) //此函数内部自带计数
-            call UnitRemoveAbility(u, 'Aasl')
-            call UnitRemoveAbility(u, 'BPSE')
-            set t = null
-            return true
-        endif
-        return false
-    endfunction
-
-    function UnitStun_Actions takes nothing returns nothing
-        local timer t = GetExpiredTimer()
-        local integer h = GetHandleId(t)
-        local unit u = LoadUnitHandle(HT, h, 0)
-        local integer uh = GetHandleId(u)
-        //call SaveInteger(UnitKeyBuff, uh, UNITBUFF_STUN,  LoadInteger(UnitKeyBuff, uh, UNITBUFF_STUN) - 1 )
-        call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-        call RemoveSavedHandle(HT, h, 0)
-        call DestroyTimer(t)
-        call EXPauseUnit(u, false) //此函数内部自带计数
-        call UnitRemoveAbility(u, 'Aasl')
-        call UnitRemoveAbility(u, 'BPSE')
-        set t = null
-        set u = null
-    endfunction
-    //单位、持续时间、是否无视魔免
-    function UnitSetStun takes unit u, real dur returns boolean
-        local timer t
-        local integer h = GetHandleId(u)
-        local real time = 0
-        if HaveSavedHandle(UnitKeyBuff, h, UNITBUFF_STUN) then
-            set t = LoadTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN)
-            set time = TimerGetRemaining(t)
-        else
-            set t = CreateTimer()
-            call EXPauseUnit(u, true)
-            //call SaveInteger(UnitKeyBuff, h, UNITBUFF_STUN, LoadInteger(UnitKeyBuff, h, UNITBUFF_STUN) + 1)
-            call UnitAddAbility(u, 'Aasl')
-            call UnitMakeAbilityPermanent(u, true, 'Aasl')
-            call SaveTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN, t)
-            call SaveUnitHandle(HT, GetHandleId(t), 0, u)
-        endif
-        if time < dur then
-            set time = dur
-        endif
-        if time != 0 then
-            call TimerStart(t, time, false, function UnitStun_Actions)
-        endif
-        set t = null
-        return true
-    endfunction
-    //封装了一层本质上是使用UnitSetStun 参数b为是否无视魔法免疫
-    function M_UnitSetStun takes unit u, real dur, real herodur, boolean b returns boolean
-        if IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE) and not b then//检查是否魔免
-            return false
-        endif
-        if GetUnitAbilityLevel(u, 'AHer') == 1 then //如果单位为英雄 那么就会有此技能
-            set dur = herodur
-        endif
-        return UnitSetStun(u, dur)
-    endfunction
 
     
     //移除单位枷锁
@@ -468,10 +422,10 @@ library Common requires InitSetUp
             call TriggerRegisterTimerEvent(trig, time, false)
             call TriggerAddCondition(trig, Condition( function UnitSetMagicImmunityRemove))
             call SaveUnitHandle(HT, iHandleId, 0, whichUnit)
-            call SaveReal(HT, iHandleId, 0, time + TimerGetElapsed(GameTimer))
+            call SaveReal(HT, iHandleId, 0, time + GetGameTime())
         else
             set iHandleId = GetHandleId(trig)
-            set elapsed = TimerGetElapsed(GameTimer) - LoadReal(HT, iHandleId, 0)
+            set elapsed = GetGameTime() - LoadReal(HT, iHandleId, 0)
             if elapsed < time then
                 call FlushChildHashtable(HT, iHandleId)
                 call ClearTrigger(trig)
@@ -589,12 +543,13 @@ library Common requires InitSetUp
         return Tmp_Destructable
     endfunction
 
-
-
     //逆变身 使用后需要刷新一下单位的基础攻击力
     function YDWEUnitTransform takes unit u, integer targetid returns nothing
         local integer i = GetUnitTypeId(u)
+        local real value
         if i != targetid and i != 0 then
+            // 刷新基础攻击力
+            set value = GetHeroPrimaryValue(u) + LoadInteger(UnitData, GetHandleId(u), UNIT_BASE_DAMAGE)
             call UnitAddAbility(u, 'Abrf')
             call EXSetAbilityDataInteger(EXGetUnitAbility(u, 'Abrf'), 1, ABILITY_DATA_UNITID, i)
             call EXSetAbilityAEmeDataA(EXGetUnitAbility(u, 'Abrf'), i)
@@ -602,6 +557,7 @@ library Common requires InitSetUp
             call UnitAddAbility(u, 'Abrf')
             call EXSetAbilityAEmeDataA(EXGetUnitAbility(u, 'Abrf'), targetid)
             call UnitRemoveAbility(u, 'Abrf')
+            call SetUnitState(u, UNIT_STATE_ATTACK1_DAMAGE_BASE, value)
         endif
     endfunction
 
@@ -641,6 +597,35 @@ library Common requires InitSetUp
         call SaveWidgetHandle(HT, iHandleId, 1, targetWidget)
 
         set trig = null
+    endfunction
+
+
+    function IssuePointOrderByIdWait0S_CallBack takes nothing returns boolean
+        local trigger trig = CreateTrigger()
+        local integer iHandleId = GetHandleId(trig)
+        local integer order = LoadInteger(HT, iHandleId, 0)
+        local unit whichUnit = LoadUnitHandle(HT, iHandleId, 0)
+        local real targetX = LoadReal(HT, iHandleId, 1)
+        local real targetY = LoadReal(HT, iHandleId, 2)
+
+        call IssuePointOrderById(whichUnit, order, targetX, targetY)
+        call FlushChildHashtable(HT, iHandleId)
+        call ClearTrigger(trig)
+
+        set trig = null
+        set whichUnit = null
+        return false
+    endfunction
+
+    // 点目标技能 
+    function IssuePointOrderByIdWait0S takes unit whichUnit, integer order, real x, real y returns nothing
+        local integer iHandleId = CreateTimerEventTrigger( 0., false, function IssuePointOrderByIdWait0S_CallBack )
+
+        call SaveInteger(HT, iHandleId, 0, order)
+        call SaveUnitHandle(HT, iHandleId, 0, whichUnit)
+        call SaveReal(HT, iHandleId, 1, x)
+        call SaveReal(HT, iHandleId, 2, y)
+
     endfunction
     
     //不推荐使用
@@ -717,6 +702,7 @@ library Common requires InitSetUp
         key UnitDelayedStandingKey
     endglobals
 
+    // 
     function UnitDelayStandActions takes nothing returns nothing
         local timer hTimer = GetExpiredTimer()
         local integer iHandleId = GetHandleId(hTimer)
@@ -727,6 +713,7 @@ library Common requires InitSetUp
         endif
         call RemoveSavedHandle(UnitKeyBuff, GetHandleId(whichUnit), UnitDelayedStandingKey)
 
+        call FlushChildHashtable( HT, iHandleId )
         call DestroyTimer(hTimer)
         set hTimer = null
         set whichUnit = null
@@ -758,7 +745,6 @@ library Common requires InitSetUp
         return bj_lastCreatedTrigger
     endfunction
 
-    
     //检查玩家对单位的可见性
     function UnitVisibleToPlayer takes unit whichUnit, player whichPlayer returns boolean //GetUnitAbilityLevel(u,'A1HX')== 0
         return IsUnitVisible(whichUnit, whichPlayer) or ( IsUnitAlly(whichUnit, whichPlayer) )

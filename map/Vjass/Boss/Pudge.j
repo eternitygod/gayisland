@@ -229,7 +229,7 @@ scope Pudge
             call GroupRemoveUnit(g, dummyUnit)
         endloop
         set dummyUnit = null
-        set isDismember = GetUnitCurrentOrder(pudge) == Order_MagicLeash and YDWEGetUnitAbilityState(pudge, 'A006', 1) != 0.  
+        set isDismember = GetUnitCurrentOrder(pudge) == ORDER_MAGICLEASH and YDWEGetUnitAbilityState(pudge, 'A006', 1) != 0.  
         if ( ( iMeetCondition > 1 or isDismember ) and not isRot  ) or ( iMeetCondition < 2 and isRot and not isDismember ) then
             call IssueImmediateAbilityById(pudge, 'A005')
         endif
@@ -267,13 +267,13 @@ scope Pudge
         local real rMeatHookTime
         local location targetPosition = null
         local boolean targetNoSmartUnit
-        if targetOrder == 0 or ( targetOrder != Order_Move ) then
+        if targetOrder == 0 or ( targetOrder != ORDER_MOVE ) then
             call Debug("log", "targetName=  " + GetUnitName(target))
-            call IssuePointOrderById(pudge, Order_Flare, targetX, targetY)
+            call IssuePointOrderById(pudge, ORDER_MEATHOOK, targetX, targetY)
         else
             set targetSpeed = GetUnitMoveSpeed(target)
             set targetNoSmartUnit = LoadBoolean(HT, GetHandleId(GetTriggeringTrigger()), GetHandleId(target))
-            if targetOrder == Order_Move or (targetOrder == Order_Smart and targetNoSmartUnit)  then
+            if targetOrder == ORDER_MOVE or (targetOrder == ORDER_SMART and targetNoSmartUnit)  then
                 set maxRangeMeatHook = ( 30 + 5 * GetUnitAbilityLevel(pudge, 'Apg1') ) * 40
                 set rMeatHookTime = maxRangeMeatHook / 1600
                 set targetPosition = GetUnitPositionAfterMovement(target, rMeatHookTime + 0.3)
@@ -288,7 +288,7 @@ scope Pudge
                         return false
                     endif
                 endif
-                call IssuePointOrderById(pudge, Order_Flare, targetX, targetY)
+                call IssuePointOrderById(pudge, ORDER_MEATHOOK, targetX, targetY)
             endif
         endif
         return true
@@ -308,7 +308,7 @@ scope Pudge
             return
         endif
         //如果屠夫在放技能直接返回
-        if pudgeOrder == Order_MagicLeash or pudgeOrder == Order_Flare then
+        if pudgeOrder == ORDER_MAGICLEASH or pudgeOrder == ORDER_MEATHOOK then
             call Debug("log","return - Order = MagicLeash")
             return
         endif
@@ -361,7 +361,7 @@ scope Pudge
         if YDWEGetUnitAbilityState(pudge, 'A006', 1) != 0. then
             return
         endif
-        if pudgeOrder == Order_MagicLeash or pudgeOrder == Order_Flare then//如果屠夫在钩就返回
+        if pudgeOrder == ORDER_MAGICLEASH or pudgeOrder == ORDER_MEATHOOK then//如果屠夫在钩就返回
             call Debug("log"," return - Order = Spell")
             return
         endif
@@ -383,7 +383,7 @@ scope Pudge
         call LogoutGroup(enumGroup)
         set enumGroup = null
         set targetUnit = GetNearestUnitByGroup(targetGroup, pudgeX, pudgeY)
-        call IssueTargetOrderByIdWait0S(pudge, Order_MagicLeash, targetUnit)
+        call IssueTargetOrderByIdWait0S(pudge, ORDER_MAGICLEASH, targetUnit)
         call Debug("log", "Dismember TargetName = " + GetUnitName(targetUnit))
         call LogoutGroup(targetGroup)
         set targetUnit = null
@@ -401,7 +401,7 @@ scope Pudge
         local integer pudgeOrder = GetUnitCurrentOrder(pudge)
         local unit targetUnit
         local real rDistance = 0
-        if pudgeOrder == Order_MagicLeash or pudgeOrder == Order_Flare then//如果屠夫在放技能就返回
+        if pudgeOrder == ORDER_MAGICLEASH or pudgeOrder == ORDER_MEATHOOK then//如果屠夫在放技能就返回
             call Debug("log"," return - Order = Spell")
             return
         endif
@@ -431,21 +431,21 @@ scope Pudge
             return
         endif
         call Debug("log", "MinLife TargetName = " + GetUnitName(targetUnit))
-        if pudgeOrder != Order_Move then
-            if pudgeOrder == Order_Attack then
+        if pudgeOrder != ORDER_MOVE then
+            if pudgeOrder == ORDER_ATTACK then
                 set targetUnitX = GetUnitX(targetUnit)
                 set targetUnitY = GetUnitY(targetUnit)
                 set rDistance = GetDistanceBetween(pudgeX, pudgeY, targetUnitX, targetUnitY)
             endif
             if rDistance < 700 then
                 if YDWEGetUnitAbilityState(pudge, 'Apg1', 1) == 0. then 
-                    call IssuePointOrderById(pudge, Order_Flare, targetUnitX, targetUnitY)
+                    call IssuePointOrderById(pudge, ORDER_MEATHOOK, targetUnitX, targetUnitY)
                     call Debug("log", "Hook TargetName = " + GetUnitName(targetUnit))
                 elseif YDWEGetUnitAbilityState(pudge, 'A006', 1) == 0. then
-                    call IssueTargetOrderById(pudge, Order_MagicLeash, targetUnit)
+                    call IssueTargetOrderById(pudge, ORDER_MAGICLEASH, targetUnit)
                     call Debug("log", "Dismember TargetName = " + GetUnitName(targetUnit))
                 else
-                    call IssueTargetOrderById(pudge, Order_Attack, targetUnit)
+                    call IssueTargetOrderById(pudge, ORDER_ATTACK, targetUnit)
                     call Debug("log", "Attack TargetName = " + GetUnitName(targetUnit))
                 endif
             endif
@@ -475,7 +475,7 @@ scope Pudge
             call PudgeAIDismember(pudge)
         elseif orderUnit != null then
             set orderId = GetIssuedOrderId()
-            if orderId == Order_Smart then
+            if orderId == ORDER_SMART then
                 call SaveBoolean(HT, iHandleId, GetHandleId(orderUnit), GetOrderTargetUnit() == null)
             endif
         elseif trigEventId == EVENT_WIDGET_DEATH then
@@ -510,22 +510,7 @@ scope Pudge
     endfunction
     
     
-    function StartBossAI takes unit whichUnit returns nothing
-        local integer bossType = GetUnitTypeId(whichUnit)
-        if bossType == 'U001' then
-            call InitPudgeAI(whichUnit)
-        endif
-    
-    endfunction
-    
-    function StartPedugAI takes nothing returns boolean
-        local trigger trig = GetTriggeringTrigger()
-        local integer iHandleId = GetHandleId(trig)
-        call StartBossAI(LoadUnitHandle(HT, iHandleId, 0))
-        call FlushChildHashtable(HT, iHandleId)
-        call ClearTrigger(trig)
-        return false
-    endfunction
+
 
 
 endscope

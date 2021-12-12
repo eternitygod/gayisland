@@ -28,6 +28,8 @@ scope UnitDeathEvent initializer Init
         local integer unitType = GetUnitTypeId(dyingUnit)
         local integer deathType
 
+        call EXUnitRemoveBuffs( dyingUnit, BUFF_TYPE_IS_BUFF )
+
         if IsUnitType(dyingUnit, UNIT_TYPE_HERO) then
 
         else

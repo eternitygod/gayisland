@@ -1,10 +1,16 @@
 // 初始化的函数
 #include "Vjass\InitSetUp.j"
 
+#include "Vjass\Order.j"
+
 // 大部分的常用函数
 #include "Vjass\CommonFunc.j"
 // 单位选取的过滤条件
 #include "Vjass\Filter.j"
+
+#include "Vjass\Test.j"
+
+#include "Vjass\Buff\BuffSystem.j"
 
 // #include "Vjass\Cinematic.j"
 
@@ -180,18 +186,18 @@ globals
 
 	//技能事件的哈希表key
 	//准备释放技能
-	constant integer SPELL_CHANNEL = 10
+	constant key SPELL_CHANNEL = 10
 	//发动技能效果
-	constant integer SPELL_EFFECT = 11
+	constant key SPELL_EFFECT = 11
 	//学习技能
-	constant integer LEARN_SKILL = 14
+	constant key LEARN_SKILL = 14
 	//学习技能1级
-	constant integer LEARN_FIRST_LEVEL_SKILL = 15
+	constant key LEARN_FIRST_LEVEL_SKILL = 15
 
 
 
-	//UnitBuff
-	hashtable UnitBuff = InitHashtable()
+	// UnitBuff
+	// hashtable UnitBuff = InitHashtable()
 	hashtable UnitKeyBuff = InitHashtable()
 	constant integer AttackTarget = - 100 //攻击目标 用于判断与攻击事件
 	constant integer AttackReadyTrg = - 101 //捕捉远程攻击弹道出手的触发器
@@ -200,29 +206,12 @@ globals
 
 
 	constant integer Leash = - 1 //枷锁 + BuffId
-	constant integer UNITBUFF_STUN = 0 // 单位晕眩
 	constant integer ZeroCast = 1 //零重施法
 	constant integer BallLightningCount = 7 //球状闪电计数 计数为0时才逆变身
 
 	constant integer MagicImmunity = 11
 
-	// 一些命令Id
-	// 攻击
-	constant integer Order_Attack = 851983
-	// 右键
-	constant integer Order_Smart = 851971
-	// 移动
-	constant integer Order_Move = 851986
-	// 照明弹
-	constant integer Order_Flare = 852060
-	// 魔法枷锁
-	constant integer Order_MagicLeash = 852480
-	// 闪电链
-	constant integer Order_Chainlightning = 852119
-	// 嘲讽
-	constant integer Order_Taunt = 852520
-	// 采集
-	constant integer Order_Harvest = 852018
+
 
 
 	//是否是初始化单位
@@ -1241,6 +1230,25 @@ function UnitDecayEvnetActions takes nothing returns boolean
 	return false
 endfunction
 
+function ExecuteBossAI takes unit whichUnit returns nothing
+	local integer bossType = GetUnitTypeId(whichUnit)
+	if bossType == 'U001' then
+		call InitPudgeAI(whichUnit)
+	elseif bossType == 'u000' then
+		call InitImagoAI(whichUnit)
+	endif
+
+endfunction
+
+function StartBossAI takes nothing returns boolean
+	local trigger trig = GetTriggeringTrigger()
+	local integer iHandleId = GetHandleId(trig)
+	call ExecuteBossAI(LoadUnitHandle(HT, iHandleId, 0))
+	call FlushChildHashtable(HT, iHandleId)
+	call ClearTrigger(trig)
+	return false
+endfunction
+
 function InitBoss takes nothing returns nothing
 	local trigger trig = CreateTrigger()
 	local integer iHandleId = GetHandleId(trig)
@@ -1250,7 +1258,13 @@ function InitBoss takes nothing returns nothing
 	set whichBoss = CreateUnit(Player(9), 'U001', - 13853.3, - 27003.7, 89.893)
 	call SetHeroLevel(whichBoss, 9, false)
 	call TriggerRegisterUnitInRange(trig, whichBoss, 600, null)
-	call TriggerAddCondition(trig, Condition( function StartPedugAI))
+	call TriggerAddCondition(trig, Condition( function StartBossAI))
+	call SaveUnitHandle(HT, iHandleId, 0, whichBoss)
+
+	set whichBoss = CreateUnit(Player(9), 'u000', - 24785.3, - 25275.7, 89.893)
+	// call SetHeroLevel(whichBoss, 9, false)
+	call TriggerRegisterUnitInRange(trig, whichBoss, 600, null)
+	call TriggerAddCondition(trig, Condition( function StartBossAI))
 	call SaveUnitHandle(HT, iHandleId, 0, whichBoss)
 
 	//死灵法师 10级

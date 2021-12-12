@@ -129,7 +129,7 @@ scope CopperAlchemist
 		local integer iHandleId = GetHandleId(trig)
 		local unit whichUnit
 		local integer fierySoulCount
-		if TimerGetElapsed(GameTimer)> LoadReal(HT, iHandleId, 0) then
+		if GetGameTime()> LoadReal(HT, iHandleId, 0) then
 			call RemoveSavedHandle(HT, GetHandleId( LoadTriggerHandle(HT, iHandleId, 1) ) , 0)
 			set whichUnit = LoadUnitHandle(HT, iHandleId, 0)
 			call UnitReduceAttackSpeedBonus(whichUnit, LoadReal(HT, iHandleId, 1))
@@ -177,7 +177,7 @@ scope CopperAlchemist
 		else
 			set iHandleId = GetHandleId(newTrig)
 		endif
-		call SaveReal(HT, iHandleId, 0, TimerGetElapsed(GameTimer)+ 9)
+		call SaveReal(HT, iHandleId, 0, GetGameTime()+ 9)
 		set fierySoulCount = LoadInteger(HT, iHandleId, 0)
 		if fierySoulCount < 3 then
 			call SaveInteger(HT, iHandleId, 0, fierySoulCount + 1)

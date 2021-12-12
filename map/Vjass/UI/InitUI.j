@@ -131,7 +131,7 @@ function InitUIFrame takes nothing returns boolean
 
 	//call DzFrameSetText(DzSimpleFontStringFindByName("ResourceBarGoldText", 0), "吼啊")
 
-	call DzFrameSetEnable(DzFrameFindByName("SaveGameButton", 0), false)
+	/*call DzFrameSetEnable(DzFrameFindByName("SaveGameButton", 0), false)
 	call DzFrameSetEnable(DzFrameFindByName("SaveGameSaveButton", 0), false)
 	call DzFrameShow(DzFrameFindByName("SaveGameSaveButton", 0), false)
 	call DzFrameSetEnable(DzFrameFindByName("OverwriteOverwriteButton", 0), false)
@@ -141,7 +141,7 @@ function InitUIFrame takes nothing returns boolean
 	call DzFrameSetEnable(DzFrameFindByName("LoadGameButton", 0), false)
 	call DzFrameSetEnable(DzFrameFindByName("LoadGameLoadButton", 0), false)
 	call DzFrameShow(DzFrameFindByName("LoadGameLoadButton", 0), false)
-	call DzFrameSetEnable(DzFrameFindByName("DecoratedMapListBox", 0), false)
+	call DzFrameSetEnable(DzFrameFindByName("DecoratedMapListBox", 0), false)*/
         
 	//call DzFrameSetEnable(DzFrameFindByName("TipsButton", 0), false)
 	//call DzFrameShow(DzFrameFindByName("TipsButton", 0), false)

@@ -194,7 +194,7 @@ scope StormSpirit
     //电子涡流
     function ElectricVortex takes nothing returns nothing
         if not HaveSpellShield(M_GetSpellAbilityUnit()) then
-            call ElectricVortex_Fx(M_GetSpellAbilityUnit(), M_GetSpellAbilityUnit(), M_GetSpellAbilityLevel())
+            call ElectricVortex_Fx(M_GetSpellAbilityUnit(), M_GetSpellTargetUnit(), M_GetSpellAbilityLevel())
         endif
     endfunction
 

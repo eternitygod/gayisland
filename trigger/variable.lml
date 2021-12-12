@@ -11,6 +11,8 @@ MainQuest: quest
     数组: 1
 SideQuest: quest
     数组: 1
-Tavern: unit
+TavernUnit: unit
     数组: 1
 CinematicUnitsGroup: group
+TavernHeroBirthRect: rect
+    数组: 1

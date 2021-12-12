@@ -22,7 +22,7 @@ function crosskill_actions takes integer unitId, integer buffId returns nothing
 	local integer i = 0
 	local unit ft = null
 	local player p = GetOwningPlayer(M_GetSpellAbilityUnit())
-	local unit target = M_GetSpellAbilityUnit()
+	local unit target = M_GetSpellTargetUnit()
 	local boolean isAlly = IsUnitAlly(target, p)
 	if target == null then
 		set x1 = M_GetSpellTargetX()
@@ -38,7 +38,7 @@ function crosskill_actions takes integer unitId, integer buffId returns nothing
 		set ft = CreateUnit(p, unitId, x2, y2, AngleBetweenXY(x2, y2, x1, y1))
 		call UnitApplyTimedLife(ft, buffId, 30.)
 		if not isAlly then
-			call IssueTargetOrderById(ft, Order_Attack, target)
+			call IssueTargetOrderById(ft, ORDER_ATTACK, target)
 		endif
 		call SetUnitX(ft, x2)
 		call SetUnitY(ft, y2)

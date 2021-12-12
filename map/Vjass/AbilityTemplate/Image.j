@@ -11,7 +11,7 @@ scope Image
     // 设置单位高度来到达隐藏单位，并同时隐藏单位阴影(需要用逆变身来刷新)。
     function M_ShowUnit takes unit whichUnit, boolean bIsShow returns nothing
         if bIsShow then
-            call SetUnitShadow(whichUnit, "Shadow")
+            call SetUnitShadow(whichUnit, GetUnitOriginShadow(whichUnit) )
             call SetUnitInvulnerable(whichUnit, false)
             call EXPauseUnit(whichUnit, false)
             call SetUnitFlyHeight(whichUnit, GetUnitDefaultFlyHeight(whichUnit), 0)

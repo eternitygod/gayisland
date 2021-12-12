@@ -26,10 +26,10 @@ function Shinyboy takes nothing returns nothing
 	set spellUnit = null
 endfunction
 
-
+// 
 function Transmute takes nothing returns nothing
 	local unit spellUnit = M_GetSpellAbilityUnit()
-	local unit targetUnit = M_GetSpellAbilityUnit()
+	local unit targetUnit = M_GetSpellTargetUnit()
 	local integer level = M_GetSpellAbilityLevel()
 	local integer addGold = 40 + level * 20
 	if TaxStealerGoldAmount >= 0 then
@@ -102,7 +102,7 @@ function WeMedia takes nothing returns nothing
 	call TaxStealerAddGold( spellUnit, - 100)
 
 	call SetUnitExploded(media, true)
-	call IssueImmediateOrderById(media, Order_Taunt)
+	call IssueImmediateOrderById(media, ORDER_TAUNT)
 
 	call UnitApplyTimedLife(media, 'BTLF', 5)
 	call TriggerRegisterDeathEvent(trig, media)

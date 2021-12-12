@@ -82,6 +82,10 @@ constant boolean LIBRARY_YDWEPolledWaitNull=true
 //globals from YDWESetUnitFacingToFaceLocTimedNull:
 constant boolean LIBRARY_YDWESetUnitFacingToFaceLocTimedNull=true
 //endglobals from YDWESetUnitFacingToFaceLocTimedNull
+//globals from YDWETriggerRegisterEnterRectSimpleNull:
+constant boolean LIBRARY_YDWETriggerRegisterEnterRectSimpleNull=true
+region yd_NullTempRegion
+//endglobals from YDWETriggerRegisterEnterRectSimpleNull
 //globals from Common:
 constant boolean LIBRARY_Common=true
         //JAPI常量 - 技能
@@ -176,6 +180,9 @@ constant integer EVENT_DAMAGE_DATA_ATTACK_TYPE= 6
 trigger bj_lastCreatedTrigger= null
         //是否要DeBug
 boolean IsMirage= false
+        // 哈希表KEY 技能需求等级
+constant integer OBJ_KEY_HERO_PRIMARY=6
+constant integer OBJ_KEY_UNIT_SHADOW=8
         
         // 魔法
 constant integer DAMAGE_TYPE_MAGICAL= 1
@@ -186,13 +193,17 @@ constant integer DAMAGE_TYPE_PURE= 3
         
 unit LastGetMasterUnit= null
 unit LastSummonedUnit= null
-constant integer KEY_MASTERUNIT=6
-constant integer UnitDelayedStandingKey=8
+constant integer KEY_MASTERUNIT=10
+constant integer UnitDelayedStandingKey=12
 hashtable UnitAbilityTrigger= InitHashtable()
 //endglobals from Common
 //globals from YDWESetUnitFacingToFaceUnitTimedNull:
 constant boolean LIBRARY_YDWESetUnitFacingToFaceUnitTimedNull=true
 //endglobals from YDWESetUnitFacingToFaceUnitTimedNull
+//globals from TestSystem:
+constant boolean LIBRARY_TestSystem=true
+    
+//endglobals from TestSystem
 //globals from UnitStateRefresh:
 constant boolean LIBRARY_UnitStateRefresh=true
 //endglobals from UnitStateRefresh
@@ -206,8 +217,9 @@ unit array udg_TempArryUnit
 unit array udg_Elevators
 quest array udg_MainQuest
 quest array udg_SideQuest
-unit array udg_Tavern
+unit array udg_TavernUnit
 group udg_CinematicUnitsGroup= null
+rect array udg_TavernHeroBirthRect
     // Generated
 rect gg_rct_Elevators_01= null
 rect gg_rct_Intro__Build1= null
@@ -228,6 +240,8 @@ rect gg_rct_Intro__PortalBirth= null
 rect gg_rct_Intro__LieutenantMove1= null
 rect gg_rct_Intro__TrollMove1= null
 rect gg_rct_Intro__DeterminedExterminatorMove1= null
+rect gg_rct_TavernHeroBirthPos1= null
+rect gg_rct_Egg__ShanTaoZombie= null
 camerasetup gg_cam_Intro__GameStart= null
 camerasetup gg_cam_Intro__OrgeCloseUp= null
 camerasetup gg_cam_Intro__OrgeInitialPoint= null
@@ -276,6 +290,9 @@ trigger gg_trg_Intro_Skipped= null
 trigger gg_trg_Intro_Cleanup= null
 trigger gg_trg_GameStart= null
 trigger gg_trg_InitQuest= null
+trigger gg_trg_SideQuest1= null
+trigger gg_trg_ShanTaoZombie= null
+unit gg_unit_n001_0016= null
 unit gg_unit_nhew_0088= null
 unit gg_unit_nhew_0010= null
 unit gg_unit_nhew_0013= null
@@ -286,11 +303,25 @@ unit gg_unit_nhew_0018= null
 unit gg_unit_nm03_0022= null
 unit gg_unit_nm05_0023= null
 unit gg_unit_nm06_0024= null
-destructable gg_dest_ZTtw_2470= null
 unit gg_unit_nhew_0025= null
 destructable gg_dest_ZTtw_1356= null
-unit gg_unit_n001_0016= null
+destructable gg_dest_ZTtw_2470= null
 player P2= null
+constant integer UNITBUFF_STUN= 'BPSE'
+        
+hashtable UnitBuff= InitHashtable()
+hashtable BuffSystem___Buff= InitHashtable()
+constant integer BUFF_TYPE_POSITIVE=14
+constant integer BUFF_TYPE_NEGATIVE=16
+
+constant integer BUFF_TYPE_MAGIC=18
+constant integer BUFF_TYPE_PHYSICAL=20
+constant integer BUFF_TYPE_AUTODISPEL=22
+
+        // 
+constant integer BUFF_TYPE_BUFFID=24
+
+constant integer BUFF_TYPE_IS_BUFF=26
         //单位状态恢复 生命/魔法
         //计时器RestoreFrame秒回调一次
         //timer UnitRestoreTimer = null 
@@ -303,17 +334,17 @@ real array ManaRestoreValue
 integer UnitLifeRestoreNumber= 0
 integer UnitManaRestoreNumber= 0
         //ObjectData
-constant integer BONUS_DAMAGE=10
-constant integer BONUS_ARMOR=12
-constant integer BONUS_ATTACK=14
-constant integer BONUS_LIFE=16
-constant integer BONUS_MANA=18
-constant integer BONUS_STR=20
-constant integer BONUS_AGI=22
-constant integer BONUS_INT=24
-constant integer BONUS_MOVESPEED=26
+constant integer BONUS_DAMAGE=28
+constant integer BONUS_ARMOR=30
+constant integer BONUS_ATTACK=32
+constant integer BONUS_LIFE=34
+constant integer BONUS_MANA=36
+constant integer BONUS_STR=38
+constant integer BONUS_AGI=40
+constant integer BONUS_INT=42
+constant integer BONUS_MOVESPEED=44
 constant integer Image___ImageAbility= 'AIil'
-constant integer UnitIsSummoningIllusions=28
+constant integer UnitIsSummoningIllusions=46
         //===========================================
         //物品系统
 integer ItemStack_Number= 0
@@ -346,8 +377,8 @@ trigger AbilityEventTrigger= null
 trigger UnitSpellEffectTrigger= null
 trigger EnterMapTrigger= CreateTrigger()
 trigger HeroLevelUpTrigger= CreateTrigger()
-constant integer IllusionUnitDataB=30
-constant integer IllusionUnitDataC=32
+constant integer IllusionUnitDataB=48
+constant integer IllusionUnitDataC=50
 	
 	//TaxStealer Gold UI
 integer TaxStealerGoldAmount= 0
@@ -355,9 +386,9 @@ integer TaxStealerResourceBarFrame
 integer TaxStealerGoldFrameText
 integer TaxStealerGoldTipBoxedFrame
 integer TaxStealerGoldTipTextTitle
-constant integer StormSpirit___HaveOverload=34
-constant integer StormSpirit___OverloadEffectRight=36
-constant integer StormSpirit___OverloadEffectLeft=38
+constant integer StormSpirit__HaveOverload=52
+constant integer StormSpirit__OverloadEffectRight=54
+constant integer StormSpirit__OverloadEffectLeft=56
 	//ui的frame
 integer GameUI
 	//控制台UI
@@ -466,8 +497,8 @@ constant integer SPELL_EFFECT= 11
 constant integer LEARN_SKILL= 14
 	//学习技能1级
 constant integer LEARN_FIRST_LEVEL_SKILL= 15
-	//UnitBuff
-hashtable UnitBuff= InitHashtable()
+	// UnitBuff
+	// hashtable UnitBuff = InitHashtable()
 hashtable UnitKeyBuff= InitHashtable()
 constant integer AttackTarget= - 100
 constant integer AttackReadyTrg= - 101
@@ -475,7 +506,6 @@ constant integer AttackReadyTimer= - 102
 constant integer CriticalStrikeDamage= - 99
 
 constant integer Leash= - 1
-constant integer UNITBUFF_STUN= 0
 constant integer ZeroCast= 1
 constant integer BallLightningCount= 7
 
@@ -1984,6 +2014,16 @@ function YDWESetUnitFacingToFaceLocTimedNull takes unit whichUnit,location targe
 endfunction
 
 //library YDWESetUnitFacingToFaceLocTimedNull ends
+//library YDWETriggerRegisterEnterRectSimpleNull:
+function YDWETriggerRegisterEnterRectSimpleNull takes trigger trig,rect r returns event
+    local region rectRegion= CreateRegion()
+    call RegionAddRect(rectRegion, r)
+    set yd_NullTempRegion=rectRegion
+    set rectRegion=null
+    return TriggerRegisterEnterRegion(trig, yd_NullTempRegion, null)
+endfunction
+
+//library YDWETriggerRegisterEnterRectSimpleNull ends
 //library Common:
     //常量
     function Debug takes string debugtype,string msg returns nothing
@@ -1991,28 +2031,41 @@ endfunction
             call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 60, msg)
         endif
     endfunction
-    function GetBuffSlkData takes integer Id,string data returns string
-        set SlkType="buff"
-        set SlkdataType=data
-        return AbilityId2String(Id)
+    function GetPlayerSelectedUnit takes nothing returns unit
+        return GetDetectedUnit()
     endfunction
-    
-    //与lua交互获得Slk数据
-    function GetUnitSlkData takes integer Id,string data returns string
-        set SlkType="unit"
-        set SlkdataType=data
-        return AbilityId2String(Id)
+    // 与lua交互获得Slk数据
+    function GetObjectDataBySlk takes integer objectId,string tableName,string dataType returns string
+        set SlkType=tableName
+        set SlkdataType=dataType
+        return AbilityId2String(objectId) // lua hook了此函数 调用slk库
+endfunction
+    function GetUnitSlkData takes integer objectId,string dataType returns string
+        return GetObjectDataBySlk(objectId , "unit" , dataType)
     endfunction
     //获取英雄单位的主属性 primary: 1 == str  2 == int  3 = agi 
-    function GetUnitPrimaryById takes integer whichType returns string
-        return GetUnitSlkData(whichType , "Primary")
+    function GetHeroPrimaryById takes integer whichType returns string
+        return GetObjectDataBySlk(whichType , "unit" , "Primary")
     endfunction
-    function GetUnitPrimary takes unit whichUnit returns string
-        local integer i= GetUnitTypeId(whichUnit)
-        return GetUnitSlkData(i , "Primary")
+    function GetHeroPrimary takes unit whichUnit returns string
+        local integer whichType= GetUnitTypeId(whichUnit)
+        local string data= LoadStr(ObjectData, OBJ_KEY_HERO_PRIMARY, whichType)
+        if data == null then
+            set data=GetObjectDataBySlk(whichType , "unit" , "Primary")
+        endif
+        return data
     endfunction
-    function GetUnitPrimaryValue takes unit whichUnit returns integer
-        local string data= GetUnitPrimary(whichUnit)
+    // 原生的阴影 还是从slk库中获取
+    function GetUnitOriginShadow takes unit whichUnit returns string
+        local integer whichType= GetUnitTypeId(whichUnit)
+        local string data= LoadStr(ObjectData, OBJ_KEY_UNIT_SHADOW, whichType)
+        if data == null then
+            set data=GetObjectDataBySlk(whichType , "unit" , "Primary")
+        endif
+        return data
+    endfunction
+    function GetHeroPrimaryValue takes unit whichUnit returns integer
+        local string data= GetHeroPrimary(whichUnit)
         if data == "STR" then
             return GetHeroStr(whichUnit, true)
         elseif data == "AGI" then
@@ -2108,80 +2161,12 @@ call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_NORMA
         elseif Type == 9 then //生命移除
 endif
     endfunction
+    // 斩杀单位
+    function UnitKillTarget takes unit whichUnit,unit target returns boolean
+        call UnitRemoveBuffs(target, true, true)
+        return UnitDamageTarget(whichUnit, target, 10000000, false, false, ATTACK_TYPE_PIERCE, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+    endfunction
     
-    //模拟行为限制
-    //模拟晕眩
-    //EXPauseUnit内部自带计数 为true时+1 false时-1 计数 <=0 时单位不再晕眩
-    //移除晕眩
-    function UnitRemoveStun takes unit u returns boolean
-        local integer h
-        local integer uh= GetHandleId(u)
-        local timer t= null
-        if HaveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN) then
-            set t=LoadTimerHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-            set h=GetHandleId(t)
-            call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-            call RemoveSavedHandle(HT, h, 0)
-            call DestroyTimer(t)
-            call EXPauseUnit(u, false) //此函数内部自带计数
-call UnitRemoveAbility(u, 'Aasl')
-            call UnitRemoveAbility(u, 'BPSE')
-            set t=null
-            return true
-        endif
-        return false
-    endfunction
-    function UnitStun_Actions takes nothing returns nothing
-        local timer t= GetExpiredTimer()
-        local integer h= GetHandleId(t)
-        local unit u= LoadUnitHandle(HT, h, 0)
-        local integer uh= GetHandleId(u)
-        //call SaveInteger(UnitKeyBuff, uh, UNITBUFF_STUN,  LoadInteger(UnitKeyBuff, uh, UNITBUFF_STUN) - 1 )
-        call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-        call RemoveSavedHandle(HT, h, 0)
-        call DestroyTimer(t)
-        call EXPauseUnit(u, false) //此函数内部自带计数
-call UnitRemoveAbility(u, 'Aasl')
-        call UnitRemoveAbility(u, 'BPSE')
-        set t=null
-        set u=null
-    endfunction
-    //单位、持续时间、是否无视魔免
-    function UnitSetStun takes unit u,real dur returns boolean
-        local timer t
-        local integer h= GetHandleId(u)
-        local real time= 0
-        if HaveSavedHandle(UnitKeyBuff, h, UNITBUFF_STUN) then
-            set t=LoadTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN)
-            set time=TimerGetRemaining(t)
-        else
-            set t=CreateTimer()
-            call EXPauseUnit(u, true)
-            //call SaveInteger(UnitKeyBuff, h, UNITBUFF_STUN, LoadInteger(UnitKeyBuff, h, UNITBUFF_STUN) + 1)
-            call UnitAddAbility(u, 'Aasl')
-            call UnitMakeAbilityPermanent(u, true, 'Aasl')
-            call SaveTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN, t)
-            call SaveUnitHandle(HT, GetHandleId(t), 0, u)
-        endif
-        if time < dur then
-            set time=dur
-        endif
-        if time != 0 then
-            call TimerStart(t, time, false, function UnitStun_Actions)
-        endif
-        set t=null
-        return true
-    endfunction
-    //封装了一层本质上是使用UnitSetStun 参数b为是否无视魔法免疫
-    function M_UnitSetStun takes unit u,real dur,real herodur,boolean b returns boolean
-        if IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE) and not b then //检查是否魔免
-            return false
-        endif
-        if GetUnitAbilityLevel(u, 'AHer') == 1 then //如果单位为英雄 那么就会有此技能
-set dur=herodur
-        endif
-        return UnitSetStun(u , dur)
-    endfunction
     
     //移除单位枷锁
     function UnitRemoveLeash takes unit u,integer abid,integer buffId returns nothing
@@ -2420,7 +2405,10 @@ endif
     //逆变身 使用后需要刷新一下单位的基础攻击力
     function YDWEUnitTransform takes unit u,integer targetid returns nothing
         local integer i= GetUnitTypeId(u)
+        local real value
         if i != targetid and i != 0 then
+            // 刷新基础攻击力
+            set value=GetHeroPrimaryValue(u) + LoadInteger(UnitData, GetHandleId(u), UNIT_BASE_DAMAGE)
             call UnitAddAbility(u, 'Abrf')
             call EXSetAbilityDataInteger(EXGetUnitAbility(u, 'Abrf'), 1, ABILITY_DATA_UNITID, i)
             call EXSetAbilityAEmeDataA(EXGetUnitAbility(u, 'Abrf'), i)
@@ -2428,6 +2416,7 @@ endif
             call UnitAddAbility(u, 'Abrf')
             call EXSetAbilityAEmeDataA(EXGetUnitAbility(u, 'Abrf'), targetid)
             call UnitRemoveAbility(u, 'Abrf')
+            call SetUnitState(u, UNIT_STATE_ATTACK1_DAMAGE_BASE, value)
         endif
     endfunction
     // 使用无目标技能(ID)
@@ -2519,6 +2508,7 @@ endif
         endif
         return LastGetMasterUnit
     endfunction
+    // 
     function UnitDelayStandActions takes nothing returns nothing
         local timer hTimer= GetExpiredTimer()
         local integer iHandleId= GetHandleId(hTimer)
@@ -2527,6 +2517,7 @@ endif
             call SetUnitAnimation(whichUnit, "Stand")
         endif
         call RemoveSavedHandle(UnitKeyBuff, GetHandleId(whichUnit), UnitDelayedStandingKey)
+        call FlushChildHashtable(HT, iHandleId)
         call DestroyTimer(hTimer)
         set hTimer=null
         set whichUnit=null
@@ -2550,7 +2541,6 @@ endif
         call SaveTriggerHandle(UnitAbilityTrigger, iHandleId, iAbilityId, bj_lastCreatedTrigger)
         return bj_lastCreatedTrigger
     endfunction
-    
     //检查玩家对单位的可见性
     function UnitVisibleToPlayer takes unit whichUnit,player whichPlayer returns boolean
 return IsUnitVisible(whichUnit, whichPlayer) or ( IsUnitAlly(whichUnit, whichPlayer) )
@@ -2623,6 +2613,57 @@ function YDWESetUnitFacingToFaceUnitTimedNull takes unit whichUnit,unit target,r
 endfunction
 
 //library YDWESetUnitFacingToFaceUnitTimedNull ends
+//library TestSystem:
+    function TestSystem___ExecuteTestOrderFunc takes string msg,boolean execute returns nothing
+        if execute and msg != null then
+            call ExecuteFunc("TestSystem___" + msg)
+        endif
+    endfunction
+    function TestSystem___AddAbility takes nothing returns nothing
+        local string idStr= SubString(GetEventPlayerChatString(), 4, 99999)
+        local integer abilityId= YDWES2Id(idStr)
+        if UnitAddAbility(GetPlayerSelectedUnit(), abilityId) then
+            call Debug("Test" , "AddAbility 成功 " + idStr)
+        else
+            call Debug("Test" , "AddAbility 失败 " + idStr)
+        endif
+    endfunction
+    function TestSystem___AddItem takes nothing returns nothing
+        local string idStr= SubString(GetEventPlayerChatString(), 4, 99999)
+        local integer abilityId= YDWES2Id(idStr)
+        if UnitAddItemById(GetPlayerSelectedUnit(), abilityId) != null then
+            call Debug("Test" , "AddItem 成功 " + idStr)
+        else
+            call Debug("Test" , "AddItem 失败 " + idStr)
+        endif
+    endfunction
+    function TestSystem___LocalCreateUnit takes nothing returns nothing
+        local string idStr= SubString(GetEventPlayerChatString(), 4, 99999)
+        local integer abilityId= YDWES2Id(idStr)
+        if CreateUnit(LocalPlayer, abilityId, DzGetMouseTerrainX(), DzGetMouseTerrainY(), 0) != null then
+            call Debug("Test" , "CreateUnit 成功 " + idStr)
+        else
+            call Debug("Test" , "CreateUnit 失败 " + idStr)
+        endif
+    endfunction
+    function TestSystem___TestPlayerChat__CallBack takes nothing returns boolean
+        local string chatMessage= StringCase(GetEventPlayerChatString(), false)
+        local boolean addAbility= SubString(chatMessage, 0, 4) == "-aa "
+        local boolean addItem= SubString(chatMessage, 0, 4) == "-ai "
+        local boolean createUnit= SubString(chatMessage, 0, 4) == "-cu "
+        call TestSystem___ExecuteTestOrderFunc("AddAbility" , addAbility)
+        call TestSystem___ExecuteTestOrderFunc("AddItem" , addItem)
+        call TestSystem___ExecuteTestOrderFunc("LocalCreateUnit" , createUnit)
+        
+        return false
+    endfunction
+    function TestSystem___Init takes nothing returns nothing
+        local trigger trig= CreateTrigger()
+        call TriggerRegisterPlayerChatEvent(trig, LocalPlayer, null, false)
+        call TriggerAddCondition(trig, Condition(function TestSystem___TestPlayerChat__CallBack))
+    endfunction
+
+//library TestSystem ends
 //library UnitStateRefresh:
     //UNIT_LIFERESTORE
     //UNIT_MANARESTORE
@@ -2670,14 +2711,12 @@ local real value= LoadReal(UnitData, h, BONUS_ARMOR) + LoadReal(UnitData, UNIT_B
         local integer i
         call SetUnitState(u, UNIT_STATE_ARMOR, newValue)
         //刷新基础攻击力
-        set value=GetUnitPrimaryValue(u)
+        set value=GetHeroPrimaryValue(u)
         set newValue=value + LoadInteger(UnitData, h, UNIT_BASE_DAMAGE)
         call SetUnitState(u, UNIT_STATE_ATTACK1_DAMAGE_BASE, newValue)
         //刷新 生命/魔法恢复速度
         call RefreshUnitRestore(u)
-        if IsMirage then
-            call Debug("log" , GetUnitName(u) + "生命/魔法 恢复：" + R2S(LoadReal(UnitData, h, UNIT_LIFERESTORE) + GetHeroStr(u, true) * 0.04) + "/" + R2S(LoadReal(UnitData, h, UNIT_MANARESTORE) + GetHeroInt(u, true) * 0.03))
-        endif
+         call Debug("log" , GetUnitName(u) + "生命/魔法 恢复：" + R2S(LoadReal(UnitData, h, UNIT_LIFERESTORE) + GetHeroStr(u, true) * 0.04) + "/" + R2S(LoadReal(UnitData, h, UNIT_MANARESTORE) + GetHeroInt(u, true) * 0.03))
         //同时刷新面板
         //call UnitStateUpdateCallback()
     endfunction
@@ -2689,7 +2728,7 @@ local real value= LoadReal(UnitData, h, BONUS_ARMOR) + LoadReal(UnitData, UNIT_B
 // 
 //   Warcraft III map script
 //   Generated by the Warcraft III World Editor
-//   Date: Thu Nov 25 12:12:59 2021
+//   Date: Thu Dec 09 16:23:28 2021
 //   Map Author: 未知
 // 
 //===========================================================================
@@ -2928,6 +2967,7 @@ function CreateUnitsForPlayer8 takes nothing returns nothing
     local integer unitID
     local trigger t
     local real life
+    set u=CreateUnit(p, 'u000', - 8361.4, - 18516.1, 208.610)
     set u=CreateUnit(p, 'nmed', - 8199.6, - 9148.2, 187.880)
 endfunction
 //===========================================================================
@@ -3026,7 +3066,7 @@ function CreateNeutralHostile takes nothing returns nothing
     local real life
     set u=CreateUnit(p, 'nmsn', - 24827.7, - 19072.1, 280.582)
     set u=CreateUnit(p, 'nmtw', - 23281.0, - 21093.4, 272.766)
-    set u=CreateUnit(p, 'nmrv', - 24671.6, - 19597.2, 287.600)
+    set u=CreateUnit(p, 'nmrv', - 24634.1, - 19599.3, 287.600)
     set u=CreateUnit(p, 'nmsn', - 24424.0, - 19241.5, 280.313)
     set u=CreateUnit(p, 'nmsn', - 25227.2, - 19630.9, 256.967)
     set u=CreateUnit(p, 'nmsn', - 24252.4, - 18896.9, 6.240)
@@ -3062,6 +3102,7 @@ function CreateNeutralHostile takes nothing returns nothing
     call SetUnitState(u, UNIT_STATE_MANA, 0)
     set u=CreateUnit(p, 'ntrs', - 20751.6, - 25514.6, 183.652)
     set u=CreateUnit(p, 'nmyr', - 16781.6, - 24061.9, 299.540)
+    set u=CreateUnit(p, 'nscb', - 25992.2, - 20779.4, 29.974)
     set u=CreateUnit(p, 'nmsn', - 25473.9, - 20981.6, 293.383)
     set u=CreateUnit(p, 'nmtw', - 25560.5, - 21398.7, 281.602)
     set u=CreateUnit(p, 'nmtw', - 25372.2, - 21201.0, 236.224)
@@ -3152,6 +3193,8 @@ function CreateRegions takes nothing returns nothing
     set gg_rct_Intro__LieutenantMove1=Rect(- 22944.0, - 24672.0, - 22848.0, - 24576.0)
     set gg_rct_Intro__TrollMove1=Rect(- 22624.0, - 24736.0, - 22528.0, - 24640.0)
     set gg_rct_Intro__DeterminedExterminatorMove1=Rect(- 22528.0, - 25024.0, - 22432.0, - 24928.0)
+    set gg_rct_TavernHeroBirthPos1=Rect(- 22624.0, - 25600.0, - 22528.0, - 25504.0)
+    set gg_rct_Egg__ShanTaoZombie=Rect(- 15808.0, - 20640.0, - 15680.0, - 20512.0)
 endfunction
 //***************************************************************************
 //*
@@ -3269,54 +3312,183 @@ endfunction
 // 初始化的函数
 // 大部分的常用函数
 // 单位选取的过滤条件
-//获取是否拥有法术护盾
+// 获取是否拥有法术护盾
 function HaveSpellShield takes unit u returns boolean
 	return false
 endfunction
 //filter 条件
-//敌对 非建筑
-//大部分物理攻击特效的筛选
+// 敌对 非建筑
+// 大部分物理攻击特效的筛选
 function CommonAttackEffectFilter takes unit whichUnit,unit targetUnit returns boolean
 	return IsUnitEnemy(whichUnit, GetOwningPlayer(targetUnit)) and not IsUnitType(targetUnit, UNIT_TYPE_STRUCTURE)
 endfunction
-//联盟 存活 非建筑
+// 联盟 存活 非建筑
 function Ally_Alive_NoStructure takes unit u returns boolean
 	return IsUnitAlly(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
 endfunction
-//联盟 存活
+// 联盟 存活 非建筑
+function Ally_Alive_NoStructure_IsHero takes unit u returns boolean
+	return IsUnitAlly(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and IsUnitType(u, UNIT_TYPE_HERO)
+endfunction
+// 联盟 存活
 function Ally_Alive takes unit u returns boolean
 	return IsUnitAlly(u, P2) and UnitAlive(u)
 endfunction
 	
-//敌对 存活
+// 敌对 存活
 function Enemy_Alive takes unit u returns boolean
 	return IsUnitEnemy(u, P2) and UnitAlive(u)
 endfunction
-//敌对 存活
+// 敌对 存活 地面
 function Enemy_Alive_NotFly takes unit u returns boolean
 	return IsUnitEnemy(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_FLYING)
 endfunction
-//敌对 存活 非建筑
+// 敌对 存活 非建筑
 function Enemy_Alive_NoStructure takes unit u returns boolean
 	return IsUnitEnemy(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
 endfunction
 	
-//敌对 存活 非建筑 非魔免
+// 敌对 存活 非建筑 非魔免
 function Enemy_Alive_NoStructure_NoImmune takes unit u returns boolean
 	return Enemy_Alive_NoStructure(u) and not IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE)
 endfunction
-//存活 非建筑
+// 存活 非建筑
 function Alive_NoStructure takes unit u returns boolean
 	return UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
 endfunction
-//非空军 非机械 存活 非建筑 敌军
+// 非空军 非机械 存活 非建筑 敌军
 function IsGround_NotMechanical_Enemy_Alive_NoStructure takes unit u returns boolean
 	return not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitType(u, UNIT_TYPE_MECHANICAL) and Enemy_Alive_NoStructure(u)
 endfunction
-//非机械 存活 非建筑 友军
+// 非机械 存活 非建筑 友军
 function IsMechanical_Ally_Alive_NoStructure takes unit u returns boolean
 	return not IsUnitType(u, UNIT_TYPE_MECHANICAL) and Ally_Alive_NoStructure(u)
 endfunction
+// scope Stun begins
+    //模拟行为限制
+    //模拟晕眩
+    //EXPauseUnit内部自带计数 为true时+1 false时-1 计数 <=0 时单位不再晕眩
+    //移除晕眩
+    function UnitRemoveStun takes unit u returns boolean
+        local integer h
+        local integer uh= GetHandleId(u)
+        local timer t= null
+        if HaveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN) then
+            set t=LoadTimerHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
+            set h=GetHandleId(t)
+            call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
+            call RemoveSavedHandle(HT, h, 0)
+            call DestroyTimer(t)
+            call EXPauseUnit(u, false) //此函数内部自带计数
+call UnitRemoveAbility(u, 'Aasl')
+            call UnitRemoveAbility(u, 'BPSE')
+            set t=null
+            return true
+        endif
+        return false
+    endfunction
+    function UnitStun_Actions takes nothing returns nothing
+        local timer t= GetExpiredTimer()
+        local integer h= GetHandleId(t)
+        local unit u= LoadUnitHandle(HT, h, 0)
+        local integer uh= GetHandleId(u)
+        //call SaveInteger(UnitKeyBuff, uh, UNITBUFF_STUN,  LoadInteger(UnitKeyBuff, uh, UNITBUFF_STUN) - 1 )
+        call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
+        call RemoveSavedHandle(HT, h, 0)
+        call PauseTimer(t)
+        call DestroyTimer(t)
+        call EXPauseUnit(u, false) //此函数内部自带计数
+call UnitRemoveAbility(u, 'Aasl')
+        call UnitRemoveAbility(u, 'BPSE')
+        set t=null
+        set u=null
+    endfunction
+    //单位、持续时间、是否无视魔免
+    function UnitSetStun takes unit u,real dur returns boolean
+        local timer t
+        local integer h= GetHandleId(u)
+        local real time= 0
+        if HaveSavedHandle(UnitKeyBuff, h, UNITBUFF_STUN) then
+            set t=LoadTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN)
+            set time=TimerGetRemaining(t)
+        else
+            set t=CreateTimer()
+            call EXPauseUnit(u, true)
+            //call SaveInteger(UnitKeyBuff, h, UNITBUFF_STUN, LoadInteger(UnitKeyBuff, h, UNITBUFF_STUN) + 1)
+            call UnitAddAbility(u, 'Aasl')
+            call UnitMakeAbilityPermanent(u, true, 'Aasl')
+            call SaveTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN, t)
+            call SaveUnitHandle(HT, GetHandleId(t), 0, u)
+        endif
+        if time < dur then
+            set time=dur
+        endif
+        if time != 0 then
+            call TimerStart(t, time, false, function UnitStun_Actions)
+        endif
+        set t=null
+        return true
+    endfunction
+    //封装了一层本质上是使用UnitSetStun 参数b为是否无视魔法免疫
+    function M_UnitSetStun takes unit u,real dur,real herodur,boolean b returns boolean
+        if IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE) and not b then //检查是否魔免
+            return false
+        endif
+        if GetUnitAbilityLevel(u, 'AHer') == 1 then //如果单位为英雄 那么就会有此技能
+set dur=herodur
+        endif
+        return UnitSetStun(u , dur)
+    endfunction
+// scope Stun ends
+    
+// scope BuffSystem begins
+    function SetBuffType takes integer whichAbilityId,integer whichBuffId,integer whichPolarity,integer whichType returns nothing
+        call SaveBoolean(BuffSystem___Buff, whichType, whichAbilityId, true)
+        call SaveInteger(BuffSystem___Buff, whichAbilityId, BUFF_TYPE_BUFFID, whichBuffId)
+        if whichPolarity != 0 then
+            call SaveBoolean(BuffSystem___Buff, whichPolarity, whichAbilityId, true)
+        endif
+        call SaveBoolean(BuffSystem___Buff, BUFF_TYPE_IS_BUFF, whichAbilityId, true)
+        
+    endfunction
+    function BuffSystem___InitBuff takes nothing returns nothing
+        // 晕眩 负面 物理
+        call SetBuffType('Aasl' , 'BPSE' , BUFF_TYPE_NEGATIVE , BUFF_TYPE_PHYSICAL)
+    endfunction
+    // 
+    function BuffSystem___IsBuffType takes integer whichAbilityId,integer whichType returns boolean
+        return LoadBoolean(BuffSystem___Buff, whichType, whichAbilityId)
+    endfunction
+    function BuffSystem___GetAbilityBuff takes integer whichAbilityId returns integer
+        return LoadInteger(BuffSystem___Buff, whichAbilityId, BUFF_TYPE_BUFFID)
+    endfunction
+    // 单位死亡时移除的Buff
+    function EXUnitRemoveBuffs takes unit whichUnit,integer whichType returns nothing
+        local integer abilityId= 0
+        local integer loop__Index= 0
+        local trigger buffTrig
+        local integer iHandleId= GetHandleId(whichUnit)
+        loop
+            set abilityId=EXGetAbilityId(EXGetUnitAbilityByIndex(whichUnit, loop__Index))
+            exitwhen abilityId == 0
+            if BuffSystem___IsBuffType(abilityId , whichType) then
+                call UnitRemoveAbility(whichUnit, abilityId)
+                set abilityId=BuffSystem___GetAbilityBuff(abilityId)
+                if abilityId != 0 then
+                    set buffTrig=LoadTriggerHandle(UnitKeyBuff, iHandleId, abilityId)
+                    call UnitRemoveAbility(whichUnit, abilityId)
+                    if buffTrig != null then
+                        call TriggerEvaluate(buffTrig)
+                    endif
+                endif
+                 call Debug("log" , GetUnitName(whichUnit) + " 删除Buff " + GetObjectName(abilityId) + " Id:" + YDWEId2S(abilityId))
+            endif
+            set loop__Index=loop__Index + 1
+        endloop
+        set buffTrig=null
+    endfunction
+// scope BuffSystem ends
+
 // #include "Vjass\Cinematic.j"
 // scope UnitRestore begins
     
@@ -3960,7 +4132,7 @@ endfunction
     // 设置单位高度来到达隐藏单位，并同时隐藏单位阴影(需要用逆变身来刷新)。
     function M_ShowUnit takes unit whichUnit,boolean bIsShow returns nothing
         if bIsShow then
-            call SetUnitShadow(whichUnit , "Shadow")
+            call SetUnitShadow(whichUnit , GetUnitOriginShadow(whichUnit))
             call SetUnitInvulnerable(whichUnit, false)
             call EXPauseUnit(whichUnit, false)
             call SetUnitFlyHeight(whichUnit, GetUnitDefaultFlyHeight(whichUnit), 0)
@@ -4433,7 +4605,7 @@ endif
         return damage
     endfunction
     //模拟
-    function UnitAttackEvent___UnitAttack takes unit whichUnit,unit target,boolean isAttack returns nothing
+    function UnitAttackEvent__UnitAttack takes unit whichUnit,unit target,boolean isAttack returns nothing
         local real amount= GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_BASE) + GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_DICE) * GetRandomInt(1, R2I(GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_SIDE)))
         local integer weapon_type= R2I(GetUnitState(whichUnit, UNIT_STATE_ATTACK1_ATTACK_TYPE))
 call UnitDamageTarget(whichUnit, target, amount, isAttack, false, ConvertAttackType(weapon_type), DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
@@ -4475,7 +4647,7 @@ local real distance
         call EXSetEffectXY(missile, x1, y1)
         if distance <= speed then
             call DestroyEffect(missile)
-            call UnitAttackEvent___UnitAttack(whichUnit , target , LoadBoolean(HT, h, 10))
+            call UnitAttackEvent__UnitAttack(whichUnit , target , LoadBoolean(HT, h, 10))
             call FlushChildHashtable(HT, h)
             call ClearTrigger(t)
         endif
@@ -4552,7 +4724,7 @@ call SaveReal(HT, h, 30, 0)
             call SaveBoolean(HT, h, 10, isAttack)
             set t=null
         else
-            call UnitAttackEvent___UnitAttack(whichUnit , target , isAttack)
+            call UnitAttackEvent__UnitAttack(whichUnit , target , isAttack)
         endif
     endfunction
     function AttackReadyToGoInitActions takes nothing returns boolean
@@ -4574,7 +4746,7 @@ call SaveReal(HT, h, 30, 0)
         set t=null
         return false
     endfunction
-    function UnitAttackEvent___AttackReadyToGoInit takes unit u,unit target,integer h returns nothing
+    function UnitAttackEvent__AttackReadyToGoInit takes unit u,unit target,integer h returns nothing
         local trigger trig
         local timer t
         local integer th
@@ -4603,7 +4775,7 @@ call SaveReal(HT, h, 30, 0)
         set t=null
     endfunction
     //任意单位被攻击
-    function UnitAttackEvent___UnitAttackedActions takes nothing returns boolean
+    function UnitAttackEvent__UnitAttackedActions takes nothing returns boolean
         local unit targetUnit= GetTriggerUnit()
 local unit attackerUnit= GetAttacker()
 local integer h= GetHandleId(attackerUnit)
@@ -4615,16 +4787,16 @@ if CommonAttackEffectFilter(attackerUnit , targetUnit) then
         endif
         //捕捉弹道出手
         if IsUnitIdType(GetUnitTypeId(attackerUnit), UNIT_TYPE_RANGED_ATTACKER) then
-            call UnitAttackEvent___AttackReadyToGoInit(attackerUnit , targetUnit , h)
+            call UnitAttackEvent__AttackReadyToGoInit(attackerUnit , targetUnit , h)
         endif
         set attackerUnit=null
         set targetUnit=null
         return false
     endfunction
-    function UnitAttackEvent___Init takes nothing returns nothing
+    function UnitAttackEvent__Init takes nothing returns nothing
         local trigger trig= CreateTrigger()
         call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_ATTACKED)
-        call TriggerAddCondition(trig, Condition(function UnitAttackEvent___UnitAttackedActions))
+        call TriggerAddCondition(trig, Condition(function UnitAttackEvent__UnitAttackedActions))
         set trig=null
     endfunction
 // scope UnitAttackEvent ends
@@ -4650,6 +4822,7 @@ if CommonAttackEffectFilter(attackerUnit , targetUnit) then
         local unit dyingUnit= GetDyingUnit()
         local integer unitType= GetUnitTypeId(dyingUnit)
         local integer deathType
+        call EXUnitRemoveBuffs(dyingUnit , BUFF_TYPE_IS_BUFF)
         if IsUnitType(dyingUnit, UNIT_TYPE_HERO) then
         else
             //非英雄单位死亡直接清空哈希表子目录
@@ -4662,7 +4835,7 @@ if CommonAttackEffectFilter(attackerUnit , targetUnit) then
         set dyingUnit=null
         return false
     endfunction
-    function UnitDeathEvent___Init takes nothing returns nothing
+    function UnitDeathEvent__Init takes nothing returns nothing
         local trigger trig= CreateTrigger()
         call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_DEATH)
         call TriggerAddCondition(trig, Condition(function UnitDeathEvnetActions))
@@ -4670,7 +4843,7 @@ if CommonAttackEffectFilter(attackerUnit , targetUnit) then
     endfunction
 // scope UnitDeathEvent ends
 // scope UnitAbilityEvent begins
-    function UnitAbilityEvent___InitAbilityFunctions takes nothing returns nothing
+    function UnitAbilityEvent__InitAbilityFunctions takes nothing returns nothing
         //中尉 Lieutenant
         call SaveStr(ObjectData, SPELL_EFFECT, 'Alc1', "Crosskill")
         call SaveStr(ObjectData, SPELL_EFFECT, 'Alc2', "EnchantEquipment")
@@ -4759,13 +4932,13 @@ if HaveSavedString(ObjectData, SPELL_EFFECT, abId) then
     //endfunction
     //英文名部分为机翻 因为英语实在渣
     //初始化技能事件
-    function UnitAbilityEvent___Init takes nothing returns nothing
+    function UnitAbilityEvent__Init takes nothing returns nothing
         set AbilityEventTrigger=CreateTrigger()
         set UnitSpellEffectTrigger=CreateTrigger()
         call TriggerAddCondition(UnitSpellEffectTrigger, Condition(function UnitSpellEffectActions))
         call TriggerAddCondition(AbilityEventTrigger, Condition(function AbilityEventActions))
 	
-        call UnitAbilityEvent___InitAbilityFunctions()
+        call UnitAbilityEvent__InitAbilityFunctions()
     endfunction
 // scope UnitAbilityEvent ends
 // scope UnitEnterMapEvent begins
@@ -4797,7 +4970,7 @@ call TriggerRegisterUnitEvent(DamageEventTrigger, u, EVENT_UNIT_DAMAGED)
         set u=null
         return false
     endfunction
-    function UnitEnterMapEvent___Init takes nothing returns nothing
+    function UnitEnterMapEvent__Init takes nothing returns nothing
         local rect world= GetWorldBounds()
         set WorldRegion=CreateRegion()
         call RegionAddRect(WorldRegion, world)
@@ -4815,7 +4988,7 @@ set u=null
         return false
     endfunction
     
-    function HeroLevelUp___Init takes nothing returns nothing
+    function HeroLevelUp__Init takes nothing returns nothing
         call TriggerAddCondition(HeroLevelUpTrigger, Condition(function HeroLevelUpActions))
     endfunction
 // scope HeroLevelUp ends
@@ -4847,7 +5020,7 @@ set u=null
         set hSnmmoingUnit=null
         return false
     endfunction
-    function UnitSummonEvent___Init takes nothing returns nothing
+    function UnitSummonEvent__Init takes nothing returns nothing
         local trigger trig= CreateTrigger()
         call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_SUMMON)
         call TriggerAddCondition(trig, Condition(function UnitSummonEventActions))
@@ -4874,7 +5047,7 @@ function crosskill_actions takes integer unitId,integer buffId returns nothing
  local integer i= 0
  local unit ft= null
  local player p= GetOwningPlayer(M_GetSpellAbilityUnit())
- local unit target= M_GetSpellAbilityUnit()
+ local unit target= M_GetSpellTargetUnit()
  local boolean isAlly= IsUnitAlly(target, p)
 	if target == null then
 		set x1=M_GetSpellTargetX()
@@ -5204,7 +5377,7 @@ endfunction
 	endfunction
 	
 	// 偷懒直接在筛选里面加特效
- function CopperAlchemist___DragonSlave_Filter takes nothing returns boolean
+ function CopperAlchemist__DragonSlave_Filter takes nothing returns boolean
   local unit hFilterUnit= GetFilterUnit()
 		if Enemy_Alive_NoStructure(hFilterUnit) then
 			call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Human\\LagunaBlade\\LagunaBlade_hit.mdx", hFilterUnit, "origin"))
@@ -5214,7 +5387,7 @@ endfunction
 		return false
 	endfunction
 	//神灭斩
- function CopperAlchemist___LagunaBlade takes nothing returns nothing
+ function CopperAlchemist__LagunaBlade takes nothing returns nothing
   local unit hSpellUnit= M_GetSpellAbilityUnit()
   local unit hTargetUnitt= M_GetSpellTargetUnit()
   local integer level= M_GetSpellAbilityLevel()
@@ -5233,7 +5406,7 @@ endfunction
 			set targetY=GetUnitY(hTargetUnitt)
 		endif
 		set missileEffect=AddSpecialEffect(effectPath, targetX, targetY)
-		call UnitSpellWaveByEffect(hSpellUnit , missileEffect , damage , 800 , 275 , 200 , startX , startY , targetX , targetY , 1200 , 1 , null , level , function CopperAlchemist___DragonSlave_Filter)
+		call UnitSpellWaveByEffect(hSpellUnit , missileEffect , damage , 800 , 275 , 200 , startX , startY , targetX , targetY , 1200 , 1 , null , level , function CopperAlchemist__DragonSlave_Filter)
 		set missileEffect=null
 		set hSpellUnit=null
 		set hTargetUnitt=null
@@ -5286,7 +5459,7 @@ endfunction
 //暗杀
 function Assassination takes nothing returns nothing
  local unit spellUnit= M_GetSpellAbilityUnit()
- local unit targetUnit= M_GetSpellAbilityUnit()
+ local unit targetUnit= M_GetSpellTargetUnit()
  local unit firstUnit
  local group targetGroup= LoginGroup()
  local integer abilityLevel= M_GetSpellAbilityLevel()
@@ -5574,9 +5747,10 @@ function Shinyboy takes nothing returns nothing
 	call DamageUnit(spellUnit , M_GetSpellAbilityUnit() , 1 , gold)
 	set spellUnit=null
 endfunction
+// 
 function Transmute takes nothing returns nothing
  local unit spellUnit= M_GetSpellAbilityUnit()
- local unit targetUnit= M_GetSpellAbilityUnit()
+ local unit targetUnit= M_GetSpellTargetUnit()
  local integer level= M_GetSpellAbilityLevel()
  local integer addGold= 40 + level * 20
 	if TaxStealerGoldAmount >= 0 then
@@ -5678,7 +5852,7 @@ function CreateTaxStealerGoldBarUI takes unit taxStealerUnit returns nothing
 	call TaxStealerAddGold(taxStealerUnit , 500)
 endfunction
 // scope StormSpirit begins
-    function StormSpirit___BallLightningMove takes nothing returns nothing
+    function StormSpirit__BallLightningMove takes nothing returns nothing
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local real distance= LoadReal(HT, h, 0)
@@ -5801,13 +5975,13 @@ call SaveUnitHandle(HT, h, 10, M_GetSpellAbilityUnit())
         call SaveInteger(HT, h, 30, ( IMaxBJ(R2I(SquareRoot(( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 )) / ( 25 + 25 * lv )), 1) ))
         call SaveEffectHandle(HT, h, 32, ( AddSpecialEffectTarget("effects\\Lightning_Ball_Tail_FX.mdx", d2, "origin") ))
         call TriggerRegisterTimerEvent(t, .04, true)
-        call TriggerAddCondition(t, Condition(function StormSpirit___BallLightningMove))
+        call TriggerAddCondition(t, Condition(function StormSpirit__BallLightningMove))
         set light=null
         set t=null
         set d1=null
         set d2=null
     endfunction
-    function StormSpirit___ElectricVortexTow takes nothing returns boolean
+    function StormSpirit__ElectricVortexTow takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit target= LoadUnitHandle(HT, h, 17)
@@ -5830,7 +6004,7 @@ call SaveUnitHandle(HT, h, 10, M_GetSpellAbilityUnit())
         set target=null
         return false
     endfunction
-    function StormSpirit___ElectricVortex_Fx takes unit u,unit target,integer lv returns nothing
+    function StormSpirit__ElectricVortex_Fx takes unit u,unit target,integer lv returns nothing
         local trigger t= CreateTrigger()
         local integer h= GetHandleId(t)
         local real x= GetUnitX(u)
@@ -5840,7 +6014,7 @@ call SaveUnitHandle(HT, h, 10, M_GetSpellAbilityUnit())
         local unit du= CreateUnit(GetOwningPlayer(u), 'nstd', x, y, GetUnitFacing(u))
         call TriggerRegisterTimerEvent(t, .05, true)
         call TriggerRegisterDeathEvent(t, target)
-        call TriggerAddCondition(t, Condition(function StormSpirit___ElectricVortexTow))
+        call TriggerAddCondition(t, Condition(function StormSpirit__ElectricVortexTow))
         call SaveUnitHandle(HT, h, 17, target)
         call SaveInteger(HT, h, 5, 10 + 10 * lv)
         call SaveReal(HT, h, 6, x)
@@ -5855,11 +6029,11 @@ call SaveUnitHandle(HT, h, 10, M_GetSpellAbilityUnit())
     //电子涡流
     function ElectricVortex takes nothing returns nothing
         if not HaveSpellShield(M_GetSpellAbilityUnit()) then
-            call StormSpirit___ElectricVortex_Fx(M_GetSpellAbilityUnit() , M_GetSpellAbilityUnit() , M_GetSpellAbilityLevel())
+            call StormSpirit__ElectricVortex_Fx(M_GetSpellAbilityUnit() , M_GetSpellTargetUnit() , M_GetSpellAbilityLevel())
         endif
     endfunction
     //残影动作 造成伤害或持续时间到期
-    function StormSpirit___StaticRremnantActions takes nothing returns boolean
+    function StormSpirit__StaticRremnantActions takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local trigger effT= LoadTriggerHandle(HT, h, 9)
@@ -5916,7 +6090,7 @@ call ShowUnit(shadow, false)
         return false
     endfunction
     //创建残影 有0.5s的延迟出现 1.0s延迟生效
-    function StormSpirit___CreateStaticRremnant takes nothing returns boolean
+    function StormSpirit__CreateStaticRremnant takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local trigger newT
@@ -5938,7 +6112,7 @@ call ShowUnit(shadow, false)
             call SaveTriggerHandle(HT, newH, 9, t)
             call TriggerRegisterUnitInRange(newT, shadow, 235, null) //残影触发范围
 call TriggerRegisterUnitEvent(newT, shadow, EVENT_UNIT_DEATH)
-            call TriggerAddCondition(newT, Condition(function StormSpirit___StaticRremnantActions))
+            call TriggerAddCondition(newT, Condition(function StormSpirit__StaticRremnantActions))
             //else c > 2 then
         else
             call DestroyEffect(AddSpecialEffectTarget("effects\\ManaFlareBoltImpact_NoSound.mdx", LoadUnitHandle(HT, h, 30), "origin"))
@@ -5950,7 +6124,7 @@ call TriggerRegisterUnitEvent(newT, shadow, EVENT_UNIT_DEATH)
     endfunction
     //风暴之灵 - 残影
     function StaticRremnant takes nothing returns nothing
-        local integer h= CreateTimerEventTrigger(0.5 , true , function StormSpirit___CreateStaticRremnant)
+        local integer h= CreateTimerEventTrigger(0.5 , true , function StormSpirit__CreateStaticRremnant)
         local real x= GetUnitX(M_GetSpellAbilityUnit())
         local real y= GetUnitY(M_GetSpellAbilityUnit())
         call SaveInteger(HT, h, 50, M_GetSpellAbilityLevel())
@@ -5968,9 +6142,9 @@ call TriggerRegisterUnitEvent(newT, shadow, EVENT_UNIT_DEATH)
         local group g= LoginGroup()
         local unit u= Tmp_DamageInjured
         local real damage= GetUnitAbilityLevel(Tmp_DamageSource, 'Ast3') * 20 + 10
-        call SaveInteger(UnitKeyBuff, h, StormSpirit___HaveOverload, 0)
-        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit___OverloadEffectLeft))
-        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit___OverloadEffectRight))
+        call SaveInteger(UnitKeyBuff, h, StormSpirit__HaveOverload, 0)
+        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectLeft))
+        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectRight))
         call DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\Thunderclap\\ThunderClapCaster.mdl", GetUnitX(u), GetUnitY(u)))
 	
         set P2=GetOwningPlayer(Tmp_DamageSource)
@@ -5989,7 +6163,7 @@ if Enemy_Alive_NoStructure(u) then
         set u=null
     endfunction
     function OverLoad_Filter takes nothing returns boolean
-        if LoadInteger(UnitKeyBuff, GetHandleId(Tmp_DamageSource), StormSpirit___HaveOverload) == 1 then
+        if LoadInteger(UnitKeyBuff, GetHandleId(Tmp_DamageSource), StormSpirit__HaveOverload) == 1 then
             call OverLoadActions()
         endif
         return false
@@ -5997,10 +6171,10 @@ if Enemy_Alive_NoStructure(u) then
     function AddOverLoad takes nothing returns boolean
         local unit u= GetTriggerUnit()
         local integer h= GetHandleId(u)
-        if LoadInteger(UnitKeyBuff, h, StormSpirit___HaveOverload) == 0 then
-            call SaveInteger(UnitKeyBuff, h, StormSpirit___HaveOverload, 1)
-            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit___OverloadEffectRight, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "right hand") ))
-            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit___OverloadEffectLeft, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "left hand") ))
+        if LoadInteger(UnitKeyBuff, h, StormSpirit__HaveOverload) == 0 then
+            call SaveInteger(UnitKeyBuff, h, StormSpirit__HaveOverload, 1)
+            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectRight, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "right hand") ))
+            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectLeft, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "left hand") ))
         endif
         set u=null
         return false
@@ -6019,6 +6193,7 @@ if Enemy_Alive_NoStructure(u) then
     endfunction
 // scope StormSpirit ends
 // scope PickMan begins
+    // 战斗螺旋  反击螺旋缝合战斗饥渴
     function BattleSpiralActions takes nothing returns boolean
         local unit whichUnit= GetTriggerUnit()
         local unit hAttacker= GetAttacker()
@@ -6075,21 +6250,73 @@ if Enemy_Alive_NoStructure(u) then
         set whichUnit=null
         set trig=null
     endfunction
-    function BattleImago takes nothing returns nothing
+    // 口嗨
+    function CallSbNames takes nothing returns nothing
         local unit whichUnit= M_GetSpellAbilityUnit()
-        local string sSpecialArt= "Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageCaster.mdl"
-        local string sMissileArt= "Abilities\\Spells\\Orc\\MirrorImage\\MirrorImageMissile.mdl"
-        call UnitSpellImage(whichUnit , 3 , 1 , 1 , 2.2 , 60 , sSpecialArt , sMissileArt , 250 , 300 , 1500)
-         call BJDebugMsg("运行")
+        local group enumUnits= LoginGroup()
+        local unit firstUnit
+        local real radius= 525
+        local real armoarValue= 5
+        call GroupEnumUnitsInRange(enumUnits, GetUnitX(whichUnit), GetUnitY(whichUnit), radius, null)
+        call GroupRemoveUnit(enumUnits, whichUnit)
+        set P2=GetOwningPlayer(whichUnit)
+        loop
+            set firstUnit=FirstOfGroup(enumUnits)
+        exitwhen firstUnit == null
+            call GroupRemoveUnit(enumUnits, firstUnit)
+            // 友军 存活 非建筑 英雄
+            if Ally_Alive_NoStructure_IsHero(firstUnit) then
+                // 把友军的护甲给吃瓜
+                call UnitReduceArmorBonus(firstUnit , armoarValue)
+                call UnitAddArmorBonus(whichUnit , armoarValue)
+            endif
+        endloop
+        set firstUnit=null
+        call LogoutGroup(enumUnits)
+        set enumUnits=null
         set whichUnit=null
     endfunction
+    // 战斗咆哮 狂战士的怒吼+淘汰之刃
+    function BattleRoar takes nothing returns nothing
+        local unit whichUnit= M_GetSpellAbilityUnit()
+        local group enumUnits= LoginGroup()
+        local unit firstUnit
+        local real radius= 525
+        local string effectPath= ""
+        local real criticalValue= 300
+        local integer killCount= 0
+        call GroupEnumUnitsInRange(enumUnits, GetUnitX(whichUnit), GetUnitY(whichUnit), radius, null)
+        set P2=GetOwningPlayer(whichUnit)
+        loop
+            set firstUnit=FirstOfGroup(enumUnits)
+        exitwhen firstUnit == null
+            call GroupRemoveUnit(enumUnits, firstUnit)
+            // 敌对 存活 非建筑
+            if Enemy_Alive_NoStructure(firstUnit) then
+                // 超过生命临界点就斩杀
+                if GetWidgetLife(firstUnit) < criticalValue then
+                    if UnitKillTarget(whichUnit , firstUnit) then
+                        // 斩杀成功后的动作
+                        call DestroyEffect(AddSpecialEffectTarget(effectPath, firstUnit, "origin"))
+                        set killCount=killCount + 1
+                    endif
+                endif
+            endif
+        endloop
+        //再根据斩杀计数来做动作
+        set firstUnit=null
+        call LogoutGroup(enumUnits)
+        set enumUnits=null
+        set whichUnit=null
+    endfunction
+    
 // scope PickMan ends
 // scope Pudge begins
-    function Pudge___MeatHook_Filter takes nothing returns boolean
+    function Pudge__MeatHook_Filter takes nothing returns boolean
         return Alive_NoStructure(GetFilterUnit())
     endfunction
     
-    function Pudge___MeatHook_Return takes nothing returns boolean
+    function Pudge__MeatHook_Return takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit target= LoadUnitHandle(HT, h, 5)
@@ -6120,7 +6347,7 @@ if Enemy_Alive_NoStructure(u) then
         return false
     endfunction
     
-    function Pudge___Pudge_MeatHook_Move takes nothing returns boolean
+    function Pudge__Pudge_MeatHook_Move takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit u= LoadUnitHandle(HT, h, 10)
@@ -6151,7 +6378,7 @@ if Enemy_Alive_NoStructure(u) then
             call SaveEffectHandle(HT, rh, 2100 + count, hook)
             set hook=null
             set g=LoginGroup()
-            call GroupEnumUnitsInRange(g, x, y, range, Condition(function Pudge___MeatHook_Filter))
+            call GroupEnumUnitsInRange(g, x, y, range, Condition(function Pudge__MeatHook_Filter))
             call GroupRemoveUnit(g, u)
             set target=FirstOfGroup(g)
             if target == null then
@@ -6164,7 +6391,7 @@ if Enemy_Alive_NoStructure(u) then
                 call ClearTrigger(t)
                 call TriggerRegisterTimerEvent(rt, .025, true)
                 call TriggerRegisterDeathEvent(rt, target)
-                call TriggerAddCondition(rt, Condition(function Pudge___MeatHook_Return))
+                call TriggerAddCondition(rt, Condition(function Pudge__MeatHook_Return))
                 call SetUnitPathing(target, false)
                 call SaveInteger(HT, rh, 21, count)
                 call SaveBoolean(HT, rh, 10, true)
@@ -6179,7 +6406,7 @@ if Enemy_Alive_NoStructure(u) then
             call FlushChildHashtable(HT, h)
             call ClearTrigger(t)
             call TriggerRegisterTimerEvent(rt, .025, true)
-            call TriggerAddCondition(rt, Condition(function Pudge___MeatHook_Return))
+            call TriggerAddCondition(rt, Condition(function Pudge__MeatHook_Return))
             call SaveInteger(HT, rh, 21, count)
         endif
     
@@ -6191,7 +6418,7 @@ if Enemy_Alive_NoStructure(u) then
     
     //技能函数不能为私有函数(因为函数名记录在哈希表内)
     function Pudge_MeatHook takes nothing returns nothing
-        local integer h= CreateTimerEventTrigger(.025 , true , function Pudge___Pudge_MeatHook_Move)
+        local integer h= CreateTimerEventTrigger(.025 , true , function Pudge__Pudge_MeatHook_Move)
         //前进方向
         local real a= AngleBetweenXY(GetUnitX(M_GetSpellAbilityUnit()) , GetUnitY(M_GetSpellAbilityUnit()) , M_GetSpellTargetX() , M_GetSpellTargetY())
         
@@ -6203,7 +6430,7 @@ if Enemy_Alive_NoStructure(u) then
     
     endfunction
     
-    function Pudge___Pudge_Rot_Action takes nothing returns boolean
+    function Pudge__Pudge_Rot_Action takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit u= LoadUnitHandle(HT, h, 10)
@@ -6257,7 +6484,7 @@ call TriggerEvaluate(trig)
             set trig=CreateTrigger()
             set h=GetHandleId(trig)
             call TriggerRegisterTimerEvent(trig, 0.1, true)
-            call TriggerAddCondition(trig, Condition(function Pudge___Pudge_Rot_Action))
+            call TriggerAddCondition(trig, Condition(function Pudge__Pudge_Rot_Action))
             call SaveTriggerHandle(UnitKeyBuff, GetHandleId(whichUnit), 'Bpg2', trig)
             call SaveUnitHandle(HT, h, 10, whichUnit)
             call UnitAddPermanentAbility(whichUnit , 'Ab05')
@@ -6887,7 +7114,7 @@ function PickHeroSync takes nothing returns boolean
 		return false
 	endif
 	if AllHeroTypeId[frameId] > 0 then
-		set newHero=CreateUnit(syncPlayer, AllHeroTypeId[frameId], - 24940.0, - 25225.7, 89.893)
+		set newHero=CreateUnit(syncPlayer, AllHeroTypeId[frameId], GetRectCenterX(udg_TavernHeroBirthRect[1]), GetRectCenterY(udg_TavernHeroBirthRect[1]), 90)
 		if LocalPlayer == syncPlayer then
 			call SelectUnit(newHero, true)
 		endif
@@ -6994,7 +7221,7 @@ function InitPickHerosUI takes nothing returns nothing
 		set attributeId=attributeId + 1
 		set heroCount=heroCount + 1
 	endloop
-	set PickHeroFrame=DzCreateSimpleFrame("PickHeroButtonTemplate", DzSimpleFrameFindByName("SimpleInfoPanelIconFood", 4), 0)
+	set PickHeroFrame=DzCreateSimpleFrame("PickHeroButtonTemplate", ConsoleUI, 0)
 	call DzFrameSetAbsolutePoint(PickHeroFrame, 4, 0.42, 0.15)
 	call DzFrameShow(PickHeroFrame, false)
 	call DzFrameShow(PickHeroFrame, true)
@@ -7020,17 +7247,7 @@ function InitUIFrame takes nothing returns boolean
 	//	set i = i + 1
 	//endloop
 	//call DzFrameSetText(DzSimpleFontStringFindByName("ResourceBarGoldText", 0), "吼啊")
-	call DzFrameSetEnable(DzFrameFindByName("SaveGameButton", 0), false)
-	call DzFrameSetEnable(DzFrameFindByName("SaveGameSaveButton", 0), false)
-	call DzFrameShow(DzFrameFindByName("SaveGameSaveButton", 0), false)
-	call DzFrameSetEnable(DzFrameFindByName("OverwriteOverwriteButton", 0), false)
-	call DzFrameSetEnable(DzFrameFindByName("SaveGameFileEditBox", 0), false)
-	call DzFrameShow(DzFrameFindByName("SaveGameFileEditBox", 0), false)
-        
-	call DzFrameSetEnable(DzFrameFindByName("LoadGameButton", 0), false)
-	call DzFrameSetEnable(DzFrameFindByName("LoadGameLoadButton", 0), false)
-	call DzFrameShow(DzFrameFindByName("LoadGameLoadButton", 0), false)
-	call DzFrameSetEnable(DzFrameFindByName("DecoratedMapListBox", 0), false)
+	
         
 	//call DzFrameSetEnable(DzFrameFindByName("TipsButton", 0), false)
 	//call DzFrameShow(DzFrameFindByName("TipsButton", 0), false)
@@ -8079,7 +8296,8 @@ function Trig_Init_IntroCineActions takes nothing returns nothing
     set udg_TempArryUnit[5]=CreateUnitAtLoc(Player(6), 'nefm', GetRectCenter(gg_rct_Intro__Build3), 270.00)
     set udg_TempArryUnit[6]=CreateUnitAtLoc(Player(6), 'nefm', GetRectCenter(gg_rct_Intro__Build4), 60.00)
     set udg_Elevators[1]=CreateUnitAtLoc(Player(PLAYER_NEUTRAL_PASSIVE), 'n000', GetRectCenter(gg_rct_Elevators_01), bj_UNIT_FACING)
-    set udg_Tavern[1]=gg_unit_n001_0016
+    set udg_TavernUnit[1]=gg_unit_n001_0016
+    set udg_TavernHeroBirthRect[1]=gg_rct_TavernHeroBirthPos1
     // 创建物体
     set udg_IntroCinePortal=CreateDestructableZ('B000', GetRectCenterX(gg_rct_Intro__PortalBirth), GetRectCenterY(gg_rct_Intro__PortalBirth), 600.00, 235.00, 1, 0)
     set udg_OgreMagi=CreateUnit(Player(6), 'nm01', GetRectCenterX(gg_rct_Intro__OrgeBirth1), GetRectCenterY(gg_rct_Intro__OrgeBirth1), 45.00)
@@ -8218,7 +8436,7 @@ function Trig_Intro_CleanupActions takes nothing returns nothing
         exitwhen ydl_unit == null
         call GroupRemoveUnit(ydl_group, ydl_unit)
         if ( ( GetUnitTypeId(ydl_unit) == 'nhew' ) ) then
-            call IssueTargetOrder(ydl_unit, "smart", udg_Tavern[1])
+            call IssueTargetOrder(ydl_unit, "smart", udg_TavernUnit[1])
         else
             if ( ( IsUnitInGroup(ydl_unit, udg_CinematicUnitsGroup) == true ) ) then
                 call PauseUnit(ydl_unit, true)
@@ -8228,10 +8446,10 @@ function Trig_Intro_CleanupActions takes nothing returns nothing
         endif
     endloop
     call DestroyGroup(ydl_group)
-    call IssueTargetOrder(gg_unit_nbee_0014, "smart", udg_Tavern[1])
+    call IssueTargetOrder(gg_unit_nbee_0014, "smart", udg_TavernUnit[1])
     set ydl_trigger=CreateTrigger()
     call TriggerRegisterTimerEventSingle(ydl_trigger, 10.00)
-    call TriggerRegisterUnitInRangeSimple(ydl_trigger, 200.00, udg_Tavern[1])
+    call TriggerRegisterUnitInRangeSimple(ydl_trigger, 200.00, udg_TavernUnit[1])
     call TriggerAddCondition(ydl_trigger, Condition(function Trig_Intro_CleanupFunc026Conditions))
     call DestroyTrigger(gg_trg_Intro_Cleanup)
     set ydl_group=null
@@ -8286,6 +8504,40 @@ function InitTrig_InitQuest takes nothing returns nothing
     call TriggerAddAction(gg_trg_InitQuest, function Trig_InitQuestActions)
 endfunction
 //===========================================================================
+// Trigger: SideQuest1
+//
+// 蟹皇的支线
+//===========================================================================
+function Trig_SideQuest1Actions takes nothing returns nothing
+endfunction
+//===========================================================================
+function InitTrig_SideQuest1 takes nothing returns nothing
+    set gg_trg_SideQuest1=CreateTrigger()
+    call DoNothing()
+    call TriggerAddAction(gg_trg_SideQuest1, function Trig_SideQuest1Actions)
+endfunction
+//===========================================================================
+// Trigger: ShanTaoZombie
+//===========================================================================
+function Trig_ShanTaoZombieConditions takes nothing returns boolean
+    return ( ( IsUnitType(GetEnteringUnit(), UNIT_TYPE_HERO) == true ) )
+endfunction
+function Trig_ShanTaoZombieActions takes nothing returns nothing
+    call DisableTrigger(GetTriggeringTrigger())
+    call DisplayTextToPlayer(GetTriggerPlayer(), 0, 0, "上面写着《山桃僵尸》")
+    call DestroyTrigger(GetTriggeringTrigger())
+endfunction
+//===========================================================================
+function InitTrig_ShanTaoZombie_Orig takes nothing returns nothing
+    set gg_trg_ShanTaoZombie=CreateTrigger()
+    call DoNothing()
+    call YDWETriggerRegisterEnterRectSimpleNull(gg_trg_ShanTaoZombie , gg_rct_Egg__ShanTaoZombie)
+    call TriggerAddCondition(gg_trg_ShanTaoZombie, Condition(function Trig_ShanTaoZombieConditions))
+    call TriggerAddAction(gg_trg_ShanTaoZombie, function Trig_ShanTaoZombieActions)
+endfunction
+function InitTrig_ShanTaoZombie takes nothing returns nothing
+endfunction
+//===========================================================================
 function InitCustomTriggers takes nothing returns nothing
     call InitTrig_Intro_Start()
     call InitTrig_Init_IntroCine()
@@ -8293,6 +8545,8 @@ function InitCustomTriggers takes nothing returns nothing
     call InitTrig_Intro_Cleanup()
     call InitTrig_GameStart()
     call InitTrig_InitQuest()
+    call InitTrig_SideQuest1()
+    call InitTrig_ShanTaoZombie()
 endfunction
 //***************************************************************************
 //*
@@ -8371,7 +8625,7 @@ function InitCustomPlayerSlots takes nothing returns nothing
     call SetPlayerController(Player(10), MAP_CONTROL_COMPUTER)
 endfunction
 function InitCustomTeams takes nothing returns nothing
-    // Force: TRIGSTR_017
+    // Force: TRIGSTR_020
     call SetPlayerTeam(Player(0), 0)
     call SetPlayerState(Player(0), PLAYER_STATE_ALLIED_VICTORY, 1)
     call SetPlayerTeam(Player(1), 0)
@@ -8472,7 +8726,7 @@ function InitCustomTeams takes nothing returns nothing
     call SetPlayerAllianceStateVisionBJ(Player(6), Player(3), true)
     call SetPlayerAllianceStateVisionBJ(Player(6), Player(4), true)
     call SetPlayerAllianceStateVisionBJ(Player(6), Player(5), true)
-    // Force: TRIGSTR_018
+    // Force: TRIGSTR_021
     call SetPlayerTeam(Player(7), 1)
     call SetPlayerState(Player(7), PLAYER_STATE_ALLIED_VICTORY, 1)
     call SetPlayerTeam(Player(8), 1)
@@ -8619,14 +8873,16 @@ function main takes nothing returns nothing
 call ExecuteFunc("InitSetUp___Init")
 call ExecuteFunc("YDTriggerSaveLoadSystem___Init")
 call ExecuteFunc("InitializeYD")
+call ExecuteFunc("TestSystem___Init")
+call BuffSystem___InitBuff()
 call InitUnitRestore()
 call InitItemSystem()
-call UnitAttackEvent___Init()
-call UnitDeathEvent___Init()
-call UnitAbilityEvent___Init()
-call UnitEnterMapEvent___Init()
-call HeroLevelUp___Init()
-call UnitSummonEvent___Init()
+call UnitAttackEvent__Init()
+call UnitDeathEvent__Init()
+call UnitAbilityEvent__Init()
+call UnitEnterMapEvent__Init()
+call HeroLevelUp__Init()
+call UnitSummonEvent__Init()
 call SetHeroVariable()
 
 	//创建单位进入地图事件 早于任意单位受伤事件之前

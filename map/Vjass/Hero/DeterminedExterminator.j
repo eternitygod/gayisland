@@ -57,7 +57,7 @@ endfunction
 //暗杀
 function Assassination takes nothing returns nothing
 	local unit spellUnit = M_GetSpellAbilityUnit()
-	local unit targetUnit = M_GetSpellAbilityUnit()
+	local unit targetUnit = M_GetSpellTargetUnit()
 	local unit firstUnit
 	local group targetGroup = LoginGroup()
 	local integer abilityLevel = M_GetSpellAbilityLevel()
