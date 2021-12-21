@@ -18,7 +18,7 @@ scope PickMan
         local integer iDamageType
 
         if IsUnitEnemy(whichUnit, GetOwningPlayer(hAttacker)) then
-            if PrdRandom(whichUnit, 'Apm2', 15) then
+            if GetPrdRandom(whichUnit, 'Apm2', 15) then
 
                 // 物理伤害 对敌对单位 非建筑 无视魔免
 
@@ -95,7 +95,7 @@ scope PickMan
         exitwhen firstUnit == null
             call GroupRemoveUnit( enumUnits, firstUnit )
             // 友军 存活 非建筑 英雄
-            if Ally_Alive_NoStructure_IsHero( firstUnit ) then
+            if AllyAliveNoStructureIsHero( firstUnit ) then
                 // 把友军的护甲给吃瓜
                 call UnitReduceArmorBonus( firstUnit, armoarValue )
                 call UnitAddArmorBonus( whichUnit, armoarValue )

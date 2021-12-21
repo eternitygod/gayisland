@@ -1,12 +1,7 @@
 // 初始化的函数
-#include "Vjass\InitSetUp.j"
 
-#include "Vjass\Order.j"
+#include "Vjass\base\base.j"
 
-// 大部分的常用函数
-#include "Vjass\CommonFunc.j"
-// 单位选取的过滤条件
-#include "Vjass\Filter.j"
 
 #include "Vjass\Test.j"
 
@@ -14,19 +9,12 @@
 
 // #include "Vjass\Cinematic.j"
 
-#include "Vjass\UnitRestore.j"
 
-#include "Vjass\UnitStateRefresh.j"
-
-#include "Vjass\UnitBonusSystem.j"
 
 // 一些通用技能模板
 #include "Vjass\AbilityTemplate.j"
 
-#include "Vjass\ItemSystem.j"
 
-// 物品相关事件包含在ItemSystem.j
-#include "Vjass\Event.j"
 
 // 英雄尽量在后面加载
 #include "Vjass\Hero.j"
@@ -110,8 +98,6 @@ globals
 	trigger array DamageEventQueue
 	integer array DamageEventNumber
 	
-	hashtable ObjectData = InitHashtable()
-	
 	//Frame
 	//光环刷新间隔
 	constant real AuraFrame = 0.5 
@@ -186,13 +172,13 @@ globals
 
 	//技能事件的哈希表key
 	//准备释放技能
-	constant key SPELL_CHANNEL = 10
+	constant key SPELL_CHANNEL
 	//发动技能效果
-	constant key SPELL_EFFECT = 11
+	constant key SPELL_EFFECT
 	//学习技能
-	constant key LEARN_SKILL = 14
+	constant key LEARN_SKILL
 	//学习技能1级
-	constant key LEARN_FIRST_LEVEL_SKILL = 15
+	constant key LEARN_FIRST_LEVEL_SKILL
 
 
 
@@ -1008,7 +994,7 @@ endfunction
 //防御光环选取条件
 function defense_aura_filter takes nothing returns boolean
 	//call Debug("log", "filter" + GetUnitName(GetFilterUnit()))
-	return Ally_Alive_NoStructure(GetFilterUnit())
+	return AllyAliveNoStructure(GetFilterUnit())
 endfunction
 
 

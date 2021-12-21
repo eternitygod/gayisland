@@ -41,15 +41,15 @@ scope Imago
         local group enumGroup
         local unit firstUnit
         local unit targetUnit
-        set Tmp__ArrarReal[0] = GetUnitX(imago)
-        set Tmp__ArrarReal[1] = GetUnitY(imago)
-        call GroupEnumUnitsInRange(enumGroup, Tmp__ArrarReal[0], Tmp__ArrarReal[1], 1600, null )
+        set Tmp__ArrayReal[0] = GetUnitX(imago)
+        set Tmp__ArrayReal[1] = GetUnitY(imago)
+        call GroupEnumUnitsInRange(enumGroup, Tmp__ArrayReal[0], Tmp__ArrayReal[1], 1600, null )
         // 筛选
         set P2 = GetOwningPlayer(imago)
         loop
             set firstUnit = FirstOfGroup(enumGroup)
             exitwhen firstUnit == null//检查可见度 防止对隐身单位
-            if Enemy_Alive(firstUnit) and UnitVisibleToPlayer(firstUnit, P2) then
+            if EnemyAlive(firstUnit) and UnitVisibleToPlayer(firstUnit, P2) then
                 call GroupAddUnit(targetGroup, firstUnit)
             endif
             call GroupRemoveUnit(enumGroup, firstUnit)
@@ -128,7 +128,7 @@ scope Imago
             set Tmp__ArrayInt[1] = GetIssuedOrderId()
             if Tmp__ArrayInt[1] != 0 and IsCommonOrderId(Tmp__ArrayInt[1]) then
                 // 保存命令Id的发布时间
-                call SaveInteger( HT, iHandleId, Tmp__ArrayInt[1], GetGameTime() )
+                call SaveInteger( HT, iHandleId, Tmp__ArrayInt[1], R2I(GetGameTime()) )
 
             endif
         endif

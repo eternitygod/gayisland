@@ -56,7 +56,7 @@ function Crosskill takes nothing returns nothing
 		call crosskill_actions('hlc2', 'Bft2')
 		call Lcqy_ZeroCast(M_GetSpellAbilityUnit(), false) //移除零重施法状态
 	else
-		if PrdRandom(M_GetSpellAbilityUnit(), 'Alc0', 20) then
+		if GetPrdRandom(M_GetSpellAbilityUnit(), 'Alc0', 20) then
 			call Lcqy_ZeroCast(M_GetSpellAbilityUnit(), true) //添加零重施法状态
 			return
 		endif
@@ -93,7 +93,7 @@ function EnchantEquipment takes nothing returns nothing
 		call enchant_equipment_actions()
 		call Lcqy_ZeroCast(M_GetSpellAbilityUnit(), false) //移除零重施法状态
 	else
-		if PrdRandom(M_GetSpellAbilityUnit(), 'Alc0', 20) then
+		if GetPrdRandom(M_GetSpellAbilityUnit(), 'Alc0', 20) then
 			call Lcqy_ZeroCast(M_GetSpellAbilityUnit(), true) //添加零重施法状态
 			return
 		endif
@@ -121,7 +121,7 @@ function LcqyStompSpell takes boolean haveZeroCast returns nothing
 			exitwhen firstUnit == null
 			set typeId = GetUnitTypeId( firstUnit ) 
 			if typeId == 'hlc1' or typeId == 'hlc2' then
-				if Ally_Alive(firstUnit) then
+				if AllyAlive(firstUnit) then
 					call UnitSpellStmop(firstUnit, damage, 1, dur, herodur, area, true, "Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl")
 				endif
 			endif
@@ -140,7 +140,7 @@ function Stomp takes nothing returns nothing
 		call Lcqy_ZeroCast(M_GetSpellAbilityUnit(), false) //移除零重施法状态
 		call LcqyStompSpell(true)
 	else
-		if PrdRandom(M_GetSpellAbilityUnit(), 'Alc0', 20) then
+		if GetPrdRandom(M_GetSpellAbilityUnit(), 'Alc0', 20) then
 			call Lcqy_ZeroCast(M_GetSpellAbilityUnit(), true) //添加零重施法状态
 			return
 		endif

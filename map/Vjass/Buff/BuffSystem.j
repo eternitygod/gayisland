@@ -2,7 +2,69 @@
 
 #include "Stun.j"
 
-scope BuffSystem initializer InitBuff
+library BuffSystem initializer InitBuff requires base, Common
+    
+    private function RemoveAbility takes nothing returns boolean
+        local trigger trig = GetTriggeringTrigger()
+        local integer iHandleId = GetHandleId(trig)
+        local unit whichUnit = LoadUnitHandle(HT, iHandleId, 17)
+        local integer abilityId = LoadInteger(HT, iHandleId, 59)
+        local integer buffId = LoadInteger(HT, iHandleId, 60)
+        local timer durTimer = LoadTimerHandle(HT, iHandleId, 10)
+        call SaveBoolean(HT, iHandleId, 0, true)
+        call UnitRemoveAbility(whichUnit, abilityId)
+        call UnitRemoveAbility(whichUnit, buffId)
+        if GetUnitAbilityLevel(whichUnit, abilityId) == 0 then
+            call FlushChildHashtable(HT, iHandleId)
+            call ClearTrigger(trig)
+            call DestroyTimer(durTimer)
+            call RemoveSavedHandle(HT, GetHandleId(whichUnit), 0 - abilityId)
+        else
+            call TimerStart(durTimer, 1, true, null)
+        endif
+        set whichUnit = null
+        set trig = null
+        set durTimer = null
+        return false
+    endfunction
+
+    // 在一段时间内添加技能 一般用于添加Buff
+    function UnitAddAbilityTimed takes unit whichUnit, integer abilityId, integer level, real duration, integer buffId, integer i returns nothing
+        local trigger trig
+        local integer iHandleId
+        local real remaining
+        local timer durTimer
+        if not UnitAlive(whichUnit) then
+            return
+        endif
+        if HaveSavedHandle(HT, GetHandleId(whichUnit), 0 - abilityId) then
+            set trig = LoadTriggerHandle(HT, GetHandleId(whichUnit), 0 - abilityId)
+            set iHandleId = GetHandleId(trig)
+            set durTimer = LoadTimerHandle(HT, iHandleId, 10)
+        else
+            set trig = CreateTrigger()
+            set iHandleId = GetHandleId(trig)
+            set durTimer = CreateTimer()
+            call FlushChildHashtable(HT, iHandleId)
+            call SaveUnitHandle(HT, iHandleId, 17, whichUnit)
+            call SaveInteger(HT, iHandleId, 59, abilityId)
+            call SaveInteger(HT, iHandleId, 60, buffId)
+            call SaveReal(HT, iHandleId, 0, 0)
+            call TriggerRegisterDeathEvent(trig, whichUnit)
+            call SaveTimerHandle(HT, iHandleId, 10, durTimer)
+            call TriggerRegisterTimerExpireEvent(trig, durTimer)
+            call TriggerAddCondition(trig, Condition(function RemoveAbility))
+            call SaveTriggerHandle(HT, GetHandleId(whichUnit), 0 - abilityId, trig)
+        endif
+        call RemoveSavedBoolean(HT, iHandleId, 0)
+        set remaining = TimerGetRemaining(durTimer)
+        if remaining < duration then
+            call TimerStart(durTimer, duration, false, null)
+        endif
+        call UnitAddPermanentAbilitySetlevel(whichUnit, abilityId, level)
+        set trig = null
+        set durTimer = null
+    endfunction
 
     globals
         
@@ -22,6 +84,7 @@ scope BuffSystem initializer InitBuff
 
         key BUFF_TYPE_IS_BUFF // 表示是一个Buff 死亡时会驱散此类
     endglobals
+    
 
 
     function SetBuffType takes integer whichAbilityId, integer whichBuffId, integer whichPolarity, integer whichType returns nothing
@@ -37,8 +100,6 @@ scope BuffSystem initializer InitBuff
     private function InitBuff takes nothing returns nothing
         // 晕眩 负面 物理
         call SetBuffType( 'Aasl', 'BPSE', BUFF_TYPE_NEGATIVE, BUFF_TYPE_PHYSICAL )
-
-
 
 
 
@@ -84,7 +145,8 @@ scope BuffSystem initializer InitBuff
 
     endfunction
 
-endscope
+
+endlibrary
 
 
 
