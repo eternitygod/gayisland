@@ -3,6 +3,7 @@
 // japi常量
 #include "JapiConstant.j"
 #include "math.j"
+// 单位状态恢复
 #include "UnitRestore.j"
 // 任意单位受伤和任意物品死亡
 #include "CustomAnyEvent.j"
@@ -12,8 +13,6 @@
 #include "CommonFunc.j"
 // 单位选取的过滤条件
 #include "Filter.j"
-
-
 
 #include "UnitStateRefresh.j"
 
@@ -25,7 +24,7 @@
 
 #include "Buff\BuffSystem.j"
 
-
+#include "Test.j"
 
 library base initializer Init requires math
 

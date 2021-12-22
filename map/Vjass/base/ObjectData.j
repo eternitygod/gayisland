@@ -10,7 +10,6 @@ library ObjectData
         private key KEY_UNIT_SHADOW
     endglobals
 
-
     // 与lua交互获得Slk数据
     function GetObjectDataBySlk takes integer objectId, string tableName, string dataType returns string
         set SlkType = tableName

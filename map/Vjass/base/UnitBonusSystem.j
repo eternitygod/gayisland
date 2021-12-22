@@ -4,7 +4,7 @@
 scope UnitBonusSystem 
 
     globals
-        //ObjectData
+        // BonusKey
         key BONUS_DAMAGE// = 0   //攻击
         key BONUS_ARMOR// = 1 //护甲
         key BONUS_ATTACK// = 2    //攻速

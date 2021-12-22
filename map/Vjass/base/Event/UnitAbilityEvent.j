@@ -24,7 +24,7 @@ scope UnitAbilityEvent initializer Init
         call SetSkillEvent(SPELL_EFFECT, 'Ahy0', "AbstinenceIsGoodMedicine")
         call SetSkillEvent(SPELL_EFFECT, 'Ahy1', "DragonSlave")
         call SetSkillEvent(SPELL_EFFECT, 'Ahy2', "LightStrikeArray")
-        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Ahy3', "FierySoul")
+        call SetSkillEvent(LEARN_FIRST_LEVEL_SKILL, 'Ahy3', "Register_FierySoul")
         call SetSkillEvent(SPELL_EFFECT, 'Ahy4', "LagunaBlade")
 
         //铁心灭绝者 DeterminedExterminator

@@ -191,15 +191,16 @@ scope CopperAlchemist
 		set trig = null
 	endfunction
 
-	function FierySoulFilter takes nothing returns boolean
+	private function FierySoulFilter takes nothing returns boolean
 		local integer abilityId = GetSpellAbilityId()
 		call FierySoulEffect(GetSpellAbilityUnit())
 		return false
 	endfunction
 
-	function FierySoul takes nothing returns nothing
+	function Register_FierySoul takes nothing returns nothing
 		local unit learnUnit = GetLearningUnit()
-		local trigger trig = CreateTrigger()
+		local trigger trig = CreateUnitAbilityTrigger( learnUnit, GetLearnedSkill() )
+		
 		call TriggerRegisterUnitEvent(trig, learnUnit, EVENT_UNIT_SPELL_EFFECT)
 		call TriggerAddCondition(trig, Condition( function FierySoulFilter))
 		set trig = null

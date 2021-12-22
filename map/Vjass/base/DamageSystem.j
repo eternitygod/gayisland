@@ -183,4 +183,39 @@ library DamageSystem requires base, TextTag
         return false
     endfunction
 
+    // 注意filterId的值不宜过高,Jass的数值最大值为8191
+    // 每个filterId可以注册200个事件,通常不会用那么多
+    // 给触发器注册任意单位受伤事件
+    // 通常一个攻击特效filterId用1, (敌对,非建筑)CommonAttackEffectFilter
+    function TriggerRegisterAnyUnitDamagedEvent takes trigger trig, integer filterId returns nothing
+        local integer id = filterId * 200
+        if trig == null then
+            return
+        endif
+        set DamageEventQueue[id + DamageEventNumber[filterId]] = trig
+        set DamageEventNumber[filterId] = id + DamageEventNumber[filterId] + 1
+        //call Debug("log","register" + I2S(GetHandleId(DamageEventQueue[200])))
+    endfunction
+
+    // 计时器回调到期则设置变量为false
+    function DisableAttackEffect takes nothing returns nothing
+        set EffectIsEnabled[LoadInteger(HT, GetHandleId(GetExpiredTimer()), 0)]= false
+    endfunction
+    // 在一定时间内激活攻击特效 key的值不能为0  time为0则是永久激活
+    function EnabledAttackEffect takes integer key, real time returns nothing
+        if not EffectIsEnabled[0] then
+            set EffectIsEnabled[0] = true
+        endif
+        set EffectIsEnabled[key] = true
+        if time == 0 then
+            return
+        elseif EffectEnabledTimer[key] == null then
+            set EffectEnabledTimer[key] = CreateTimer()
+            call SaveInteger(HT, GetHandleId(EffectEnabledTimer[key]), 0, key)
+        endif
+        if TimerGetRemaining(EffectEnabledTimer[key])< time then
+            call TimerStart(EffectEnabledTimer[key], time, false, function DisableAttackEffect)
+        endif
+    endfunction
+
 endlibrary
