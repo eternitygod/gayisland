@@ -5,8 +5,10 @@ scope StormSpirit
         private key HaveOverload
         private key OverloadEffectRight
         private key OverloadEffectLeft
+        constant key BallLightningCount  //球状闪电计数 计数为0时才逆变身
     endglobals
 
+    /* 蓝猫 待重做 部分代码与当前系统冲突
     private function BallLightningMove takes nothing returns nothing
         local trigger t = GetTriggeringTrigger()
         local integer h = GetHandleId(t)
@@ -220,7 +222,7 @@ scope StormSpirit
             call ClearTrigger(effT)
         else
             set P2 = GetOwningPlayer(shadow)
-            if Enemy_Alive_NoStructure_NoImmune(GetTriggerUnit()) then
+            if IsEnemyAliveNoStructureNoImmune(GetTriggerUnit()) then
                 set x = GetUnitX(shadow)
                 set y = GetUnitY(shadow)
                 set u = LoadUnitHandle(HT, effH, 10)
@@ -236,7 +238,7 @@ scope StormSpirit
                 loop
                     set u = FirstOfGroup(g)
                     exitwhen u == null
-                    if Enemy_Alive_NoStructure_NoImmune(u) then
+                    if IsEnemyAliveNoStructureNoImmune(u) then
                         call DamageUnit(shadow, u, 1, damage)
                         call DestroyEffect(AddSpecialEffect("Abilities\\Weapons\\ChimaeraLightningMissile\\ChimaeraLightningMissile.mdl", GetUnitX(u), GetUnitY(u)))
                     endif
@@ -324,9 +326,9 @@ scope StormSpirit
         loop
             set u = FirstOfGroup(g)
             exitwhen u == null //造成法术攻击 魔法伤害
-            if Enemy_Alive_NoStructure(u) then
+            if IsEnemyAliveNoStructure(u) then
                 call DamageUnit(Tmp_DamageSource, u, 1, damage)
-                call UnitAddAbilityTimed(u, 'ANol', 1, 0.6, 'BSts', 2)
+                call UnitAddAbilityTimed(u, 'ANol', 1, 0.6, 'BSts')
                 call GroupRemoveUnit(g, u)
             endif
         endloop
@@ -367,6 +369,8 @@ scope StormSpirit
         set u = null
         set t = null
     endfunction
+
+    */
 
 
 endscope

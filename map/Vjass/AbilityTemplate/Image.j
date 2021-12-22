@@ -5,13 +5,13 @@ scope Image
 
     globals
         private constant integer ImageAbility = 'AIil'
-        key UnitIsSummoningIllusions 
+        constant key IMAGO_UNIT_IS_SUMMONING_ILLUSIONS
     endglobals
 
     // 设置单位高度来到达隐藏单位，并同时隐藏单位阴影(需要用逆变身来刷新)。
     function M_ShowUnit takes unit whichUnit, boolean bIsShow returns nothing
         if bIsShow then
-            call SetUnitShadow(whichUnit, GetUnitOriginShadow(whichUnit) )
+            call SetUnitShadow(whichUnit, OBJ_GetUnitOriginShadow(whichUnit) )
             call SetUnitInvulnerable(whichUnit, false)
             call EXPauseUnit(whichUnit, false)
             call SetUnitFlyHeight(whichUnit, GetUnitDefaultFlyHeight(whichUnit), 0)
@@ -44,7 +44,7 @@ scope Image
         call EXSetAbilityDataReal(hAbilityAIil, 1, ABILITY_DATA_HERODUR, rDur)
         set hAbilityAIil = null
         // 给召唤者标识一下
-        call SaveBoolean(UnitBuff, GetHandleId(whichUnit), UnitIsSummoningIllusions, true)
+        call SaveBoolean(DynamicData, GetHandleId(whichUnit), IMAGO_UNIT_IS_SUMMONING_ILLUSIONS, true)
         set Tmp__ArrayReal['B'] = dataB
         set Tmp__ArrayReal['C'] = dataC
         call M_ShowUnit(whichUnit, true)
@@ -62,7 +62,7 @@ scope Image
             exitwhen loop__i == iMaxAmount
             set loop__i = loop__i + 1
         endloop
-        call RemoveSavedBoolean(UnitBuff, GetHandleId(whichUnit), UnitIsSummoningIllusions)
+        call RemoveSavedBoolean(DynamicData, GetHandleId(whichUnit), IMAGO_UNIT_IS_SUMMONING_ILLUSIONS)
         call DestroyFogModifier(LoadFogModifierHandle(HT, iHandleId2, 20))
 
         call ClearTrigger(trig)
@@ -122,7 +122,7 @@ scope Image
         local effect eImageMissileEff
         local integer loop__i
         // 对于上个触发器的参数读取应该在这条注释上面
-        call BJDebugMsg(I2S(iMaxAmount)+"iMaxAmount")
+        call BJDebugMsg(I2S(iMaxAmount)+ "iMaxAmount")
         set iHandleId = CreateTimerEventTrigger(0.03, true, function ImageMissileMovement)
         if HaveSavedHandle(HT, iHandleId, 100) then
             call DestroyEffect(LoadEffectHandle(HT, iHandleId, 100))

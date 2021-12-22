@@ -35,11 +35,6 @@ scope UnitEnterMapEvent initializer Init
     endfunction
 
     private function Init takes nothing returns nothing
-        local rect world = GetWorldBounds()
-        set WorldRegion = CreateRegion()
-        call RegionAddRect(WorldRegion, world)
-        call RemoveRect(world)
-        set world = null
         call TriggerRegisterEnterRegion(EnterMapTrigger, WorldRegion, Condition(function UnitEnterMapAction))
     endfunction
 

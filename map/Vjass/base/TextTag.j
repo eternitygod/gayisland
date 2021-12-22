@@ -1,6 +1,12 @@
 
 library TextTag requires base
     
+    //***************************************************************************
+    //*
+    //*  Text Tag Utility Functions
+    //*
+    //***************************************************************************
+
     //暴击漂浮文字 只会出现一次
     function CriticalStrikeTextTag takes unit whichUnit, real damage returns nothing
         local texttag t = CreateTextTag()

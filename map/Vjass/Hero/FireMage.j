@@ -55,7 +55,7 @@ scope CopperAlchemist
 	endfunction
 
 	function DragonSlave_Filter takes nothing returns boolean
-		return Enemy_Alive_NoStructure_NoImmune(GetFilterUnit())
+		return IsEnemyAliveNoStructureNoImmune(GetFilterUnit())
 	endfunction
 
 	// 龙破斩
@@ -227,7 +227,7 @@ scope CopperAlchemist
 	// 偷懒直接在筛选里面加特效
 	private function DragonSlave_Filter takes nothing returns boolean
 		local unit hFilterUnit = GetFilterUnit()
-		if Enemy_Alive_NoStructure(hFilterUnit) then
+		if IsEnemyAliveNoStructure(hFilterUnit) then
 			call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Human\\LagunaBlade\\LagunaBlade_hit.mdx", hFilterUnit, "origin"))
 			return true
 		endif

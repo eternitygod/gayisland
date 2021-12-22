@@ -67,7 +67,7 @@ function WeMediaDeath takes nothing returns nothing
 	loop
 		set firstUnit = FirstOfGroup(targetGroup)
 		exitwhen firstUnit == null
-		if EnemyAliveNotFly(firstUnit) then
+		if IsEnemyAliveNotFly(firstUnit) then
 
 			call DamageUnit(boomUnit, firstUnit, 3, damage)
 

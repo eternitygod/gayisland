@@ -2,7 +2,7 @@
 scope Order initializer Init
 
     globals
-        key OBJ_KEY_COMMON_ORDERID
+        constant key OBJ_KEY_COMMON_ORDERID
 
         // 一些命令Id
         // 攻击

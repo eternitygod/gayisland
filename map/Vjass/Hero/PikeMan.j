@@ -42,7 +42,7 @@ scope PickMan
                     set firstUnit = FirstOfGroup(enumDamageTarget)
                     exitwhen firstUnit == null
 
-                    if Enemy_Alive_NoStructure(firstUnit) then
+                    if IsEnemyAliveNoStructure(firstUnit) then
 
                         call DestroyEffect(AddSpecialEffectTarget(targetEffectPath, firstUnit, "origin"))
                         call DamageUnit(whichUnit, firstUnit, iDamageType, rDamageAmount)
@@ -95,7 +95,7 @@ scope PickMan
         exitwhen firstUnit == null
             call GroupRemoveUnit( enumUnits, firstUnit )
             // 友军 存活 非建筑 英雄
-            if AllyAliveNoStructureIsHero( firstUnit ) then
+            if IsAllyAliveNoStructureIsHero( firstUnit ) then
                 // 把友军的护甲给吃瓜
                 call UnitReduceArmorBonus( firstUnit, armoarValue )
                 call UnitAddArmorBonus( whichUnit, armoarValue )
@@ -129,7 +129,7 @@ scope PickMan
         exitwhen firstUnit == null
             call GroupRemoveUnit( enumUnits, firstUnit )
             // 敌对 存活 非建筑
-            if Enemy_Alive_NoStructure( firstUnit ) then
+            if IsEnemyAliveNoStructure( firstUnit ) then
                 // 超过生命临界点就斩杀
                 if GetWidgetLife( firstUnit ) < criticalValue then
                     if UnitKillTarget( whichUnit, firstUnit ) then

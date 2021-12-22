@@ -1,138 +1,37 @@
 // 初始化的函数
 
 #include "Vjass\base\base.j"
-
-
-
-
-
-
-// #include "Vjass\Cinematic.j"
-
-
-
 // 一些通用技能模板
 #include "Vjass\AbilityTemplate.j"
-
-
-
 // 英雄尽量在后面加载
 #include "Vjass\Hero.j"
-
 #include "Vjass\Boss.j"
-
 // UI在英雄后面加载
 #include "Vjass\UI.j"
-
-
-
-
 
 globals
 	// 野外生物起义和基佬岛公用基础库，但会有区别
 	constant boolean IS_ISLAND = true
-	/*
-	static IS_ISLAND then
-		call DoNothing()
-	endif
-	*/
-	/*
-	// Generated
-	rect gg_rct_TriggerTiny = null
-	rect gg_rct_1_0_Movie_OgreMagi1 = null
-	rect gg_rct_1_0_Movie_InitSt = null
-	rect gg_rct_1_0_Movie_Portal1 = null
-	rect gg_rct_1_0_Movie_Portal2 = null
-	rect gg_rct_1_0_Movie_OgreMagi2 = null
-	rect gg_rct_1_0_Movie_TrollWarlord1 = null
-	rect gg_rct_1_0_Movie_LCQY1 = null
-	rect gg_rct_1_0_Movie_PAL1 = null
-	rect gg_rct_1_0_Movie_Portal3 = null
-	rect gg_rct_1_0_Movie_Portal4 = null
-	rect gg_rct_1_0_Movie_Portal5 = null
-	rect gg_rct_1_0_Movie_Portal6 = null
-	rect gg_rct_1_0_Movie_Init = null
-	rect gg_rct_1_0_Movie_injoker1 = null
-	rect gg_rct_1_0_Movie_injoker2 = null
-	rect gg_rct_SB = null
-
-	// 镜头
-	camerasetup gg_cam_OrgeInitialPoint = null
-
-
-	sound gg_snd_ShouSiJuHua = null
-	sound gg_snd_FootmanYes1 = null
-	sound gg_snd_PeasantPissed3 = null
-	sound gg_snd_SkeletonYes1 = null
-	sound gg_snd_ForestTrollYesAttack2 = null
-	sound gg_snd_ForestTrollWarcry1 = null
-	sound gg_snd_PriestYesAttack1 = null
-	sound gg_snd_ArthasPissed4 = null
-	sound gg_snd_NecromancerPissed4 = null
-	sound gg_snd_NecromancerWhat1 = null
-	sound gg_snd_pl_impact_stun = null
-	sound gg_snd_JuHuaXiao = null
-	sound gg_snd_HeroLichReady1 = null
-	sound gg_snd_S03Illidan45 = null
-	sound gg_snd_JuHuaWuGu = null
-	sound gg_snd_FlashBack1Second = null
-	sound gg_snd_BigSven_u = null
-	sound gg_snd_Sven_sevn_u = null
-	sound gg_snd_LongZhu_u = null
-	sound gg_snd_WoKaoJuQingSha = null
-	sound gg_snd_Ai_o_u = null
-	sound gg_snd_LZGL = null
-	string gg_snd_PursuitTheme
-	sound gg_snd_LJDTtth = null
-	sound gg_snd_MaLiuDXiu = null
-	sound gg_snd_OgreYesAttack3 = null
-	unit gg_unit_nvde_0068 = null
-	unit gg_unit_Hpal_0268 = null
-	unit gg_unit_ospw_0050 = null
-	unit gg_unit_hbew_0052 = null
-	*/
 
 	region WorldRegion = null
 
-	unit W2 = null
-	
+	// 以 handleId 为父Key keyType 为子key vj的Key语法保证不会冲突
+	hashtable DynamicData = InitHashtable() 
 
-	
+	//中转全局变量
+	// 数组
+	integer array Tmp__ArrayInt
+	real array Tmp__ArrayReal
 
-
-	
-	
-	trigger array DamageEventQueue
-	integer array DamageEventNumber
-	
 	//Frame
-	//光环刷新间隔
+	// 光环刷新间隔
 	constant real AuraFrame = 0.5 
-	//单位恢复间隔
+	// 单位恢复间隔
 	constant real RestoreFrame = 0.2 
-	//枷锁闪电效果移动间隔
+	// 枷锁闪电效果移动间隔
 	constant real LeashFrame = 0.05 
 
-	//单位类型 数据
-	
-
-
-	
-	//单位哈希表
-	hashtable UnitData = InitHashtable() 
-
-
-	//===========================================
-
-
-	constant integer BuffAddType_Positive = 1 //正面Buff
-	constant integer BuffAddType_Negative = 2 //负面Buff
-	constant integer BuffAddType_Magic = 8 //魔法Buff
-	constant integer BuffAddType_Physical = 16 //物理Buff
-	constant integer BuffAddType_Aura = 32 //光环Buff
-	constant integer BuffAddType_AutoDispel = 64 //不可驱散Buff
-
-	//===========================================
+	//
 
 	//主要任务
 	quest array MainQuest
@@ -140,88 +39,26 @@ globals
 	quest array SideQuest
 
 
-	
 
 
-	//中转全局变量
-	unit Tmp_SpellAbilityUnit = null
-	unit Tmp_SpellTargetUnit = null
-	integer Tmp_SpellAbilityLevel
-	real Tmp_SpellTargetX
-	real Tmp_SpellTargetY
-	// 数组
-	integer array Tmp__ArrayInt
-	real array Tmp__ArrayReal
-	//中转用的变量
-	unit TmpUnit2 = null
 
-	integer Tmp_DummyAmount = 0
 
 	//伤害事件
 
-	//伤害来源
-	unit Tmp_DamageSource = null //GetEventDamageSource()
-	//受伤者
-	unit Tmp_DamageInjured = null
-	//伤害值
-	real Tmp_DamageValue
-	boolean array EffectIsEnabled //用来一些特效是否被启用 减少运算资源
-	timer array EffectEnabledTimer
-
-	//哈希表的Key
-	//UnitData
-	constant integer UNIT_BASE_ARMOR = 101
-	constant integer UNIT_BASE_DAMAGE = 102
-	constant integer UNIT_LIFERESTORE = 103
-	constant integer UNIT_MANARESTORE = 104
-	
-
-
-	//技能事件的哈希表key
-	//准备释放技能
-	constant key SPELL_CHANNEL
-	//发动技能效果
-	constant key SPELL_EFFECT
-	//学习技能
-	constant key LEARN_SKILL
-	//学习技能1级
-	constant key LEARN_FIRST_LEVEL_SKILL
 
 
 
-	// UnitBuff
-	// hashtable UnitBuff = InitHashtable()
-	hashtable UnitKeyBuff = InitHashtable()
-	constant integer AttackTarget = - 100 //攻击目标 用于判断与攻击事件
-	constant integer AttackReadyTrg = - 101 //捕捉远程攻击弹道出手的触发器
-	constant integer AttackReadyTimer = - 102 //捕捉远程攻击弹道出手的计时器
-	constant integer CriticalStrikeDamage = - 99 //暴击伤害的Key
-
-
-	constant integer Leash = - 1 //枷锁 + BuffId
-	constant integer ZeroCast = 1 //零重施法
-	constant integer BallLightningCount = 7 //球状闪电计数 计数为0时才逆变身
-
-	constant integer MagicImmunity = 11
 
 
 
 
 	//是否是初始化单位
 	boolean IsInitUnit = true
-	//Dummy 马甲
-	rect RectDummy = Rect(0, 0, 0, 0)
-	//获取最近的可破坏物
-	destructable Tmp_Destructable = null
-	real Tmp_NearestDestructableDistance = 0.
-	real Tmp_GetNearestDestructableUnitX = 0.
-	real Tmp_GetNearestDestructableUnitY = 0.
+
 
 	//额外属性马甲
 	unit BonusDummy = null
-	//和lua交互数据的全局变量
-	string SlkdataType = ""
-	string SlkType = "" 
+
 	integer array StrHeroTypeId
 	integer array IntHeroTypeId
 	integer array AgiHeroTypeId
@@ -229,7 +66,7 @@ globals
 
 
 	constant integer MaxUserAmount = 5
-
+	integer M_OnlinePlayerAmount = 1
 
 	//
 
@@ -243,232 +80,9 @@ globals
 	//
 	//===================================
 	unit Romantic = null
+
 endglobals
 
-// 获取鼠标在游戏内的坐标X
-native DzGetMouseTerrainX takes nothing returns real
-// 获取鼠标在游戏内的坐标Y
-native DzGetMouseTerrainY takes nothing returns real
-// 获取鼠标在游戏内的坐标Z
-native DzGetMouseTerrainZ takes nothing returns real
-// 鼠标是否在游戏内
-native DzIsMouseOverUI takes nothing returns boolean
-// 获取鼠标屏幕坐标X
-native DzGetMouseX takes nothing returns integer
-// 获取鼠标屏幕坐标Y
-native DzGetMouseY takes nothing returns integer
-// 获取鼠标游戏窗口坐标X
-native DzGetMouseXRelative takes nothing returns integer
-// 获取鼠标游戏窗口坐标Y
-native DzGetMouseYRelative takes nothing returns integer
-// 设置鼠标位置
-native DzSetMousePos takes integer x, integer y returns nothing
-// 注册鼠标点击触发（sync为true时，调用TriggerExecute。为false时，直接运行action函数，可以异步不掉线，action里不要有同步操作）
-native DzTriggerRegisterMouseEvent takes trigger trig, integer btn, integer status, boolean sync, string func returns nothing
-// 注册鼠标点击触发（sync为true时，调用TriggerExecute。为false时，直接运行action函数，可以异步不掉线，action里不要有同步操作）
-native DzTriggerRegisterMouseEventByCode takes trigger trig, integer btn, integer status, boolean sync, code funcHandle returns nothing
-// 注册键盘点击触发
-native DzTriggerRegisterKeyEvent takes trigger trig, integer key, integer status, boolean sync, string func returns nothing
-// 注册键盘点击触发
-native DzTriggerRegisterKeyEventByCode takes trigger trig, integer key, integer status, boolean sync, code funcHandle returns nothing
-// 注册鼠标滚轮触发
-native DzTriggerRegisterMouseWheelEvent takes trigger trig, boolean sync, string func returns nothing
-// 注册鼠标滚轮触发
-native DzTriggerRegisterMouseWheelEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
-// 注册鼠标移动触发
-native DzTriggerRegisterMouseMoveEvent takes trigger trig, boolean sync, string func returns nothing
-// 注册鼠标移动触发
-native DzTriggerRegisterMouseMoveEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
-// 获取触发器的按键码
-native DzGetTriggerKey takes nothing returns integer
-// 获取滚轮delta
-native DzGetWheelDelta takes nothing returns integer
-// 判断按键是否按下
-native DzIsKeyDown takes integer iKey returns boolean
-// 获取触发key的玩家
-native DzGetTriggerKeyPlayer takes nothing returns player
-// 获取war3窗口宽度
-native DzGetWindowWidth takes nothing returns integer
-// 获取war3窗口高度
-native DzGetWindowHeight takes nothing returns integer
-// 获取war3窗口X坐标
-native DzGetWindowX takes nothing returns integer
-// 获取war3窗口Y坐标
-native DzGetWindowY takes nothing returns integer
-// 注册war3窗口大小变化事件
-native DzTriggerRegisterWindowResizeEvent takes trigger trig, boolean sync, string func returns nothing
-// 注册war3窗口大小变化事件
-native DzTriggerRegisterWindowResizeEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
-// 判断窗口是否激活
-native DzIsWindowActive takes nothing returns boolean
-// 设置可摧毁物位置
-native DzDestructablePosition takes destructable d, real x, real y returns nothing
-// 设置单位位置-本地调用
-native DzSetUnitPosition takes unit whichUnit, real x, real y returns nothing
-// 异步执行函数
-native DzExecuteFunc takes string funcName returns nothing
-// 取鼠标指向的单位
-native DzGetUnitUnderMouse takes nothing returns unit
-// 设置单位的贴图
-native DzSetUnitTexture takes unit whichUnit, string path, integer texId returns nothing
-//  设置内存数值
-native DzSetMemory takes integer address, real value returns nothing
-//  替换单位类型 [BZAPI]
-native DzSetUnitID takes unit whichUnit, integer id returns nothing
-//  替换单位模型 [BZAPI]
-native DzSetUnitModel takes unit whichUnit, string path returns nothing
-//  原生 - 设置小地图背景贴图
-native DzSetWar3MapMap takes string map returns nothing
-// 注册数据同步触发器
-native DzTriggerRegisterSyncData takes trigger trig, string prefix, boolean server returns nothing
-// 同步游戏数据
-native DzSyncData takes string prefix, string data returns nothing
-// 获取同步的数据
-native DzGetTriggerSyncData takes nothing returns string
-// 获取同步数据的玩家
-native DzGetTriggerSyncPlayer takes nothing returns player
-// 隐藏界面元素
-native DzFrameHideInterface takes nothing returns nothing
-// 修改游戏世界窗口位置
-native DzFrameEditBlackBorders takes real upperHeight, real bottomHeight returns nothing
-// 头像
-native DzFrameGetPortrait takes nothing returns integer
-// 小地图
-native DzFrameGetMinimap takes nothing returns integer
-// 技能按钮
-native DzFrameGetCommandBarButton takes integer row, integer column returns integer
-// 英雄按钮
-native DzFrameGetHeroBarButton takes integer buttonId returns integer
-// 英雄血条
-native DzFrameGetHeroHPBar takes integer buttonId returns integer
-// 英雄蓝条
-native DzFrameGetHeroManaBar takes integer buttonId returns integer
-// 道具按钮
-native DzFrameGetItemBarButton takes integer buttonId returns integer
-// 小地图按钮
-native DzFrameGetMinimapButton takes integer buttonId returns integer
-// 左上菜单按钮
-native DzFrameGetUpperButtonBarButton takes integer buttonId returns integer
-// 鼠标提示
-native DzFrameGetTooltip takes nothing returns integer
-// 聊天信息
-native DzFrameGetChatMessage takes nothing returns integer
-// 单位信息
-native DzFrameGetUnitMessage takes nothing returns integer
-// 获取最上的信息
-native DzFrameGetTopMessage takes nothing returns integer
-// 取rgba色值
-native DzGetColor takes integer r, integer g, integer b, integer a returns integer
-// 设置界面更新回调（非同步）
-native DzFrameSetUpdateCallback takes string func returns nothing
-// 界面更新回调
-native DzFrameSetUpdateCallbackByCode takes code funcHandle returns nothing
-// 显示/隐藏窗体
-native DzFrameShow takes integer frame, boolean enable returns nothing
-// 创建窗体
-native DzCreateFrame takes string frame, integer parent, integer id returns integer
-// 创建简单的窗体
-native DzCreateSimpleFrame takes string frame, integer parent, integer id returns integer
-// 销毁窗体
-native DzDestroyFrame takes integer frame returns nothing
-// 加载内容目录 (Toc table of contents)
-native DzLoadToc takes string fileName returns nothing
-// 设置窗体相对位置 [0:左上|1:上|2:右上|3:左|4:中|5:右|6:左下|7:下|8:右下]
-native DzFrameSetPoint takes integer frame, integer point, integer relativeFrame, integer relativePoint, real x, real y returns nothing
-// 设置窗体绝对位置
-native DzFrameSetAbsolutePoint takes integer frame, integer point, real x, real y returns nothing
-// 清空窗体锚点
-native DzFrameClearAllPoints takes integer frame returns nothing
-// 设置窗体禁用/启用
-native DzFrameSetEnable takes integer name, boolean enable returns nothing
-// 注册用户界面事件回调
-native DzFrameSetScript takes integer frame, integer eventId, string func, boolean sync returns nothing
-//  注册UI事件回调(func handle)
-native DzFrameSetScriptByCode takes integer frame, integer eventId, code funcHandle, boolean sync returns nothing
-// 获取触发用户界面事件的玩家
-native DzGetTriggerUIEventPlayer takes nothing returns player
-// 获取触发用户界面事件的窗体
-native DzGetTriggerUIEventFrame takes nothing returns integer
-// 通过名称查找窗体
-native DzFrameFindByName takes string name, integer id returns integer
-// 通过名称查找普通窗体
-native DzSimpleFrameFindByName takes string name, integer id returns integer
-// 查找字符串
-native DzSimpleFontStringFindByName takes string name, integer id returns integer
-// 查找BACKDROP frame
-native DzSimpleTextureFindByName takes string name, integer id returns integer
-// 获取游戏用户界面
-native DzGetGameUI takes nothing returns integer
-// 点击窗体
-native DzClickFrame takes integer frame returns nothing
-// 自定义屏幕比例
-native DzSetCustomFovFix takes real value returns nothing
-// 使用宽屏模式
-native DzEnableWideScreen takes boolean enable returns nothing
-// 设置文字（支持EditBox, TextFrame, TextArea, SimpleFontString、GlueEditBoxWar3、SlashChatBox、TimerTextFrame、TextButtonFrame、GlueTextButton）
-native DzFrameSetText takes integer frame, string text returns nothing
-// 获取文字（支持EditBox, TextFrame, TextArea, SimpleFontString）
-native DzFrameGetText takes integer frame returns string
-// 设置字数限制（支持EditBox）
-native DzFrameSetTextSizeLimit takes integer frame, integer size returns nothing
-// 获取字数限制（支持EditBox）
-native DzFrameGetTextSizeLimit takes integer frame returns integer
-// 设置文字颜色（支持TextFrame, EditBox）
-native DzFrameSetTextColor takes integer frame, integer color returns nothing
-// 获取鼠标所在位置的用户界面控件指针
-native DzGetMouseFocus takes nothing returns integer
-// 设置所有锚点到目标窗体上
-native DzFrameSetAllPoints takes integer frame, integer relativeFrame returns boolean
-// 设置焦点
-native DzFrameSetFocus takes integer frame, boolean enable returns boolean
-// 设置模型（支持Sprite、Model、StatusBar）
-native DzFrameSetModel takes integer frame, string modelFile, integer modelType, integer flag returns nothing
-// 获取控件是否启用
-native DzFrameGetEnable takes integer frame returns boolean
-// 设置透明度（0-255）
-native DzFrameSetAlpha takes integer frame, integer alpha returns nothing
-// 获取透明度（0-255）
-native DzFrameGetAlpha takes integer frame returns integer
-// 设置动画
-native DzFrameSetAnimate takes integer frame, integer animId, boolean autocast returns nothing
-// 设置动画进度（autocast为false是可用）
-native DzFrameSetAnimateOffset takes integer frame, real offset returns nothing
-// 设置texture（支持Backdrop、SimpleStatusBar）
-native DzFrameSetTexture takes integer frame, string texture, integer flag returns nothing
-// 设置缩放
-native DzFrameSetScale takes integer frame, real scale returns nothing
-// 设置提示
-native DzFrameSetTooltip takes integer frame, integer tooltip returns nothing
-// 鼠标限制在用户界面内
-native DzFrameCageMouse takes integer frame, boolean enable returns nothing
-// 获取当前值（支持Slider、SimpleStatusBar、StatusBar）
-native DzFrameGetValue takes integer frame returns real
-// 设置最大最小值（支持Slider、SimpleStatusBar、StatusBar）
-native DzFrameSetMinMaxValue takes integer frame, real minValue, real maxValue returns nothing
-// 设置Step值（支持Slider）
-native DzFrameSetStepValue takes integer frame, real step returns nothing
-// 设置当前值（支持Slider、SimpleStatusBar、StatusBar）
-native DzFrameSetValue takes integer frame, real value returns nothing
-// 设置窗体大小
-native DzFrameSetSize takes integer frame, real w, real h returns nothing
-// 根据tag创建窗体
-native DzCreateFrameByTagName takes string frameType, string name, integer parent, string template, integer id returns integer
-// 设置颜色（支持SimpleStatusBar）
-native DzFrameSetVertexColor takes integer frame, integer color returns nothing
-// 不明觉厉
-native DzOriginalUIAutoResetPoint takes boolean enable returns nothing
-//  设置优先级 [NEW]
-native DzFrameSetPriority takes integer frame, integer priority returns nothing
-//  设置父窗口 [NEW]
-native DzFrameSetParent takes integer frame, integer parent returns nothing
-//  设置字体 [NEW]
-native DzFrameSetFont takes integer frame, string fileName, real height, integer flag returns nothing
-//  获取 Frame 的 高度 [NEW]
-native DzFrameGetHeight takes integer frame returns real
-//  设置对齐方式 [NEW]
-native DzFrameSetTextAlignment takes integer frame, integer align returns nothing
-//  获取 Frame 的 Parent [NEW]
-native DzFrameGetParent takes integer frame returns integer
 
 //==========================================================================
 
@@ -565,12 +179,12 @@ endfunction
 //*
 //***************************************************************************//===========================================================================
 /*function CreateBuildingsForPlayer0 takes nothing returns nothing
-	local player p = Player(0)
-	local unit u
-	local integer unitID
-	local trigger t
-	local real life
-	set u = CreateUnit(p, 'ndfl', - 24704.0, - 19264.0, 270.000)
+local player p = Player(0)
+local unit u
+local integer unitID
+local trigger t
+local real life
+set u = CreateUnit(p, 'ndfl', - 24704.0, - 19264.0, 270.000)
 endfunction
 //===========================================================================
 function CreateUnitsForPlayer0 takes nothing returns nothing
@@ -771,7 +385,7 @@ function CreateAllUnits takes nothing returns nothing
 	call CreateNeutralHostile()
 	call CreateNeutralPassive()
 	call CreatePlayerUnits()
-endfunction*/
+endfunction */
 
 
 //***************************************************************************
@@ -835,7 +449,7 @@ function CreateRegions takes nothing returns nothing
 	set gg_rct_1_0_Movie_injoker1 = Rect(- 22720.0, - 25952.0, - 22592.0, - 25824.0)
 	set gg_rct_1_0_Movie_injoker2 = Rect(- 23488.0, - 25216.0, - 23360.0, - 25088.0)
 	set gg_rct_SB = Rect(- 16640.0, - 27584.0, - 16128.0, - 27392.0)
-endfunction*/
+endfunction */
 //***************************************************************************
 //*
 //*  Cameras
@@ -875,7 +489,7 @@ endfunction
 
 
 function RestoreAura_Filter takes nothing returns boolean
-	return IsMechanical_Ally_Alive_NoStructure(GetFilterUnit())
+	return IsMechanicalAllyAliveNoStructure(GetFilterUnit())
 endfunction
 
 
@@ -915,7 +529,7 @@ endfunction
 //防御光环选取条件
 function defense_aura_filter takes nothing returns boolean
 	//call Debug("log", "filter" + GetUnitName(GetFilterUnit()))
-	return AllyAliveNoStructure(GetFilterUnit())
+	return IsAllyAliveNoStructure(GetFilterUnit())
 endfunction
 
 
@@ -1131,8 +745,6 @@ endfunction
 //任意单位腐烂
 function UnitDecayEvnetActions takes nothing returns boolean
 	local unit decayUnit = GetDecayingUnit()
-
-
 	set decayUnit = null
 	return false
 endfunction
@@ -1144,7 +756,6 @@ function ExecuteBossAI takes unit whichUnit returns nothing
 	elseif bossType == 'u000' then
 		call InitImagoAI(whichUnit)
 	endif
-
 endfunction
 
 function StartBossAI takes nothing returns boolean
@@ -1229,10 +840,16 @@ endfunction
 
 //! inject main
 
-    //一些函数调用可能会在这里
+	// 一些函数调用可能会在这里
 	local trigger trig
+	// 因为只能注册不规则区域被单位进入事件 所以这里用Region
+	local rect world = GetWorldBounds()
+	set WorldRegion = CreateRegion()
+	call RegionAddRect(WorldRegion, world)
+	call RemoveRect(world)
+	set world = null
 
-	//lua入口
+	// lua入口
 	call Cheat("exec-lua:lua.base")
 
 	call SetCameraBounds(- 28416.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), - 28544.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 18176.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 18048.0 - GetCameraMargin(CAMERA_MARGIN_TOP), - 28416.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 18048.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 18176.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), - 28544.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
@@ -1252,18 +869,18 @@ endfunction
 	call CreateCameras()
 	call CreateAllItems()
 
-    //其他的调用可能会在这里
+	//其他的调用可能会在这里
 
  
 
-    //也许您想使用WorldEditor的该功能…
+	//也许您想使用WorldEditor的该功能…
 
 	
 	//要在bj初始化前使用
 
 	call InitBlizzard()
-    //call InitGlobals(  )
-    call InitCustomTriggers(  )
+	//call InitGlobals(  )
+	call InitCustomTriggers(  )
 
 
 	if M_OnlinePlayerAmount == 1 then

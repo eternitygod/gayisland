@@ -5,11 +5,29 @@ scope UnitAbilityEvent initializer Init
         //技能
         trigger AbilityEventTrigger = null
         trigger UnitSpellEffectTrigger = null
+        // temps
+        unit Tmp_SpellAbilityUnit = null
+        unit Tmp_SpellTargetUnit = null
+        integer Tmp_SpellAbilityLevel
+        real Tmp_SpellTargetX
+        real Tmp_SpellTargetY
     endglobals
 
     private function SetSkillEvent takes integer eventType, integer skillId, string evnetfunc returns nothing
         call SaveStr(ObjectData, eventType, skillId, evnetfunc)
     endfunction
+
+    globals
+        // 技能事件的哈希表key
+        // 准备释放技能
+        constant key SPELL_CHANNEL
+        // 发动技能效果
+        constant key SPELL_EFFECT
+        // 学习技能
+        constant key LEARN_SKILL
+        // 学习技能1级
+        constant key LEARN_FIRST_LEVEL_SKILL
+    endglobals
 
     private function InitAbilityFunctions takes nothing returns nothing
  

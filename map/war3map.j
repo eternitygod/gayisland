@@ -6532,7 +6532,7 @@ call TriggerEvaluate(trig)
         loop
             set dummyUnit=FirstOfGroup(g)
             exitwhen dummyUnit == null //检查可见度 防止烧隐身单位
-            if Enemy_Alive_NoStructure_NoImmune(dummyUnit) and UnitVisibleToPlayer(dummyUnit , P2) then
+            if IsEnemyAliveNoStructureNoImmune(dummyUnit) and UnitVisibleToPlayer(dummyUnit , P2) then
                 set iMeetCondition=iMeetCondition + 1
             endif
             call GroupRemoveUnit(g, dummyUnit)

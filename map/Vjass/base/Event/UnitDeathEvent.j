@@ -4,20 +4,19 @@
 scope UnitDeathEvent initializer Init
 
     //清空以单位handleId为父key的大部分数据
-    function FlushUnitData takes unit whichUnit returns nothing
+    private function FlushUnitData takes unit whichUnit returns nothing
         local integer iHandleId = GetHandleId(whichUnit)
         local integer loop_index = 0
         //如果单位会恢复生命值或魔法值,那么将其移除恢复队列
-        if HaveSavedInteger(UnitData, iHandleId, UNIT_LIFERESTORE) then
+        if HaveSavedInteger(DynamicData, iHandleId, UNIT_LIFERESTORE) then
             call QueuedUnitLifeRestoreRemove(whichUnit)
         endif
-        if HaveSavedInteger(UnitData, iHandleId, UNIT_MANARESTORE) then
+        if HaveSavedInteger(DynamicData, iHandleId, UNIT_MANARESTORE) then
             call QueuedUnitManaRestoreRemove(whichUnit)
         endif
 
         call FlushChildHashtable(HT, iHandleId)
-        call FlushChildHashtable(UnitData, iHandleId)
-        call FlushChildHashtable(UnitKeyBuff, iHandleId)
+        call FlushChildHashtable(DynamicData, iHandleId)
 
         call Debug("log", GetUnitName(whichUnit)+ " 数据已清空")	
     endfunction
@@ -33,7 +32,7 @@ scope UnitDeathEvent initializer Init
         if IsUnitType(dyingUnit, UNIT_TYPE_HERO) then
 
         else
-            //非英雄单位死亡直接清空哈希表子目录
+            // 非英雄单位死亡直接清空哈希表子目录
             call FlushUnitData(dyingUnit)
             //set deathType = S2I(GetUnitSlkData(unitType, "deathType"))
             //if deathType == 0 or deathType == 1 then

@@ -49,7 +49,7 @@ scope Imago
         loop
             set firstUnit = FirstOfGroup(enumGroup)
             exitwhen firstUnit == null//检查可见度 防止对隐身单位
-            if EnemyAlive(firstUnit) and UnitVisibleToPlayer(firstUnit, P2) then
+            if IsEnemyAlive(firstUnit) and UnitVisibleToPlayer(firstUnit, P2) then
                 call GroupAddUnit(targetGroup, firstUnit)
             endif
             call GroupRemoveUnit(enumGroup, firstUnit)

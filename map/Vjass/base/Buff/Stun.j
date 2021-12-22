@@ -5,18 +5,18 @@ scope Stun
     globals
         constant integer UNITBUFF_STUN = 'BPSE'
     endglobals
-    //模拟行为限制
-    //模拟晕眩
-    //EXPauseUnit内部自带计数 为true时+1 false时-1 计数 <=0 时单位不再晕眩
-    //移除晕眩
+    // 模拟行为限制
+    // 模拟晕眩
+    // EXPauseUnit内部自带计数 为true时+1 false时-1 计数 <=0 时单位不再晕眩
+    // 移除晕眩
     function UnitRemoveStun takes unit u returns boolean
         local integer h
         local integer uh = GetHandleId(u)
         local timer t = null
-        if HaveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN) then
-            set t = LoadTimerHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
+        if HaveSavedHandle(UnitBuffData, uh, UNITBUFF_STUN) then
+            set t = LoadTimerHandle(UnitBuffData, uh, UNITBUFF_STUN)
             set h = GetHandleId(t)
-            call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
+            call RemoveSavedHandle(UnitBuffData, uh, UNITBUFF_STUN)
             call RemoveSavedHandle(HT, h, 0)
             call DestroyTimer(t)
             call EXPauseUnit(u, false) //此函数内部自带计数
@@ -33,8 +33,8 @@ scope Stun
         local integer h = GetHandleId(t)
         local unit u = LoadUnitHandle(HT, h, 0)
         local integer uh = GetHandleId(u)
-        //call SaveInteger(UnitKeyBuff, uh, UNITBUFF_STUN,  LoadInteger(UnitKeyBuff, uh, UNITBUFF_STUN) - 1 )
-        call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
+        //call SaveInteger(UnitBuffData, uh, UNITBUFF_STUN,  LoadInteger(UnitBuffData, uh, UNITBUFF_STUN) - 1 )
+        call RemoveSavedHandle(UnitBuffData, uh, UNITBUFF_STUN)
         call RemoveSavedHandle(HT, h, 0)
         call PauseTimer(t)
         call DestroyTimer(t)
@@ -44,21 +44,21 @@ scope Stun
         set t = null
         set u = null
     endfunction
-    //单位、持续时间、是否无视魔免
+    // 单位、持续时间、是否无视魔免
     function UnitSetStun takes unit u, real dur returns boolean
         local timer t
         local integer h = GetHandleId(u)
         local real time = 0
-        if HaveSavedHandle(UnitKeyBuff, h, UNITBUFF_STUN) then
-            set t = LoadTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN)
+        if HaveSavedHandle(UnitBuffData, h, UNITBUFF_STUN) then
+            set t = LoadTimerHandle(UnitBuffData, h, UNITBUFF_STUN)
             set time = TimerGetRemaining(t)
         else
             set t = CreateTimer()
             call EXPauseUnit(u, true)
-            //call SaveInteger(UnitKeyBuff, h, UNITBUFF_STUN, LoadInteger(UnitKeyBuff, h, UNITBUFF_STUN) + 1)
+            //call SaveInteger(UnitBuffData, h, UNITBUFF_STUN, LoadInteger(UnitBuffData, h, UNITBUFF_STUN) + 1)
             call UnitAddAbility(u, 'Aasl')
             call UnitMakeAbilityPermanent(u, true, 'Aasl')
-            call SaveTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN, t)
+            call SaveTimerHandle(UnitBuffData, h, UNITBUFF_STUN, t)
             call SaveUnitHandle(HT, GetHandleId(t), 0, u)
         endif
         if time < dur then
@@ -70,7 +70,7 @@ scope Stun
         set t = null
         return true
     endfunction
-    //封装了一层本质上是使用UnitSetStun 参数b为是否无视魔法免疫
+    // 封装了一层本质上是使用UnitSetStun 参数b为是否无视魔法免疫
     function M_UnitSetStun takes unit u, real dur, real herodur, boolean b returns boolean
         if IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE) and not b then//检查是否魔免
             return false

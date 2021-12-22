@@ -69,7 +69,7 @@ function Assassination takes nothing returns nothing
 	loop
 		set firstUnit = FirstOfGroup(targetGroup)
 		exitwhen firstUnit == null
-		if IsGround_NotMechanical_Enemy_Alive_NoStructure(firstUnit) then
+		if IsGroundNotMechanicalEnemyAliveNoStructure(firstUnit) then
 			call DamageUnit(spellUnit, firstUnit, 2, damage)
 			call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Other\\Stampede\\StampedeMissileDeath.mdl", firstUnit, "origin"))
 		endif
@@ -88,7 +88,7 @@ function BlightPower takes nothing returns nothing
 	local integer abilityLevel = M_GetSpellAbilityLevel()
 	local real dur = 3 + abilityLevel * 1
 	call UnitSetMagicImmunity(spellUnit , dur)
-	call UnitAddAbilityTimed(spellUnit, 'Ab10', 1, dur, 'B010', 1)
+	call UnitAddAbilityTimed(spellUnit, 'Ab10', 1, dur, 'B010')
 	call SetBlight(GetOwningPlayer(spellUnit), GetUnitX(spellUnit), GetUnitY(spellUnit), 225, true)
 	
 	set spellUnit = null
@@ -222,7 +222,7 @@ function ShipSail takes nothing returns boolean
 			set firstUnit = FirstOfGroup(targetGroup)
 			exitwhen firstUnit == null
 			//非空军 非机械 存活 非建筑 敌军 可见
-			if UnitVisibleToPlayer(firstUnit, P2) and IsGround_NotMechanical_Enemy_Alive_NoStructure(firstUnit) and not IsUnitInGroup(firstUnit, injuredGroup) then
+			if UnitVisibleToPlayer(firstUnit, P2) and IsGroundNotMechanicalEnemyAliveNoStructure(firstUnit) and not IsUnitInGroup(firstUnit, injuredGroup) then
 				call JumpShip(firstUnit, dummyShip, spellUnit)
 				call GroupAddUnit(injuredGroup, firstUnit)
 			endif
@@ -248,7 +248,7 @@ function ShipSail takes nothing returns boolean
 		loop
 			set firstUnit = FirstOfGroup(targetGroup)
 			exitwhen firstUnit == null
-			if Enemy_Alive_NoStructure(firstUnit) then
+			if IsEnemyAliveNoStructure(firstUnit) then
 				call M_UnitSetStun(firstUnit, 2, 1.4, false)
 				call DamageUnit(spellUnit, firstUnit, 1, amount)
 			endif

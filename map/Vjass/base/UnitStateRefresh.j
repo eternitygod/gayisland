@@ -23,38 +23,47 @@ library UnitStateRefresh requires Common
 
     function RefreshLifeUnitRestore takes unit u returns nothing
         local integer h = GetHandleId(u)
-        local integer index = LoadInteger(UnitData, h, UNIT_LIFERESTORE)
-        set LifeRestoreValue[index] = (LoadReal(UnitData, h, UNIT_LIFERESTORE) +(GetHeroStr(u, true) * 0.04)) * RestoreFrame
+        local integer index = LoadInteger(DynamicData, h, UNIT_LIFERESTORE)
+        set LifeRestoreValue[index] = (LoadReal(DynamicData, h, UNIT_LIFERESTORE) +(GetHeroStr(u, true) * 0.04)) * RestoreFrame
     endfunction
     function RefreshManaUnitRestore takes unit u returns nothing
         local integer h = GetHandleId(u)
-        local integer index = LoadInteger(UnitData, h, UNIT_MANARESTORE)
-        set ManaRestoreValue[index] = (LoadReal(UnitData, h, UNIT_MANARESTORE) +(GetHeroInt(u, true) * 0.03)) * RestoreFrame
+        local integer index = LoadInteger(DynamicData, h, UNIT_MANARESTORE)
+        set ManaRestoreValue[index] = (LoadReal(DynamicData, h, UNIT_MANARESTORE) +(GetHeroInt(u, true) * 0.03)) * RestoreFrame
     endfunction
 
     function RefreshUnitRestore takes unit u returns nothing
         local integer h = GetHandleId(u)
-        set LifeRestoreValue[LoadInteger(UnitData, h, UNIT_LIFERESTORE)] = (LoadReal(UnitData, h, UNIT_LIFERESTORE) +(GetHeroStr(u, true) * 0.04)) * RestoreFrame
-        set ManaRestoreValue[LoadInteger(UnitData, h, UNIT_MANARESTORE)] = (LoadReal(UnitData, h, UNIT_MANARESTORE) +(GetHeroInt(u, true) * 0.03)) * RestoreFrame
+        set LifeRestoreValue[LoadInteger(DynamicData, h, UNIT_LIFERESTORE)] = (LoadReal(DynamicData, h, UNIT_LIFERESTORE) +(GetHeroStr(u, true) * 0.04)) * RestoreFrame
+        set ManaRestoreValue[LoadInteger(DynamicData, h, UNIT_MANARESTORE)] = (LoadReal(DynamicData, h, UNIT_MANARESTORE) +(GetHeroInt(u, true) * 0.03)) * RestoreFrame
     endfunction
 
+    globals
+        // 哈希表的Key
+        // DynamicData
+        constant key UNIT_BASE_ARMOR
+        constant key UNIT_BASE_DAMAGE
+        constant key UNIT_LIFERESTORE
+        constant key UNIT_MANARESTORE
+    endglobals
+    
     //刷新单位属性
     //call RefreshUnitArmor(u)		//刷新护甲
     //call RefreshUnitBaseAttack(u)	//刷新基础攻击力
     //call RefreshUnitRestor(u)		//刷新状态恢复
     function RefreshUnitState takes unit u returns nothing
         local integer h = GetHandleId(u) //刷新基础护甲
-        local real value = LoadReal(UnitData, h, BONUS_ARMOR) + LoadReal(UnitData, UNIT_BASE_ARMOR, h)
+        local real value = LoadReal(DynamicData, h, BONUS_ARMOR) + LoadReal(DynamicData, UNIT_BASE_ARMOR, h)
         local real newValue = (GetHeroAgi(u, true) / 6.00)* 1. + value
         local integer i
         call SetUnitState(u, UNIT_STATE_ARMOR, newValue)
         //刷新基础攻击力
-        set value = GetHeroPrimaryValue(u)
-        set newValue = value + LoadInteger(UnitData, h, UNIT_BASE_DAMAGE)
+        set value = OBJ_GetHeroPrimaryValue(u)
+        set newValue = value + LoadInteger(DynamicData, h, UNIT_BASE_DAMAGE)
         call SetUnitState(u, UNIT_STATE_ATTACK1_DAMAGE_BASE, newValue)
         //刷新 生命/魔法恢复速度
         call RefreshUnitRestore(u)
-        debug    call Debug("log",GetUnitName(u) + "生命/魔法 恢复：" + R2S(LoadReal(UnitData, h, UNIT_LIFERESTORE) + GetHeroStr(u, true)* 0.04) + "/" + R2S(LoadReal(UnitData, h, UNIT_MANARESTORE) + GetHeroInt(u, true)* 0.03) )
+        debug call Debug("log",GetUnitName(u) + "生命/魔法 恢复：" + R2S(LoadReal(DynamicData, h, UNIT_LIFERESTORE) + GetHeroStr(u, true)* 0.04) + "/" + R2S(LoadReal(DynamicData, h, UNIT_MANARESTORE) + GetHeroInt(u, true)* 0.03) )
         //同时刷新面板
         //call UnitStateUpdateCallback()
     endfunction

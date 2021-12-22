@@ -136,7 +136,7 @@ scope Pudge
             loop
                 set target = FirstOfGroup(g)
                 exitwhen target == null
-                if Enemy_Alive_NoStructure_NoImmune(target) then
+                if IsEnemyAliveNoStructureNoImmune(target) then
                     call DamageUnit(u, target, 2, damage)
                 endif
                 call GroupRemoveUnit(g, target)
@@ -151,7 +151,7 @@ scope Pudge
             set target = null
         else
             call DestroyEffect(effSlow)
-            call RemoveSavedHandle(UnitKeyBuff, GetHandleId(u), 'Bpg2')
+            call RemoveSavedHandle(UnitBuffData, GetHandleId(u), 'Bpg2')
             call FlushChildHashtable(HT, h)
             call ClearTrigger(t)
         endif
@@ -165,8 +165,8 @@ scope Pudge
         local unit whichUnit = M_GetSpellAbilityUnit()
         local integer h = GetHandleId(whichUnit)
         local trigger trig
-        if HaveSavedHandle(UnitKeyBuff, h, 'Bpg2') then
-            set trig = LoadTriggerHandle(UnitKeyBuff, h, 'Bpg2')
+        if HaveSavedHandle(UnitBuffData, h, 'Bpg2') then
+            set trig = LoadTriggerHandle(UnitBuffData, h, 'Bpg2')
             call UnitRemoveAbility(whichUnit, 'Ab05')
             call UnitRemoveAbility(whichUnit, 'Bpg2') //删除技能并立即运行一次触发 即可结束此触发
             call TriggerEvaluate(trig)
@@ -175,7 +175,7 @@ scope Pudge
             set h = GetHandleId(trig)
             call TriggerRegisterTimerEvent(trig, 0.1, true)
             call TriggerAddCondition(trig, Condition( function Pudge_Rot_Action))
-            call SaveTriggerHandle(UnitKeyBuff, GetHandleId(whichUnit), 'Bpg2', trig)
+            call SaveTriggerHandle(UnitBuffData, GetHandleId(whichUnit), 'Bpg2', trig)
             call SaveUnitHandle(HT, h, 10, whichUnit)
             call UnitAddPermanentAbility(whichUnit, 'Ab05')
             call SaveEffectHandle(HT, h, 0, AddSpecialEffectTarget("Abilities\\Spells\\Human\\slow\\slowtarget.mdl", whichUnit, "head"))
@@ -223,7 +223,7 @@ scope Pudge
         loop
             set dummyUnit = FirstOfGroup(g)
             exitwhen dummyUnit == null//检查可见度 防止烧隐身单位
-            if Enemy_Alive_NoStructure_NoImmune(dummyUnit) and UnitVisibleToPlayer(dummyUnit, P2) then
+            if IsEnemyAliveNoStructureNoImmune(dummyUnit) and UnitVisibleToPlayer(dummyUnit, P2) then
                 set iMeetCondition = iMeetCondition + 1
             endif
             call GroupRemoveUnit(g, dummyUnit)
@@ -375,7 +375,7 @@ scope Pudge
         loop
             set dummyUnit = FirstOfGroup(enumGroup)
             exitwhen dummyUnit == null//检查可见度 防止对隐身单位
-            if Enemy_Alive_NoStructure(dummyUnit) and UnitVisibleToPlayer(dummyUnit, P2) then
+            if IsEnemyAliveNoStructure(dummyUnit) and UnitVisibleToPlayer(dummyUnit, P2) then
                 call GroupAddUnit(targetGroup, dummyUnit)
             endif
             call GroupRemoveUnit(enumGroup, dummyUnit)
@@ -415,7 +415,7 @@ scope Pudge
         loop
             set firstUnit = FirstOfGroup(enumGroup)
             exitwhen firstUnit == null//检查可见度 防止对隐身单位
-            if EnemyAlive(firstUnit) and UnitVisibleToPlayer(firstUnit, P2) then
+            if IsEnemyAlive(firstUnit) and UnitVisibleToPlayer(firstUnit, P2) then
                 call GroupAddUnit(targetGroup, firstUnit)
             endif
             call GroupRemoveUnit(enumGroup, firstUnit)

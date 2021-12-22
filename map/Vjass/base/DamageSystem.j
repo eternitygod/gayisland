@@ -1,6 +1,6 @@
 
 
-library DamageSystem requires base, TextTag
+library DamageSystem requires base, TextTag, UnitAttackEvent
 
     //==============================================================================
     // DamagedEvent
@@ -89,6 +89,19 @@ library DamageSystem requires base, TextTag
         endif
     endfunction
 
+    globals
+        trigger array DamageEventQueue
+        integer array DamageEventNumber
+        //伤害来源
+        unit Tmp_DamageSource = null //GetEventDamageSource()
+        //受伤者
+        unit Tmp_DamageInjured = null
+        //伤害值
+        real Tmp_DamageValue
+        boolean array EffectIsEnabled //用来一些特效是否被启用 减少运算资源
+        timer array EffectEnabledTimer
+    endglobals
+
     // 斩杀单位
     function UnitKillTarget takes unit whichUnit, unit target returns boolean
         call UnitRemoveBuffs(target, true, true)
@@ -117,14 +130,6 @@ library DamageSystem requires base, TextTag
         call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Undead\\VampiricAura\\VampiricAuraTarget.mdl", Tmp_DamageSource, "origin"))
     endfunction
 
-    //使得单位本次攻击 暴击
-    function SetUnitCriticalStrike takes real c, boolean isAttackTarget returns nothing
-        set Tmp_DamageValue = Tmp_DamageValue + Tmp_DamageValue * c //设置这个全局值为暴击后的伤害
-        call EXSetEventDamage(Tmp_DamageValue) //设置伤害值
-        if isAttackTarget then
-            call CriticalStrikeTextTag(Tmp_DamageSource , Tmp_DamageValue)
-        endif
-    endfunction
 
     function TraversalDamagedEvent takes integer id returns nothing
         local integer i = id * 200
@@ -166,11 +171,16 @@ library DamageSystem requires base, TextTag
             call DamageReduction()
             if EXGetEventDamageData(EVENT_DAMAGE_DATA_IS_ATTACK) != 0 then //如果是物理伤害则运行此部分
                 //伤害减免后运行暴击
-                set isAttackTarget = LoadUnitHandle(UnitKeyBuff, i, AttackTarget) == Tmp_DamageInjured
-                set c = LoadReal(UnitKeyBuff, i, CriticalStrikeDamage)
-                if c != .0 then
-                    call SetUnitCriticalStrike(c, isAttackTarget)//先一步把暴击运行了 因为这会改变伤害值
+                set isAttackTarget = GetUnitAttackTarget( i ) == Tmp_DamageInjured
+                set c = GetUnitCriticalStrike( i )
+                if c != .0 then // 先运行暴击
+                    set Tmp_DamageValue = Tmp_DamageValue + Tmp_DamageValue * c //设置这个全局值为暴击后的伤害
+                    call EXSetEventDamage(Tmp_DamageValue) //设置伤害值
+                    if isAttackTarget then
+                        call CriticalStrikeTextTag(Tmp_DamageSource , Tmp_DamageValue)
+                    endif
                 endif
+                // 所有伤害调整完毕后 运行攻击特效
                 // 这里是判断一下该单位是否是普通攻击的目标(排除溅射伤害)
                 if isAttackTarget then
                     if CommonAttackEffectFilter(Tmp_DamageSource, Tmp_DamageInjured) then

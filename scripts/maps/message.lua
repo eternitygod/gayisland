@@ -3,14 +3,9 @@ local japi = require 'jass.japi'
 local message = require 'jass.message'
 local jass = require 'jass.common'
 local g = require 'jass.globals'
-if not message then
-	return
-end
+
 --require "jass.console".enable = true
 --message.order_enable_debug = true
-
-require 'war3.id'
-
 local hook = require "jass.hook"
 local slk = require "jass.slk"
 
@@ -38,4 +33,10 @@ function hook.AbilityId2String(s)
     end
     return nil
 end
+
+function Init()
+    japi.EXDisplayChat(jass.Player(0), 2, "LuaInit")
+end
+
+Init()
 

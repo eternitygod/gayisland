@@ -12,7 +12,7 @@ function UnitSpellStmop takes unit whichUnit, real damage, integer damageType, r
 	loop
 		set firstUnit = FirstOfGroup(targetGroup)
 		exitwhen firstUnit == null
-		if IsGround_NotMechanical_Enemy_Alive_NoStructure(firstUnit) then
+		if IsGroundNotMechanicalEnemyAliveNoStructure(firstUnit) then
 			call M_UnitSetStun(firstUnit, dur, herodur, ignoreMagicImmunes)
 			call DamageUnit(whichUnit, firstUnit, damageType, damage)
 		endif

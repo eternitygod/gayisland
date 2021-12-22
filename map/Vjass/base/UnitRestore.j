@@ -2,35 +2,39 @@
 library UnitRestore initializer InitUnitRestore
     
     globals
-        //单位状态恢复 生命/魔法
-        //计时器RestoreFrame秒回调一次
-        //timer UnitRestoreTimer = null 
-        //恢复队列
+        // 单位状态恢复 生命/魔法
+        // 计时器RestoreFrame秒回调一次
+        // timer UnitRestoreTimer = null 
+        // 恢复队列
         unit array UnitLifeRestoreQueue
         unit array UnitManaRestoreQueue
         real array LifeRestoreValue
         real array ManaRestoreValue
-        //恢复队列最大值
+        // 恢复队列最大值
         integer UnitLifeRestoreNumber = 0
         integer UnitManaRestoreNumber = 0
     endglobals
 
     function UnitCanRestoreLife takes unit whichUnit returns boolean
-        return HaveSavedInteger(UnitData, GetHandleId(whichUnit), UNIT_LIFERESTORE)
+        return HaveSavedInteger(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE)
     endfunction
 
     function UnitCanRestoreMana takes unit whichUnit returns boolean
-        return HaveSavedInteger(UnitData, GetHandleId(whichUnit), UNIT_MANARESTORE)
+        return HaveSavedInteger(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE)
     endfunction
 
     //生命恢复,所有生命恢复都以这条函数来进行	/*不包括生命移除*/
     function UnitRestoreLife takes unit u, real r returns nothing
-        if r != 0 then
-            if IsUnitType(u, UNIT_TYPE_UNDEAD) then	//不死族单位在荒芜地表享受两倍生命恢复效果
-                if IsPointBlighted(GetUnitX(u), GetUnitY(u)) then
-                    set r = r * 2.00
+        static if IS_ISLAND then
+            if r != 0 then
+                if IsUnitType(u, UNIT_TYPE_UNDEAD) then	//不死族单位在荒芜地表享受两倍生命恢复效果
+                    if IsPointBlighted(GetUnitX(u), GetUnitY(u)) then
+                        set r = r * 2.00
+                    endif
                 endif
+                call SetWidgetLife(u, GetWidgetLife(u) + r)
             endif
+        else
             call SetWidgetLife(u, GetWidgetLife(u) + r)
         endif
     endfunction
@@ -47,14 +51,14 @@ library UnitRestore initializer InitUnitRestore
         set UnitLifeRestoreNumber = UnitLifeRestoreNumber + 1
         set UnitLifeRestoreQueue[UnitLifeRestoreNumber] = whichUnit
         set LifeRestoreValue[UnitLifeRestoreNumber] = 0.	//可能不需要set 0
-        call SaveInteger(UnitData, GetHandleId(whichUnit), UNIT_LIFERESTORE, UnitLifeRestoreNumber)
+        call SaveInteger(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE, UnitLifeRestoreNumber)
     endfunction
     //使单位加入恢复队列,允许其恢复 生命/魔法
     function QueuedUnitManaRestoreAdd takes unit whichUnit returns nothing
         set UnitManaRestoreNumber = UnitManaRestoreNumber + 1
         set UnitManaRestoreQueue[UnitManaRestoreNumber] = whichUnit
         set ManaRestoreValue[UnitManaRestoreNumber] = 0.
-        call SaveInteger(UnitData, GetHandleId(whichUnit), UNIT_MANARESTORE, UnitManaRestoreNumber)
+        call SaveInteger(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE, UnitManaRestoreNumber)
     endfunction
 
     //使单位加入恢复队列,允许其恢复 生命/魔法
@@ -66,14 +70,14 @@ library UnitRestore initializer InitUnitRestore
     //将单位移出恢复队列,禁用其恢复 生命
     function QueuedUnitLifeRestoreRemove takes unit whichUnit returns nothing
         local integer iHandleId = GetHandleId(whichUnit)
-        local integer index = LoadInteger(UnitData, iHandleId, UNIT_LIFERESTORE)
+        local integer index = LoadInteger(DynamicData, iHandleId, UNIT_LIFERESTORE)
         if index != UnitLifeRestoreNumber then
             set UnitLifeRestoreQueue[index] = UnitLifeRestoreQueue[UnitLifeRestoreNumber]
             set LifeRestoreValue[index] = LifeRestoreValue[UnitLifeRestoreNumber]
-            call SaveInteger(UnitData, iHandleId, UNIT_LIFERESTORE, 0)
+            call SaveInteger(DynamicData, iHandleId, UNIT_LIFERESTORE, 0)
 
             set iHandleId = GetHandleId(UnitLifeRestoreQueue[UnitLifeRestoreNumber])
-            call SaveInteger(UnitData, iHandleId, UNIT_LIFERESTORE, index)
+            call SaveInteger(DynamicData, iHandleId, UNIT_LIFERESTORE, index)
         endif
         set UnitLifeRestoreQueue[UnitLifeRestoreNumber] = null
         set LifeRestoreValue[UnitLifeRestoreNumber] = 0.
@@ -84,14 +88,14 @@ library UnitRestore initializer InitUnitRestore
     //将单位移出恢复队列,禁用其恢复 魔法
     function QueuedUnitManaRestoreRemove takes unit whichUnit returns nothing
         local integer iHandleId = GetHandleId(whichUnit)
-        local integer index = LoadInteger(UnitData, iHandleId, UNIT_MANARESTORE)
+        local integer index = LoadInteger(DynamicData, iHandleId, UNIT_MANARESTORE)
         if index != UnitManaRestoreNumber then
             set UnitManaRestoreQueue[index] = UnitManaRestoreQueue[UnitManaRestoreNumber]
             set ManaRestoreValue[index] = ManaRestoreValue[UnitManaRestoreNumber]
-            call SaveInteger(UnitData, iHandleId, UNIT_MANARESTORE, 0)
+            call SaveInteger(DynamicData, iHandleId, UNIT_MANARESTORE, 0)
 	
             set iHandleId = GetHandleId(UnitManaRestoreQueue[UnitManaRestoreNumber])
-            call SaveInteger(UnitData, iHandleId, UNIT_MANARESTORE, index)
+            call SaveInteger(DynamicData, iHandleId, UNIT_MANARESTORE, index)
         endif
         set UnitManaRestoreQueue[UnitManaRestoreNumber] = null
         set ManaRestoreValue[UnitManaRestoreNumber] = 0.
