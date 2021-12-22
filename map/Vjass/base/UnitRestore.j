@@ -1,5 +1,5 @@
 
-scope UnitRestore initializer InitUnitRestore
+library UnitRestore initializer InitUnitRestore
     
     globals
         //单位状态恢复 生命/魔法
@@ -143,5 +143,5 @@ scope UnitRestore initializer InitUnitRestore
         call TriggerAddCondition(trig, Condition( function RestoreAllUnitMana))
     endfunction
 
-endscope
+endlibrary
 

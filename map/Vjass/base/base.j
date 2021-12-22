@@ -1,7 +1,9 @@
 
+
 // japi常量
 #include "JapiConstant.j"
 #include "math.j"
+#include "UnitRestore.j"
 // 任意单位受伤和任意物品死亡
 #include "CustomAnyEvent.j"
 // 命令Id
@@ -11,7 +13,7 @@
 // 单位选取的过滤条件
 #include "Filter.j"
 
-#include "UnitRestore.j"
+
 
 #include "UnitStateRefresh.j"
 
@@ -20,6 +22,8 @@
 #include "ItemSystem.j"
 // 物品相关事件包含在ItemSystem.j
 #include "Event.j"
+
+#include "Buff\BuffSystem.j"
 
 
 
@@ -40,7 +44,6 @@ library base initializer Init requires math
         private constant timer GameTimer = CreateTimer()
         // 本地玩家 每个玩家的此变量值不同
         player LocalPlayer = null
-
 
     endglobals
 
@@ -68,8 +71,6 @@ library base initializer Init requires math
     function GetGameTime takes nothing returns real
         return TimerGetElapsed( GameTimer )
     endfunction
-
-    
 
     //==============================================================================
     // Triggers
@@ -233,4 +234,5 @@ library base initializer Init requires math
     endfunction
 
 endlibrary
+
 

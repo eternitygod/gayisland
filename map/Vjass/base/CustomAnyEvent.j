@@ -1,7 +1,9 @@
 
 
+// 伤害系统
+#include "DamageSystem.j"
 
-library CustomAnyEvent initializer Init requires base
+library CustomAnyEvent initializer Init requires base, DamageSystem
 
     globals
         // 类型转换需要用到的哈希表,可以在同继承关系下转换
@@ -132,6 +134,7 @@ library CustomAnyEvent initializer Init requires base
     endfunction
         
     private function Init takes nothing returns nothing
+        set DamageEventCondition = Condition(function YDWEAnyUnitDamagedTriggerAction)
         call YDWESyStemAnyUnitDamagedRegistTrigger()
         call AnyItemDeathEventEnumItem()
     endfunction

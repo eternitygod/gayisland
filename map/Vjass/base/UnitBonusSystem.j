@@ -325,7 +325,7 @@ scope UnitBonusSystem
 
     function AddUnitVision takes unit whichUnit, integer value returns nothing
         call UnitAddAbility( whichUnit, 'AIsi' )
-        call YDWESetUnitAbilityDataReal( whichUnit, 'AIsi', 2, ABILITY_DATA_DATA_A, - data )
+        call YDWESetUnitAbilityDataReal( whichUnit, 'AIsi', 2, ABILITY_DATA_DATA_A, - value )
         call IncUnitAbilityLevel( whichUnit, 'AIsi')
         call UnitRemoveAbility( whichUnit, 'AIsi' )
     endfunction

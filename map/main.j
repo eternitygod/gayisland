@@ -5,7 +5,7 @@
 
 #include "Vjass\Test.j"
 
-#include "Vjass\Buff\BuffSystem.j"
+
 
 // #include "Vjass\Cinematic.j"
 
@@ -29,6 +29,13 @@
 
 
 globals
+	// 野外生物起义和基佬岛公用基础库，但会有区别
+	constant boolean IS_ISLAND = true
+	/*
+	static IS_ISLAND then
+		call DoNothing()
+	endif
+	*/
 	/*
 	// Generated
 	rect gg_rct_TriggerTiny = null
@@ -864,93 +871,7 @@ endfunction
 
 
 
-//吸血
-function GetUnitLifestealValue takes unit stealUnit returns real
-	if EffectIsEnabled[2] then
-		if GetUnitAbilityLevel(stealUnit, 'Acs0') == 1 then
-			return 0.10
-		endif
-	endif
-	return 0.
-endfunction
 
-function SetUnitLifesteal takes nothing returns nothing
-	local real value
-	set value = GetUnitLifestealValue(Tmp_DamageSource)
-	if value == 0. then
-		return
-	endif
-	if not IsUnitIllusion(Tmp_DamageSource) and not IsUnitIllusion(Tmp_DamageInjured) then
-		call UnitRestoreLife(Tmp_DamageSource, Tmp_DamageValue * value)
-	endif
-	call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Undead\\VampiricAura\\VampiricAuraTarget.mdl", Tmp_DamageSource, "origin"))
-endfunction
-
-//使得单位本次攻击 暴击
-function SetUnitCriticalStrike takes real c, boolean isAttackTarget returns nothing
-	set Tmp_DamageValue = Tmp_DamageValue + Tmp_DamageValue * c //设置这个全局值为暴击后的伤害
-	call EXSetEventDamage(Tmp_DamageValue) //设置伤害值
-	if isAttackTarget then
-		call CriticalStrikeTextTag(Tmp_DamageSource , Tmp_DamageValue)
-	endif
-endfunction
-
-//任意单位受伤动作
-function TraversalDamagedEvent takes integer id returns nothing
-	local integer i = id * 200
-	loop //遍历其他攻击特效
-		exitwhen i >= DamageEventNumber[id]
-		if DamageEventQueue[i] != null and IsTriggerEnabled(DamageEventQueue[i]) then
-			call TriggerEvaluate(DamageEventQueue[i])
-		endif
-		set i = i + 1  
-	endloop
-endfunction
-
-//
-function DamageReduction takes nothing returns nothing
-	local integer level
-	if EffectIsEnabled[3] then
-		set level = GetUnitAbilityLevel(Tmp_DamageInjured, 'Acs3')
-		if level > 0 then
-			if IsPointBlighted(GetUnitX(Tmp_DamageInjured), GetUnitY(Tmp_DamageInjured)) then
-				//call Debug("log", "减少"+R2S( Tmp_DamageValue * 0.05 * level))
-				set Tmp_DamageValue = Tmp_DamageValue - Tmp_DamageValue * 0.05 * level
-				call EXSetEventDamage(Tmp_DamageValue) //设置伤害值
-			endif
-		endif
-	endif
-endfunction
-
-function YDWEAnyUnitDamagedTriggerAction takes nothing returns boolean
-	local integer i
-	local real c
-	local boolean isAttackTarget
-	set Tmp_DamageValue = GetEventDamage()	//伤害值
-	if Tmp_DamageValue > 0 then
-		set Tmp_DamageSource = GetEventDamageSource()	//伤害来源
-		set Tmp_DamageInjured = GetTriggerUnit()	//受伤单位
-		set i = GetHandleId(Tmp_DamageSource)
-		//伤害减免
-		call DamageReduction()
-		if EXGetEventDamageData(EVENT_DAMAGE_DATA_IS_ATTACK) != 0 then //如果是物理伤害则运行此部分
-			//伤害减免后运行暴击
-			set isAttackTarget = LoadUnitHandle(UnitKeyBuff, i, AttackTarget) == Tmp_DamageInjured
-			set c = LoadReal(UnitKeyBuff, i, CriticalStrikeDamage)
-			if c != .0 then
-				call SetUnitCriticalStrike(c, isAttackTarget)//先一步把暴击运行了 因为这会改变伤害值
-			endif
-			// 这里是判断一下该单位是否是普通攻击的目标(排除溅射伤害)
-			if isAttackTarget then
-				if CommonAttackEffectFilter(Tmp_DamageSource, Tmp_DamageInjured) then
-					call TraversalDamagedEvent(1)
-					call SetUnitLifesteal()
-				endif
-			endif
-		endif
-	endif
-	return false
-endfunction
 
 
 function RestoreAura_Filter takes nothing returns boolean
@@ -1339,8 +1260,7 @@ endfunction
 
 	
 	//要在bj初始化前使用
-	set DamageEventCondition = Condition(function YDWEAnyUnitDamagedTriggerAction)
-	
+
 	call InitBlizzard()
     //call InitGlobals(  )
     call InitCustomTriggers(  )

@@ -37,8 +37,8 @@ scope Imago
     endfunction
 
     private function ImagoAI__AddCommandQueue takes unit imago returns nothing
-        local group targetGroup
-        local group enumGroup
+        local group targetGroup = LoginGroup()
+        local group enumGroup = LoginGroup()
         local unit firstUnit
         local unit targetUnit
         set Tmp__ArrayReal[0] = GetUnitX(imago)
@@ -59,6 +59,7 @@ scope Imago
         set enumGroup = null
         // 寻敌
         set targetUnit = GetMinPercentLifeUnitByGroup(targetGroup)
+        call LogoutGroup(targetGroup)
         if IsUnitInRange( targetUnit, imago, 500 ) then // 如果百分比血量最低的单位在500范围内 那就干他
             call SetBossCommandQueue( imago, targetUnit, ORDER_ATTACK, 0, 0 )
         endif
@@ -76,8 +77,8 @@ scope Imago
         
     endfunction
 
-    function ImagoAI__CallBack takes nothing returns boolean
-        local eventid hEventId = GetTriggerEventId()
+    private function ImagoAI__CallBack takes nothing returns boolean
+        local eventid trigEventId = GetTriggerEventId()
 
         local integer iHandleId = GetHandleId(GetTriggeringTrigger())
         local unit imago = LoadUnitHandle(HT, iHandleId, 0)
@@ -87,7 +88,7 @@ scope Imago
 
 
 
-        if hEventId == EVENT_GAME_TIMER_EXPIRED then
+        if trigEventId == EVENT_GAME_TIMER_EXPIRED then
 
             if currentOrderId == 0 or currentOrderId != ORDER_ATTACK  then
                 set Tmp__ArrayInt[1] = iHandleId
@@ -134,7 +135,7 @@ scope Imago
         endif
 
         set imago = null
-        set hEventId = null
+        set trigEventId = null
         return false
     endfunction
 

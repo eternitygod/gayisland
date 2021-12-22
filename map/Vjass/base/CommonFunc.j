@@ -5,7 +5,7 @@
 // 物体数据 从Slk库获取
 #include "ObjectData.j"
 
-library Common requires base
+library Common requires base, DamageSystem
 
     globals
         //是否要DeBug
@@ -46,47 +46,7 @@ library Common requires base
         endloop
     endfunction
 
-    globals
-        
-        // 魔法
-        constant integer DAMAGE_TYPE_MAGICAL = 1
-        // 物理
-        constant integer DAMAGE_TYPE_PHYSICAL = 2
-        // 纯粹
-        constant integer DAMAGE_TYPE_PURE = 3
-        
-    endglobals
 
-    //造成伤害 脚本中除了普攻以外的伤害都由此造成
-    function DamageUnit takes unit whichUnit, unit target, integer Type, real amount returns nothing
-        if Type == 0 or amount < 0 then
-            return
-        endif
-        if Type == 1 then //法术,火焰伤害(魔法伤害)
-            call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_FIRE, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 2 then //英雄,普通伤害(物理伤害)
-            call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_HERO, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 3 then //英雄,魔法伤害(纯粹伤害)
-            call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_HERO, DAMAGE_TYPE_MAGIC, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 4 then //穿刺，普通伤害(?)
-            call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_PIERCE, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 5 then //法术，普通伤害(?)
-            call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 6 then //英雄，通用伤害(神圣伤害)
-            call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_HERO, DAMAGE_TYPE_UNIVERSAL, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 7 then //英雄，加强伤害(?)
-            call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_HERO, DAMAGE_TYPE_ENHANCED, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 8 then //法术，通用伤害(?)
-            call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 9 then //生命移除
-        endif
-    endfunction
-
-    // 斩杀单位
-    function UnitKillTarget takes unit whichUnit, unit target returns boolean
-        call UnitRemoveBuffs(target, true, true)
-        return UnitDamageTarget(whichUnit, target, 10000000, false, false, ATTACK_TYPE_PIERCE, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
-    endfunction
     
 
     
