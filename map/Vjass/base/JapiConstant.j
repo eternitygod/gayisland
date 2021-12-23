@@ -1,5 +1,5 @@
 
-scope YDWEJapi
+library YDWEJapi
     native EXExecuteScript takes string script returns string
     native EXDisplayChat takes player p, integer chat_recipient, string message returns nothing
     // Abilitys
@@ -61,38 +61,40 @@ scope YDWEJapi
 	native EXGetAbilityDataString takes ability abil, integer level, integer data_type returns string
 	native EXSetAbilityDataString takes ability abil, integer level, integer data_type, string value returns boolean
 
-    // 技能属性 [JAPI]
-    function YDWEGetUnitAbilityState takes unit u, integer abilcode, integer state_type returns real
-        return EXGetAbilityState(EXGetUnitAbility(u, abilcode), state_type)
-    endfunction
-    // 技能数据 (整数) [JAPI]
-    function YDWEGetUnitAbilityDataInteger takes unit u, integer abilcode, integer level, integer data_type returns integer
-        return EXGetAbilityDataInteger(EXGetUnitAbility(u, abilcode), level, data_type)
-    endfunction
-    // 技能数据 (实数) [JAPI]
-    function YDWEGetUnitAbilityDataReal takes unit u, integer abilcode, integer level, integer data_type returns real
-        return EXGetAbilityDataReal(EXGetUnitAbility(u, abilcode), level, data_type)
-    endfunction
-    // 技能数据 (字符串) [JAPI]
-    function YDWEGetUnitAbilityDataString takes unit u, integer abilcode, integer level, integer data_type returns string
-        return EXGetAbilityDataString(EXGetUnitAbility(u, abilcode), level, data_type)
-    endfunction
-    // 设置技能属性 [JAPI]
-    function YDWESetUnitAbilityState takes unit u, integer abilcode, integer state_type, real value returns boolean
-        return EXSetAbilityState(EXGetUnitAbility(u, abilcode), state_type, value)
-    endfunction
-    // 设置技能数据 (整数) [JAPI]
-    function YDWESetUnitAbilityDataInteger takes unit u, integer abilcode, integer level, integer data_type, integer value returns boolean
-        return EXSetAbilityDataInteger(EXGetUnitAbility(u, abilcode), level, data_type, value)
-    endfunction
-    // 设置技能数据 (实数) [JAPI]
-    function YDWESetUnitAbilityDataReal takes unit u, integer abilcode, integer level, integer data_type, real value returns boolean
-        return EXSetAbilityDataReal(EXGetUnitAbility(u, abilcode), level, data_type, value)
-    endfunction
-    // 设置技能数据 (字符串) [JAPI]
-    function YDWESetUnitAbilityDataString takes unit u, integer abilcode, integer level, integer data_type, string value returns boolean
-        return EXSetAbilityDataString(EXGetUnitAbility(u, abilcode), level, data_type, value)
-    endfunction
+    static if not LIBRARY_YDWEAbilityState then
+        // 技能属性 [JAPI]
+        function YDWEGetUnitAbilityState takes unit u, integer abilcode, integer state_type returns real
+            return EXGetAbilityState(EXGetUnitAbility(u, abilcode), state_type)
+        endfunction
+        // 技能数据 (整数) [JAPI]
+        function YDWEGetUnitAbilityDataInteger takes unit u, integer abilcode, integer level, integer data_type returns integer
+            return EXGetAbilityDataInteger(EXGetUnitAbility(u, abilcode), level, data_type)
+        endfunction
+        // 技能数据 (实数) [JAPI]
+        function YDWEGetUnitAbilityDataReal takes unit u, integer abilcode, integer level, integer data_type returns real
+            return EXGetAbilityDataReal(EXGetUnitAbility(u, abilcode), level, data_type)
+        endfunction
+        // 技能数据 (字符串) [JAPI]
+        function YDWEGetUnitAbilityDataString takes unit u, integer abilcode, integer level, integer data_type returns string
+            return EXGetAbilityDataString(EXGetUnitAbility(u, abilcode), level, data_type)
+        endfunction
+        // 设置技能属性 [JAPI]
+        function YDWESetUnitAbilityState takes unit u, integer abilcode, integer state_type, real value returns boolean
+            return EXSetAbilityState(EXGetUnitAbility(u, abilcode), state_type, value)
+        endfunction
+        // 设置技能数据 (整数) [JAPI]
+        function YDWESetUnitAbilityDataInteger takes unit u, integer abilcode, integer level, integer data_type, integer value returns boolean
+            return EXSetAbilityDataInteger(EXGetUnitAbility(u, abilcode), level, data_type, value)
+        endfunction
+        // 设置技能数据 (实数) [JAPI]
+        function YDWESetUnitAbilityDataReal takes unit u, integer abilcode, integer level, integer data_type, real value returns boolean
+            return EXSetAbilityDataReal(EXGetUnitAbility(u, abilcode), level, data_type, value)
+        endfunction
+        // 设置技能数据 (字符串) [JAPI]
+        function YDWESetUnitAbilityDataString takes unit u, integer abilcode, integer level, integer data_type, string value returns boolean
+            return EXSetAbilityDataString(EXGetUnitAbility(u, abilcode), level, data_type, value)
+        endfunction
+    endif
 
 	native EXSetAbilityAEmeDataA takes ability abil, integer unitid returns boolean
     
@@ -116,215 +118,215 @@ scope YDWEJapi
     native EXSetUnitMoveType takes unit u, integer t returns nothing
         
     /*function YDWEUnitAddStun takes unit u returns nothing
-        call EXPauseUnit(u, true)
-    endfunction
+    call EXPauseUnit(u, true)
+endfunction
         
-    function YDWEUnitRemoveStun takes unit u returns nothing
-        call EXPauseUnit(u, false)
-    endfunction*/
+function YDWEUnitRemoveStun takes unit u returns nothing
+    call EXPauseUnit(u, false)
+endfunction */
     
-    globals
-        //------------单位数据类型--------------
-        // 攻击1 伤害骰子数量
-        constant unitstate UNIT_STATE_ATTACK1_DAMAGE_DICE = ConvertUnitState(0x10)
+globals
+    //------------单位数据类型--------------
+    // 攻击1 伤害骰子数量
+    constant unitstate UNIT_STATE_ATTACK1_DAMAGE_DICE = ConvertUnitState(0x10)
     
-        // 攻击1 伤害骰子面数
-        constant unitstate UNIT_STATE_ATTACK1_DAMAGE_SIDE = ConvertUnitState(0x11)
+    // 攻击1 伤害骰子面数
+    constant unitstate UNIT_STATE_ATTACK1_DAMAGE_SIDE = ConvertUnitState(0x11)
     
-        // 攻击1 基础伤害
-        constant unitstate UNIT_STATE_ATTACK1_DAMAGE_BASE = ConvertUnitState(0x12)
+    // 攻击1 基础伤害
+    constant unitstate UNIT_STATE_ATTACK1_DAMAGE_BASE = ConvertUnitState(0x12)
     
-        // 攻击1 升级奖励
-        constant unitstate UNIT_STATE_ATTACK1_DAMAGE_BONUS = ConvertUnitState(0x13)
+    // 攻击1 升级奖励
+    constant unitstate UNIT_STATE_ATTACK1_DAMAGE_BONUS = ConvertUnitState(0x13)
     
-        // 攻击1 最小伤害
-        constant unitstate UNIT_STATE_ATTACK1_DAMAGE_MIN = ConvertUnitState(0x14)
+    // 攻击1 最小伤害
+    constant unitstate UNIT_STATE_ATTACK1_DAMAGE_MIN = ConvertUnitState(0x14)
     
-        // 攻击1 最大伤害
-        constant unitstate UNIT_STATE_ATTACK1_DAMAGE_MAX = ConvertUnitState(0x15)
+    // 攻击1 最大伤害
+    constant unitstate UNIT_STATE_ATTACK1_DAMAGE_MAX = ConvertUnitState(0x15)
     
-        // 攻击1 全伤害范围
-        constant unitstate UNIT_STATE_ATTACK1_RANGE = ConvertUnitState(0x16)
+    // 攻击1 全伤害范围
+    constant unitstate UNIT_STATE_ATTACK1_RANGE = ConvertUnitState(0x16)
     
-        // 装甲
-        constant unitstate UNIT_STATE_ARMOR = ConvertUnitState(0x20)
+    // 装甲
+    constant unitstate UNIT_STATE_ARMOR = ConvertUnitState(0x20)
     
-        // attack 1 attribute adds
-        // 攻击1 伤害衰减参数
-        constant unitstate UNIT_STATE_ATTACK1_DAMAGE_LOSS_FACTOR = ConvertUnitState(0x21)
+    // attack 1 attribute adds
+    // 攻击1 伤害衰减参数
+    constant unitstate UNIT_STATE_ATTACK1_DAMAGE_LOSS_FACTOR = ConvertUnitState(0x21)
     
-        // 攻击1 武器声音
-        constant unitstate UNIT_STATE_ATTACK1_WEAPON_SOUND = ConvertUnitState(0x22)
+    // 攻击1 武器声音
+    constant unitstate UNIT_STATE_ATTACK1_WEAPON_SOUND = ConvertUnitState(0x22)
     
-        // 攻击1 攻击类型
-        constant unitstate UNIT_STATE_ATTACK1_ATTACK_TYPE = ConvertUnitState(0x23)
+    // 攻击1 攻击类型
+    constant unitstate UNIT_STATE_ATTACK1_ATTACK_TYPE = ConvertUnitState(0x23)
     
-        // 攻击1 最大目标数
-        constant unitstate UNIT_STATE_ATTACK1_MAX_TARGETS = ConvertUnitState(0x24)
+    // 攻击1 最大目标数
+    constant unitstate UNIT_STATE_ATTACK1_MAX_TARGETS = ConvertUnitState(0x24)
     
-        // 攻击1 攻击间隔
-        constant unitstate UNIT_STATE_ATTACK1_INTERVAL = ConvertUnitState(0x25)
+    // 攻击1 攻击间隔
+    constant unitstate UNIT_STATE_ATTACK1_INTERVAL = ConvertUnitState(0x25)
     
-        // 攻击1 攻击延迟/summary>
-        constant unitstate UNIT_STATE_ATTACK1_INITIAL_DELAY = ConvertUnitState(0x26)
+    // 攻击1 攻击延迟/summary>
+    constant unitstate UNIT_STATE_ATTACK1_INITIAL_DELAY = ConvertUnitState(0x26)
     
-        // 攻击1 弹射弧度
-        constant unitstate UNIT_STATE_ATTACK1_BACK_SWING = ConvertUnitState(0x28)
+    // 攻击1 弹射弧度
+    constant unitstate UNIT_STATE_ATTACK1_BACK_SWING = ConvertUnitState(0x28)
     
-        // 攻击1 攻击范围缓冲
-        constant unitstate UNIT_STATE_ATTACK1_RANGE_BUFFER = ConvertUnitState(0x27)
+    // 攻击1 攻击范围缓冲
+    constant unitstate UNIT_STATE_ATTACK1_RANGE_BUFFER = ConvertUnitState(0x27)
     
-        // 攻击1 目标允许
-        constant unitstate UNIT_STATE_ATTACK1_TARGET_TYPES = ConvertUnitState(0x29)
+    // 攻击1 目标允许
+    constant unitstate UNIT_STATE_ATTACK1_TARGET_TYPES = ConvertUnitState(0x29)
     
-        // 攻击1 溅出区域
-        constant unitstate UNIT_STATE_ATTACK1_SPILL_DIST = ConvertUnitState(0x56)
+    // 攻击1 溅出区域
+    constant unitstate UNIT_STATE_ATTACK1_SPILL_DIST = ConvertUnitState(0x56)
     
-        // 攻击1 溅出半径
-        constant unitstate UNIT_STATE_ATTACK1_SPILL_RADIUS = ConvertUnitState(0x57)
+    // 攻击1 溅出半径
+    constant unitstate UNIT_STATE_ATTACK1_SPILL_RADIUS = ConvertUnitState(0x57)
     
-        // 攻击1 武器类型
-        constant unitstate UNIT_STATE_ATTACK1_WEAPON_TYPE = ConvertUnitState(0x58)
+    // 攻击1 武器类型
+    constant unitstate UNIT_STATE_ATTACK1_WEAPON_TYPE = ConvertUnitState(0x58)
     
-        // attack 2 attributes (sorted in a sequencial order based on memory address)
-        // 攻击2 伤害骰子数量
-        constant unitstate UNIT_STATE_ATTACK2_DAMAGE_DICE = ConvertUnitState(0x30)
+    // attack 2 attributes (sorted in a sequencial order based on memory address)
+    // 攻击2 伤害骰子数量
+    constant unitstate UNIT_STATE_ATTACK2_DAMAGE_DICE = ConvertUnitState(0x30)
     
-        // 攻击2 伤害骰子面数
-        constant unitstate UNIT_STATE_ATTACK2_DAMAGE_SIDE = ConvertUnitState(0x31)
+    // 攻击2 伤害骰子面数
+    constant unitstate UNIT_STATE_ATTACK2_DAMAGE_SIDE = ConvertUnitState(0x31)
     
-        // 攻击2 基础伤害
-        constant unitstate UNIT_STATE_ATTACK2_DAMAGE_BASE = ConvertUnitState(0x32)
+    // 攻击2 基础伤害
+    constant unitstate UNIT_STATE_ATTACK2_DAMAGE_BASE = ConvertUnitState(0x32)
     
-        // 攻击2 升级奖励
-        constant unitstate UNIT_STATE_ATTACK2_DAMAGE_BONUS = ConvertUnitState(0x33)
+    // 攻击2 升级奖励
+    constant unitstate UNIT_STATE_ATTACK2_DAMAGE_BONUS = ConvertUnitState(0x33)
     
-        // 攻击2 伤害衰减参数
-        constant unitstate UNIT_STATE_ATTACK2_DAMAGE_LOSS_FACTOR = ConvertUnitState(0x34)
+    // 攻击2 伤害衰减参数
+    constant unitstate UNIT_STATE_ATTACK2_DAMAGE_LOSS_FACTOR = ConvertUnitState(0x34)
     
-        // 攻击2 武器声音
-        constant unitstate UNIT_STATE_ATTACK2_WEAPON_SOUND = ConvertUnitState(0x35)
+    // 攻击2 武器声音
+    constant unitstate UNIT_STATE_ATTACK2_WEAPON_SOUND = ConvertUnitState(0x35)
     
-        // 攻击2 攻击类型
-        constant unitstate UNIT_STATE_ATTACK2_ATTACK_TYPE = ConvertUnitState(0x36)
+    // 攻击2 攻击类型
+    constant unitstate UNIT_STATE_ATTACK2_ATTACK_TYPE = ConvertUnitState(0x36)
     
-        // 攻击2 最大目标数
-        constant unitstate UNIT_STATE_ATTACK2_MAX_TARGETS = ConvertUnitState(0x37)
+    // 攻击2 最大目标数
+    constant unitstate UNIT_STATE_ATTACK2_MAX_TARGETS = ConvertUnitState(0x37)
     
-        // 攻击2 攻击间隔
-        constant unitstate UNIT_STATE_ATTACK2_INTERVAL = ConvertUnitState(0x38)
+    // 攻击2 攻击间隔
+    constant unitstate UNIT_STATE_ATTACK2_INTERVAL = ConvertUnitState(0x38)
     
-        // 攻击2 攻击延迟
-        constant unitstate UNIT_STATE_ATTACK2_INITIAL_DELAY = ConvertUnitState(0x39)
+    // 攻击2 攻击延迟
+    constant unitstate UNIT_STATE_ATTACK2_INITIAL_DELAY = ConvertUnitState(0x39)
     
-        // 攻击2 攻击范围
-        constant unitstate UNIT_STATE_ATTACK2_RANGE = ConvertUnitState(0x40)
+    // 攻击2 攻击范围
+    constant unitstate UNIT_STATE_ATTACK2_RANGE = ConvertUnitState(0x40)
     
-        // 攻击2 攻击缓冲
-        constant unitstate UNIT_STATE_ATTACK2_RANGE_BUFFER = ConvertUnitState(0x41)
+    // 攻击2 攻击缓冲
+    constant unitstate UNIT_STATE_ATTACK2_RANGE_BUFFER = ConvertUnitState(0x41)
     
-        // 攻击2 最小伤害
-        constant unitstate UNIT_STATE_ATTACK2_DAMAGE_MIN = ConvertUnitState(0x42)
+    // 攻击2 最小伤害
+    constant unitstate UNIT_STATE_ATTACK2_DAMAGE_MIN = ConvertUnitState(0x42)
     
-        // 攻击2 最大伤害
-        constant unitstate UNIT_STATE_ATTACK2_DAMAGE_MAX = ConvertUnitState(0x43)
+    // 攻击2 最大伤害
+    constant unitstate UNIT_STATE_ATTACK2_DAMAGE_MAX = ConvertUnitState(0x43)
     
-        // 攻击2 弹射弧度
-        constant unitstate UNIT_STATE_ATTACK2_BACK_SWING = ConvertUnitState(0x44)
+    // 攻击2 弹射弧度
+    constant unitstate UNIT_STATE_ATTACK2_BACK_SWING = ConvertUnitState(0x44)
     
-        // 攻击2 目标允许类型
-        constant unitstate UNIT_STATE_ATTACK2_TARGET_TYPES = ConvertUnitState(0x45)
+    // 攻击2 目标允许类型
+    constant unitstate UNIT_STATE_ATTACK2_TARGET_TYPES = ConvertUnitState(0x45)
     
-        // 攻击2 溅出区域
-        constant unitstate UNIT_STATE_ATTACK2_SPILL_DIST = ConvertUnitState(0x46)
+    // 攻击2 溅出区域
+    constant unitstate UNIT_STATE_ATTACK2_SPILL_DIST = ConvertUnitState(0x46)
     
-        // 攻击2 溅出半径
-        constant unitstate UNIT_STATE_ATTACK2_SPILL_RADIUS = ConvertUnitState(0x47)
+    // 攻击2 溅出半径
+    constant unitstate UNIT_STATE_ATTACK2_SPILL_RADIUS = ConvertUnitState(0x47)
     
-        // 攻击2 武器类型
-        constant unitstate UNIT_STATE_ATTACK2_WEAPON_TYPE = ConvertUnitState(0x59)
+    // 攻击2 武器类型
+    constant unitstate UNIT_STATE_ATTACK2_WEAPON_TYPE = ConvertUnitState(0x59)
     
-        // 装甲类型
-        constant unitstate UNIT_STATE_ARMOR_TYPE = ConvertUnitState(0x50)
+    // 装甲类型
+    constant unitstate UNIT_STATE_ARMOR_TYPE = ConvertUnitState(0x50)
     
-        // 攻速 取百分比
-        constant unitstate UNIT_STATE_RATE_OF_FIRE = ConvertUnitState(0x51) // global attack rate of unit, work on both attacks
-        // 寻敌 原生cj也有
-        constant unitstate UNIT_STATE_ACQUISITION_RANGE = ConvertUnitState(0x52) // how far the unit will automatically look for targets
+    // 攻速 取百分比
+    constant unitstate UNIT_STATE_RATE_OF_FIRE = ConvertUnitState(0x51) // global attack rate of unit, work on both attacks
+    // 寻敌 原生cj也有
+    constant unitstate UNIT_STATE_ACQUISITION_RANGE = ConvertUnitState(0x52) // how far the unit will automatically look for targets
         
-        // 生命恢复 当恢复类型为总是时 不知道如何使其刷新
-        constant unitstate UNIT_STATE_LIFE_REGEN = ConvertUnitState(0x53)
-        // 魔法恢复  
-        constant unitstate UNIT_STATE_MANA_REGEN = ConvertUnitState(0x54)
+    // 生命恢复 当恢复类型为总是时 不知道如何使其刷新
+    constant unitstate UNIT_STATE_LIFE_REGEN = ConvertUnitState(0x53)
+    // 魔法恢复  
+    constant unitstate UNIT_STATE_MANA_REGEN = ConvertUnitState(0x54)
     
-        // 最小射程
-        constant unitstate UNIT_STATE_MIN_RANGE = ConvertUnitState(0x55)
+    // 最小射程
+    constant unitstate UNIT_STATE_MIN_RANGE = ConvertUnitState(0x55)
     
-        // 目标类型
-        constant unitstate UNIT_STATE_AS_TARGET_TYPE = ConvertUnitState(0x60)
+    // 目标类型
+    constant unitstate UNIT_STATE_AS_TARGET_TYPE = ConvertUnitState(0x60)
     
-        // 作为目标类型
-        constant unitstate UNIT_STATE_TYPE = ConvertUnitState(0x61)
-    endglobals
-    //==============================================================================
-    globals
-        // 模型路径
-        constant integer UNIT_STRING_MODEL_PATH = 13
-        // 大头像模型路径
-        constant integer UNIT_STRING_MODEL_PORTRAIT_PATH = 14
-        // 单位阴影
-        constant integer UNIT_STRING_SHADOW_PATH = 0x13
-        // 模型缩放
-        constant integer UNIT_REAL_MODEL_SCALE = 0x2c
-        // 阴影图像 - X轴偏移
-        constant integer UNIT_REAL_SHADOW_X = 0x20
-        // 阴影图像 - Y轴偏移
-        constant integer UNIT_REAL_SHADOW_Y = 0x21
-        // 阴影图像 - 宽度
-        constant integer UNIT_REAL_SHADOW_W = 0x22
-        // 阴影图像 - 高度
-        constant integer UNIT_REAL_SHADOW_H = 0x23
-    endglobals
+    // 作为目标类型
+    constant unitstate UNIT_STATE_TYPE = ConvertUnitState(0x61)
+endglobals
+//==============================================================================
+globals
+    // 模型路径
+    constant integer UNIT_STRING_MODEL_PATH = 13
+    // 大头像模型路径
+    constant integer UNIT_STRING_MODEL_PORTRAIT_PATH = 14
+    // 单位阴影
+    constant integer UNIT_STRING_SHADOW_PATH = 0x13
+    // 模型缩放
+    constant integer UNIT_REAL_MODEL_SCALE = 0x2c
+    // 阴影图像 - X轴偏移
+    constant integer UNIT_REAL_SHADOW_X = 0x20
+    // 阴影图像 - Y轴偏移
+    constant integer UNIT_REAL_SHADOW_Y = 0x21
+    // 阴影图像 - 宽度
+    constant integer UNIT_REAL_SHADOW_W = 0x22
+    // 阴影图像 - 高度
+    constant integer UNIT_REAL_SHADOW_H = 0x23
+endglobals
 
-    native EXGetUnitString takes integer unitcode, integer Type returns string
-    native EXSetUnitString takes integer unitcode,integer Type,string value returns boolean
-    native EXGetUnitReal takes integer unitcode, integer Type returns real
-    native EXSetUnitReal takes integer unitcode,integer Type,real value returns boolean
-    native EXGetUnitInteger takes integer unitcode, integer Type returns integer
-    native EXSetUnitInteger takes integer unitcode,integer Type,integer value returns boolean
-    native EXGetUnitArrayString takes integer unitcode, integer Type,integer index returns string
+native EXGetUnitString takes integer unitcode, integer Type returns string
+native EXSetUnitString takes integer unitcode,integer Type,string value returns boolean
+native EXGetUnitReal takes integer unitcode, integer Type returns real
+native EXSetUnitReal takes integer unitcode,integer Type,real value returns boolean
+native EXGetUnitInteger takes integer unitcode, integer Type returns integer
+native EXSetUnitInteger takes integer unitcode,integer Type,integer value returns boolean
+native EXGetUnitArrayString takes integer unitcode, integer Type,integer index returns string
 
-    //==============================================================================
-    // Items
-    //==============================================================================
-    native EXGetItemDataString takes integer itemcode, integer data_type returns string
-    native EXSetItemDataString takes integer itemcode, integer data_type, string value returns boolean
+//==============================================================================
+// Items
+//==============================================================================
+native EXGetItemDataString takes integer itemcode, integer data_type returns string
+native EXSetItemDataString takes integer itemcode, integer data_type, string value returns boolean
                 
-    //==============================================================================
-    // Effects
-    //==============================================================================
-    native EXGetEffectX takes effect e returns real
-    native EXGetEffectY takes effect e returns real
-    native EXGetEffectZ takes effect e returns real
-    native EXSetEffectXY takes effect e, real x, real y returns nothing
-    native EXSetEffectZ takes effect e, real z returns nothing
-    native EXGetEffectSize takes effect e returns real
-    native EXSetEffectSize takes effect e, real size returns nothing
-    native EXEffectMatRotateX takes effect e, real angle returns nothing
-    native EXEffectMatRotateY takes effect e, real angle returns nothing
-    native EXEffectMatRotateZ takes effect e, real angle returns nothing //特效面对方向
-    native EXEffectMatScale takes effect e, real x, real y, real z returns nothing
-    native EXEffectMatReset takes effect e returns nothing
-    native EXSetEffectSpeed takes effect e, real speed returns nothing
+//==============================================================================
+// Effects
+//==============================================================================
+native EXGetEffectX takes effect e returns real
+native EXGetEffectY takes effect e returns real
+native EXGetEffectZ takes effect e returns real
+native EXSetEffectXY takes effect e, real x, real y returns nothing
+native EXSetEffectZ takes effect e, real z returns nothing
+native EXGetEffectSize takes effect e returns real
+native EXSetEffectSize takes effect e, real size returns nothing
+native EXEffectMatRotateX takes effect e, real angle returns nothing
+native EXEffectMatRotateY takes effect e, real angle returns nothing
+native EXEffectMatRotateZ takes effect e, real angle returns nothing //特效面对方向
+native EXEffectMatScale takes effect e, real x, real y, real z returns nothing
+native EXEffectMatReset takes effect e returns nothing
+native EXSetEffectSpeed takes effect e, real speed returns nothing
 
-    //==============================================================================
-    // Buffs
-    //==============================================================================
-    // Buff的Japi在1.27a不可用，最新的YDWE版本修复了这个问题，但官方平台上似乎不可用。
-    native EXGetBuffDataString takes integer buffcode, integer data_type returns string
-    native EXSetBuffDataString takes integer buffcode, integer data_type, string value returns boolean
+//==============================================================================
+// Buffs
+//==============================================================================
+// Buff的Japi在1.27a不可用，最新的YDWE版本修复了这个问题，但官方平台上似乎不可用。
+native EXGetBuffDataString takes integer buffcode, integer data_type returns string
+native EXSetBuffDataString takes integer buffcode, integer data_type, string value returns boolean
 
-endscope
+endlibrary
 
 scope BlzAPI
     globals
@@ -385,8 +387,8 @@ scope BlzAPI
     endglobals
 
     
-// 获取鼠标在游戏内的坐标X
-native DzGetMouseTerrainX takes nothing returns real
+    // 获取鼠标在游戏内的坐标X
+    native DzGetMouseTerrainX takes nothing returns real
     // 获取鼠标在游戏内的坐标Y
     native DzGetMouseTerrainY takes nothing returns real
     // 获取鼠标在游戏内的坐标Z

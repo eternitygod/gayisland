@@ -11,9 +11,6 @@ library CustomAnyEvent initializer Init requires base, DamageSystem
 
         //捕获物品死亡
         trigger ItemDeathEventTrigger = CreateTrigger()
-
-
-        
         //YDWE的伤害事件 1.33带排泄事件
         trigger DamageEventTrigger = null
         conditionfunc DamageEventCondition = null
@@ -134,9 +131,11 @@ library CustomAnyEvent initializer Init requires base, DamageSystem
     endfunction
         
     private function Init takes nothing returns nothing
+
         set DamageEventCondition = Condition(function YDWEAnyUnitDamagedTriggerAction)
         call YDWESyStemAnyUnitDamagedRegistTrigger()
         call AnyItemDeathEventEnumItem()
+        
     endfunction
     
 endlibrary

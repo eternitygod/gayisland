@@ -1,5 +1,4 @@
 
-
 scope UnitSummonEvent initializer Init
 
     globals
@@ -35,6 +34,7 @@ scope UnitSummonEvent initializer Init
         return false
     endfunction
 
+    // 任意单位被召唤事件
     private function Init takes nothing returns nothing
         local trigger trig = CreateTrigger() 
         call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_SUMMON)
@@ -43,4 +43,3 @@ scope UnitSummonEvent initializer Init
     endfunction
 
 endscope
-

@@ -56,10 +56,60 @@ library TestSystem initializer Init requires Common
         return false
     endfunction
 
+    function funcTestSpeed takes nothing returns nothing
+        
+        local integer i = 0
+        loop
+            exitwhen i == 1000
+            call GetDetectedUnit()
+            set i = i + 1
+        endloop
+
+    endfunction
+    
+    function TestEsc takes nothing returns boolean
+    
+        local integer i = 0
+        local real time 
+    
+        call ClearTextMessages()
+    
+        if false then
+            set time = S2R(EXExecuteScript( "os.clock()" ))
+            loop
+                exitwhen i == 100
+                call ExecuteFunc("funcTestSpeed")
+                set i = i + 1
+            endloop
+    
+            //call ClearTextMessages()
+    
+            call DisplayTextToPlayer(GetLocalPlayer(),0,0, "运行时间" + R2S( S2R(EXExecuteScript( "os.clock()" )) - time  ) )
+            call BJDebugMsg(R2S(GetUnitState(LocalPlayerSelectUnit, UNIT_STATE_RATE_OF_FIRE)))
+        endif
+    
+        //call GetLocalizedHotkey("yd_leak_monitor::create_report")
+        //call EnableNewUnitStateUI(not NewUnitStateUIIsEnable)
+
+        return false
+    endfunction
+
     private function Init takes nothing returns nothing
         local trigger trig = CreateTrigger()
         call TriggerRegisterPlayerChatEvent( trig, LocalPlayer, null, false )
         call TriggerAddCondition( trig, Condition( function TestPlayerChat__CallBack ) )
+        //单机测试
+        if bj_isSinglePlayer then
+            call SetPlayerState(Player(0), PLAYER_STATE_RESOURCE_GOLD, 99999)
+            //测试时Esc清屏
+            set IsMirage = true
+            call FogEnable(false)
+            call FogMaskEnable(false)
+            set trig = CreateTrigger()
+            call TriggerRegisterPlayerEvent(trig, Player(0), EVENT_PLAYER_END_CINEMATIC)
+            call TriggerAddCondition(trig, Condition( function TestEsc))
+        endif
+        set trig = null
     endfunction
 endlibrary
 

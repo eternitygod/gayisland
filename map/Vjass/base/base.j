@@ -1,32 +1,31 @@
 
 
-// japi常量
-#include "JapiConstant.j"
+
+#include "JapiConstant.j" // japi常量
 #include "math.j"
-// 单位状态恢复
-#include "UnitRestore.j"
-// 任意单位受伤和任意物品死亡
-#include "CustomAnyEvent.j"
-// 命令Id
-#include "Order.j"
-// 大部分的常用函数
-#include "CommonFunc.j"
-// 单位选取的过滤条件
-#include "Filter.j"
 
-#include "UnitStateRefresh.j"
+#include "UnitRestore.j" // 单位恢复 生命值 魔法值
+#include "CustomAnyEvent.j" // 任意单位受伤和任意物品死亡
 
-#include "UnitBonusSystem.j"
+#include "Order.j" // 命令Id
 
-#include "ItemSystem.j"
-// 物品相关事件包含在ItemSystem.j
-#include "Event.j"
+#include "CommonFunc.j" // 大部分的常用函数
 
-#include "Buff\BuffSystem.j"
+#include "Filter.j" // 单位选取的过滤条件 和一些选取单位的函数
+
+#include "UnitStateRefresh.j"  // 刷新单位的属性
+
+#include "UnitBonusSystem.j" // 
+
+#include "ItemSystem.j" // 物品相关事件包含在ItemSystem.j
+
+#include "Event.j" // 一些事件
+
+#include "Buff\BuffSystem.j" // 关于Buff的定义 add以及remove
 
 #include "Test.j"
 
-library base initializer Init requires math
+library base initializer Init requires math, YDWEJapi
 
     // 单位存活
     native UnitAlive takes unit whichUnit returns boolean
@@ -215,7 +214,6 @@ library base initializer Init requires math
     endfunction
     //==============================================================================
 
-
     private function Init takes nothing returns nothing
         
         set LocalPlayer = GetLocalPlayer()
@@ -230,6 +228,13 @@ library base initializer Init requires math
         set CorrectionMaxX = GetRectMaxX(bj_mapInitialPlayableArea)- 75
         set CorrectionMinY = GetRectMinY(bj_mapInitialPlayableArea)+ 75
         set CorrectionMaxY = GetRectMaxY(bj_mapInitialPlayableArea)- 75
+        
+        // 玩家数量和玩家能拥有的英雄数量
+        if M_OnlinePlayerAmount == 1 then
+            set PlayerMaxHeroAmount = 4
+        elseif M_OnlinePlayerAmount == 2 then
+            set PlayerMaxHeroAmount = 2
+        endif
     endfunction
 
 endlibrary

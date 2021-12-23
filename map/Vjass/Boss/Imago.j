@@ -70,7 +70,7 @@ scope Imago
 
         // 不是普通命令Id 说明在放技能
         if not IsCommonOrderId(id) then
-            debug call Debug( GetUnitName(imago) + "当前在释放技能" + I2S(id) + OrderId2String(id) + "返回" )
+            debug call Debug("Boss", GetUnitName(imago) + "当前在释放技能" + I2S(id) + OrderId2String(id) + "返回" )
             call ImagoAI__AddCommandQueue( imago )
             return
         endif
@@ -105,12 +105,12 @@ scope Imago
                 if GetBossCommandQueueOrderTargetUnit() == null then
                     // 如果释放无目标命令失败 则释放点目标
                     if not IssueImmediateOrderById( imago, Tmp__ArrayInt[2] ) then
-                        debug Debug("Boss",GetUnitName(imago)+"释放无目标命令失败 发布指定点目标命令" + OrderId2String(Tmp__ArrayInt[2]) )
+                        debug call Debug("Boss",GetUnitName(imago)+"释放无目标命令失败 发布指定点目标命令" + OrderId2String(Tmp__ArrayInt[2]) )
                         call IssuePointOrderById( imago, Tmp__ArrayInt[2], GetBossCommandQueueOrderTargetX(), GetBossCommandQueueOrderTargetY() )
                     endif
                 else
                     // 有技能目标就对技能目标放
-                    debug Debug("Boss",GetUnitName(imago)+"释放指定目标命令" + OrderId2String(Tmp__ArrayInt[2]) )
+                    debug call Debug("Boss",GetUnitName(imago)+"释放指定目标命令" + OrderId2String(Tmp__ArrayInt[2]) )
                     call IssueTargetOrderById( imago, Tmp__ArrayInt[2], GetBossCommandQueueOrderTargetUnit() )
                 endif
             endif

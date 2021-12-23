@@ -13,15 +13,11 @@ library UnitRestore initializer InitUnitRestore
         // 恢复队列最大值
         integer UnitLifeRestoreNumber = 0
         integer UnitManaRestoreNumber = 0
+
+        constant key UNIT_LIFERESTORE
+        constant key UNIT_MANARESTORE
+
     endglobals
-
-    function UnitCanRestoreLife takes unit whichUnit returns boolean
-        return HaveSavedInteger(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE)
-    endfunction
-
-    function UnitCanRestoreMana takes unit whichUnit returns boolean
-        return HaveSavedInteger(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE)
-    endfunction
 
     //生命恢复,所有生命恢复都以这条函数来进行	/*不包括生命移除*/
     function UnitRestoreLife takes unit u, real r returns nothing
@@ -38,12 +34,37 @@ library UnitRestore initializer InitUnitRestore
             call SetWidgetLife(u, GetWidgetLife(u) + r)
         endif
     endfunction
-
+    
     //魔法恢复,所有魔法恢复都以这条函数来进行  /*不包括魔法移除*/
     function UnitRestoreMana takes unit u, real r returns nothing
         if r != 0 then
             call SetUnitState(u, UNIT_STATE_MANA, GetUnitState(u, UNIT_STATE_MANA)+ r)
         endif
+    endfunction
+
+    function RefreshLifeUnitRestore takes unit u returns nothing
+        local integer h = GetHandleId(u)
+        local integer index = LoadInteger(DynamicData, h, UNIT_LIFERESTORE)
+        set LifeRestoreValue[index] = (LoadReal(DynamicData, h, UNIT_LIFERESTORE) +(GetHeroStr(u, true) * 0.04)) * RestoreFrame
+    endfunction
+    function RefreshManaUnitRestore takes unit u returns nothing
+        local integer h = GetHandleId(u)
+        local integer index = LoadInteger(DynamicData, h, UNIT_MANARESTORE)
+        set ManaRestoreValue[index] = (LoadReal(DynamicData, h, UNIT_MANARESTORE) +(GetHeroInt(u, true) * 0.03)) * RestoreFrame
+    endfunction
+
+    function RefreshUnitRestore takes unit u returns nothing
+        local integer h = GetHandleId(u)
+        set LifeRestoreValue[LoadInteger(DynamicData, h, UNIT_LIFERESTORE)] = (LoadReal(DynamicData, h, UNIT_LIFERESTORE) +(GetHeroStr(u, true) * 0.04)) * RestoreFrame
+        set ManaRestoreValue[LoadInteger(DynamicData, h, UNIT_MANARESTORE)] = (LoadReal(DynamicData, h, UNIT_MANARESTORE) +(GetHeroInt(u, true) * 0.03)) * RestoreFrame
+    endfunction
+
+    function UnitCanRestoreLife takes unit whichUnit returns boolean
+        return HaveSavedInteger(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE)
+    endfunction
+
+    function UnitCanRestoreMana takes unit whichUnit returns boolean
+        return HaveSavedInteger(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE)
     endfunction
 
     //使单位加入恢复队列,允许其恢复 生命/魔法

@@ -12,6 +12,15 @@ globals
 	
 	integer array PlayerHeroAmount
 	integer PlayerMaxHeroAmount = 1
+
+	integer array StrHeroTypeId
+	integer array IntHeroTypeId
+	integer array AgiHeroTypeId
+	integer array AllHeroTypeId
+
+
+	unit array TavernUnit 	// 酒馆
+	unit array PlayerHeroUnit //玩家英雄
 endglobals
 
 function ClickReturnButton takes nothing returns nothing

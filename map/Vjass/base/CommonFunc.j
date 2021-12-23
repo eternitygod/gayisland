@@ -55,13 +55,22 @@ library Common requires base, DamageSystem
         call SetUnitInvulnerable(whichUnit, true)
     endfunction
 
+    // 获取基础攻击力奖励
+    function GetUnitBaseDamageBonus takes integer h returns integer
+        return LoadInteger(DynamicData, h, DAMAGE_BASE_BONUS)
+    endfunction
+    // 获取基础护甲奖励
+    function GetUnitBaseArmorBonus takes integer h returns real
+        return LoadReal(DynamicData, h, ARMOR_BASE_BONUS)
+    endfunction
+
     // 逆变身 使用后需要刷新一下单位的基础攻击力
     function YDWEUnitTransform takes unit u, integer targetid returns nothing
         local integer i = GetUnitTypeId(u)
         local real value
         if i != targetid and i != 0 then
             // 刷新基础攻击力
-            set value = OBJ_GetHeroPrimaryValue(u) + LoadInteger(DynamicData, GetHandleId(u), UNIT_BASE_DAMAGE)
+            set value = GetUnitBaseDamageBonus(GetHandleId(u)) + OBJ_GetUnitBaseDamage1(u)
             call UnitAddAbility(u, 'Abrf')
             call EXSetAbilityDataInteger(EXGetUnitAbility(u, 'Abrf'), 1, ABILITY_DATA_UNITID, i)
             call EXSetAbilityAEmeDataA(EXGetUnitAbility(u, 'Abrf'), i)

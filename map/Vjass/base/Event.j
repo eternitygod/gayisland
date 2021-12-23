@@ -7,4 +7,6 @@
 #include "Event\UnitEnterMapEvent.j"
 #include "Event\HeroLevelUp.j"
 #include "Event\UnitSummonEvent.j"
+#include "Event\UnitDecayEvnet.j"
+
 
