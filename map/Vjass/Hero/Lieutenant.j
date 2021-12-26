@@ -5,6 +5,29 @@ scope Lieutenant
 		constant key ZeroCast  //零重施法
 	endglobals
 
+	function damageevent_EnchantEquipment takes nothing returns nothing
+		local integer addedDamage
+		local integer buffLevel
+		if true then//GetUnitBuff(Tmp_DamageSource, 'Blc2') != 0 then
+			set buffLevel = 0//GetUnitBuffLevel(Tmp_DamageSource, 'Blc2') 
+			set addedDamage = buffLevel * 5 + 20
+			call CommonTextTag("+" + I2S(addedDamage), 5, Tmp_DamageSource, .024, 100, 200, 255, 255, 64)
+			call DamageUnit(Tmp_DamageSource, Tmp_DamageInjured, 1, addedDamage)
+		endif
+	endfunction
+	
+	//注册零重2技能的伤害触发
+	function EnchantEquipment_Learn1 takes nothing returns nothing
+		local trigger t = CreateTrigger()
+		call TriggerAddCondition(t, Condition( function damageevent_EnchantEquipment))
+		call TriggerRegisterAnyUnitDamagedEvent(t, 1) //
+		set t = null
+	endfunction
+	
+	function CriticalStrikeAura_Learn1 takes nothing returns nothing
+		call EnabledAttackEffect(1, 0.) //永久激活
+	endfunction
+	
 	function Lcqy_ZeroCast takes unit u, boolean b returns nothing
 		local integer uh = GetHandleId(u)
 		if b then

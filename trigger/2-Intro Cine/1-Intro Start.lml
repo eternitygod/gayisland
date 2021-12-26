@@ -393,10 +393,6 @@
         变量: OgreMagi
         变量: Kael
         常量: 0
-    禁用: IssueTargetDestructableOrder
-        变量: gg_unit_nhew_0013
-        预设: UnitOrderHarvestDestructible
-        变量: gg_dest_ZTtw_2470
     IssueTargetDestructableOrder
         变量: gg_unit_nhew_0025
         预设: UnitOrderHarvestDestructible

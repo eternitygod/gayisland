@@ -101,12 +101,12 @@
                                 预设: OperatorEqualENE
                                 常量: true
                         动作
-                            PauseUnit
-                                函数: GetEnumUnit
-                                预设: PauseUnpauseOptionPause
                             ShowUnit
                                 函数: GetEnumUnit
                                 预设: ShowHideHide
+                            PauseUnit
+                                函数: GetEnumUnit
+                                预设: PauseUnpauseOptionPause
     IssueTargetOrder
         变量: gg_unit_nbee_0014
         预设: UnitOrderSmartUnit

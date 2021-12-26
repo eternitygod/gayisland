@@ -1,43 +1,16 @@
 globals
-//globals from InitSetUp:
-constant boolean LIBRARY_InitSetUp=true
-        //-----------------------------------------------------------------------
-        // Constants
-        //
-        //新的变量
-player LocalPlayer= null
-real CorrectionMinX
-real CorrectionMaxX
-real CorrectionMinY
-real CorrectionMaxY
-        //prd算法的哈希表
-hashtable Prd= InitHashtable()
-        //常用哈希表
-hashtable HT= InitHashtable()
-        //类型转换需要用到的哈希表,可以在同继承关系下转换
-hashtable TypeConversion= InitHashtable()
-        //单位组线性表 实际上比直接Create和Destroy效率差了2.5倍左右
-constant integer MaxGroupAmount= 200
-integer OverflowValue= 0
-integer GroupIdleValue= 0
-group array MainGroup
-boolean array GroupInUse
-integer MaxGroupHandle= 0
-        //定期清除Trigger
-integer DestroyQueueNumber= 0
-trigger array DestroyQueue
-real array ElapsedTime
-        //捕获物品死亡
-trigger ItemDeathEventTrigger= CreateTrigger()
-        //中心计时器，游戏运行时间
-constant timer GameTimer= CreateTimer()
-        //YDWE的伤害事件 1.33带排泄事件
-trigger DamageEventTrigger= null
-conditionfunc DamageEventCondition= null
-constant integer DAMAGE_EVENT_SWAP_TIMEOUT= 600
-constant boolean DAMAGE_EVENT_SWAP_ENABLE= true
-
-//endglobals from InitSetUp
+//globals from ObjectData:
+constant boolean LIBRARY_ObjectData=true
+string SlkdataType= ""
+string SlkType= ""
+hashtable ObjectData= InitHashtable()
+        // 哈希表父KEY
+constant integer ObjectData__HERO_PRIMARY=2
+constant integer ObjectData__UNIT_SHADOW=3
+        
+constant integer ObjectData__UNIT_ATTACK1_DAMAGE_BASE=4
+constant integer ObjectData__UNIT_ARMOR_BASE=5
+//endglobals from ObjectData
 //globals from UITips:
 constant boolean LIBRARY_UITips=true
 integer TipsFrameMaxAmount= 0
@@ -45,6 +18,22 @@ integer array TipsBackDrop
 integer array TipsText
 integer array UberTipsText
 //endglobals from UITips
+//globals from UnitRestore:
+constant boolean LIBRARY_UnitRestore=true
+        // 单位状态恢复 生命/魔法
+        // 计时器RestoreFrame秒回调一次
+        // timer UnitRestoreTimer = null 
+        // 恢复队列
+unit array UnitLifeRestoreQueue
+unit array UnitManaRestoreQueue
+real array LifeRestoreValue
+real array ManaRestoreValue
+        // 恢复队列最大值
+integer UnitLifeRestoreNumber= 0
+integer UnitManaRestoreNumber= 0
+constant integer UNIT_LIFERESTORE=6
+constant integer UNIT_MANARESTORE=7
+//endglobals from UnitRestore
 //globals from YDTriggerSaveLoadSystem:
 constant boolean LIBRARY_YDTriggerSaveLoadSystem=true
 hashtable YDHT
@@ -68,29 +57,16 @@ real yd_MapMaxX= 0
 real yd_MapMinX= 0
 real yd_MapMaxY= 0
 real yd_MapMinY= 0
-string array YDWEBase__yd_PlayerColor
-trigger array YDWEBase__AbilityCastingOverEventQueue
-integer array YDWEBase__AbilityCastingOverEventType
-integer YDWEBase__AbilityCastingOverEventNumber= 0
+string array YDWEBase___yd_PlayerColor
+trigger array YDWEBase___AbilityCastingOverEventQueue
+integer array YDWEBase___AbilityCastingOverEventType
+integer YDWEBase___AbilityCastingOverEventNumber= 0
 //endglobals from YDWEBase
-//globals from YDWEPlaySoundNull:
-constant boolean LIBRARY_YDWEPlaySoundNull=true
-//endglobals from YDWEPlaySoundNull
-//globals from YDWEPolledWaitNull:
-constant boolean LIBRARY_YDWEPolledWaitNull=true
-//endglobals from YDWEPolledWaitNull
-//globals from YDWESetUnitFacingToFaceLocTimedNull:
-constant boolean LIBRARY_YDWESetUnitFacingToFaceLocTimedNull=true
-//endglobals from YDWESetUnitFacingToFaceLocTimedNull
-//globals from YDWETriggerRegisterEnterRectSimpleNull:
-constant boolean LIBRARY_YDWETriggerRegisterEnterRectSimpleNull=true
-region yd_NullTempRegion
-//endglobals from YDWETriggerRegisterEnterRectSimpleNull
-//globals from Common:
-constant boolean LIBRARY_Common=true
+//globals from YDWEJapi:
+constant boolean LIBRARY_YDWEJapi=true
         //JAPI常量 - 技能
 constant integer ABILITY_STATE_COOLDOWN= 1
-	
+        
 constant integer ABILITY_DATA_TARGS= 100
 constant integer ABILITY_DATA_CAST= 101
 constant integer ABILITY_DATA_DUR= 102
@@ -131,58 +107,250 @@ constant integer ABILITY_DATA_RESEARCH_UBERTIP= 217
 constant integer ABILITY_DATA_UBERTIP= 218
 constant integer ABILITY_DATA_UNUBERTIP= 219
 constant integer ABILITY_DATA_UNART= 220
-
-        //JAPI常量 - UnitState 单位状态
-        //攻击1 伤害骰子数量
+    //------------单位数据类型--------------
+    // 攻击1 伤害骰子数量
 constant unitstate UNIT_STATE_ATTACK1_DAMAGE_DICE= ConvertUnitState(0x10)
-        //攻击1 伤害骰子面数
+    
+    // 攻击1 伤害骰子面数
 constant unitstate UNIT_STATE_ATTACK1_DAMAGE_SIDE= ConvertUnitState(0x11)
-        //攻击1 基础伤害
+    
+    // 攻击1 基础伤害
 constant unitstate UNIT_STATE_ATTACK1_DAMAGE_BASE= ConvertUnitState(0x12)
-        //攻击1 全伤害范围
+    
+    // 攻击1 升级奖励
+constant unitstate UNIT_STATE_ATTACK1_DAMAGE_BONUS= ConvertUnitState(0x13)
+    
+    // 攻击1 最小伤害
+constant unitstate UNIT_STATE_ATTACK1_DAMAGE_MIN= ConvertUnitState(0x14)
+    
+    // 攻击1 最大伤害
+constant unitstate UNIT_STATE_ATTACK1_DAMAGE_MAX= ConvertUnitState(0x15)
+    
+    // 攻击1 全伤害范围
 constant unitstate UNIT_STATE_ATTACK1_RANGE= ConvertUnitState(0x16)
-        //装甲
+    
+    // 装甲
 constant unitstate UNIT_STATE_ARMOR= ConvertUnitState(0x20)
-        //攻击1 攻击类型
+    
+    // attack 1 attribute adds
+    // 攻击1 伤害衰减参数
+constant unitstate UNIT_STATE_ATTACK1_DAMAGE_LOSS_FACTOR= ConvertUnitState(0x21)
+    
+    // 攻击1 武器声音
+constant unitstate UNIT_STATE_ATTACK1_WEAPON_SOUND= ConvertUnitState(0x22)
+    
+    // 攻击1 攻击类型
 constant unitstate UNIT_STATE_ATTACK1_ATTACK_TYPE= ConvertUnitState(0x23)
-        //攻击1 攻击间隔
+    
+    // 攻击1 最大目标数
+constant unitstate UNIT_STATE_ATTACK1_MAX_TARGETS= ConvertUnitState(0x24)
+    
+    // 攻击1 攻击间隔
 constant unitstate UNIT_STATE_ATTACK1_INTERVAL= ConvertUnitState(0x25)
-        //攻击1 弹射弧度
+    
+    // 攻击1 攻击延迟/summary>
+constant unitstate UNIT_STATE_ATTACK1_INITIAL_DELAY= ConvertUnitState(0x26)
+    
+    // 攻击1 弹射弧度
 constant unitstate UNIT_STATE_ATTACK1_BACK_SWING= ConvertUnitState(0x28)
-        //攻击2 攻击类型
-constant unitstate UNIT_STATE_ATTACK2_ATTACK_TYPE= ConvertUnitState(0x36)
-        //攻击2 攻击间隔
-constant unitstate UNIT_STATE_ATTACK2_INTERVAL= ConvertUnitState(0x38)
-        //装甲类型
-constant unitstate UNIT_STATE_ARMOR_TYPE= ConvertUnitState(0x50)
-        //攻击速度 对两种攻击模式都有效
-constant unitstate UNIT_STATE_RATE_OF_FIRE= ConvertUnitState(0x51)
-        //攻击1 武器类型
+    
+    // 攻击1 攻击范围缓冲
+constant unitstate UNIT_STATE_ATTACK1_RANGE_BUFFER= ConvertUnitState(0x27)
+    
+    // 攻击1 目标允许
+constant unitstate UNIT_STATE_ATTACK1_TARGET_TYPES= ConvertUnitState(0x29)
+    
+    // 攻击1 溅出区域
+constant unitstate UNIT_STATE_ATTACK1_SPILL_DIST= ConvertUnitState(0x56)
+    
+    // 攻击1 溅出半径
+constant unitstate UNIT_STATE_ATTACK1_SPILL_RADIUS= ConvertUnitState(0x57)
+    
+    // 攻击1 武器类型
 constant unitstate UNIT_STATE_ATTACK1_WEAPON_TYPE= ConvertUnitState(0x58)
-        //攻击2 武器类型
+    
+    // attack 2 attributes (sorted in a sequencial order based on memory address)
+    // 攻击2 伤害骰子数量
+constant unitstate UNIT_STATE_ATTACK2_DAMAGE_DICE= ConvertUnitState(0x30)
+    
+    // 攻击2 伤害骰子面数
+constant unitstate UNIT_STATE_ATTACK2_DAMAGE_SIDE= ConvertUnitState(0x31)
+    
+    // 攻击2 基础伤害
+constant unitstate UNIT_STATE_ATTACK2_DAMAGE_BASE= ConvertUnitState(0x32)
+    
+    // 攻击2 升级奖励
+constant unitstate UNIT_STATE_ATTACK2_DAMAGE_BONUS= ConvertUnitState(0x33)
+    
+    // 攻击2 伤害衰减参数
+constant unitstate UNIT_STATE_ATTACK2_DAMAGE_LOSS_FACTOR= ConvertUnitState(0x34)
+    
+    // 攻击2 武器声音
+constant unitstate UNIT_STATE_ATTACK2_WEAPON_SOUND= ConvertUnitState(0x35)
+    
+    // 攻击2 攻击类型
+constant unitstate UNIT_STATE_ATTACK2_ATTACK_TYPE= ConvertUnitState(0x36)
+    
+    // 攻击2 最大目标数
+constant unitstate UNIT_STATE_ATTACK2_MAX_TARGETS= ConvertUnitState(0x37)
+    
+    // 攻击2 攻击间隔
+constant unitstate UNIT_STATE_ATTACK2_INTERVAL= ConvertUnitState(0x38)
+    
+    // 攻击2 攻击延迟
+constant unitstate UNIT_STATE_ATTACK2_INITIAL_DELAY= ConvertUnitState(0x39)
+    
+    // 攻击2 攻击范围
+constant unitstate UNIT_STATE_ATTACK2_RANGE= ConvertUnitState(0x40)
+    
+    // 攻击2 攻击缓冲
+constant unitstate UNIT_STATE_ATTACK2_RANGE_BUFFER= ConvertUnitState(0x41)
+    
+    // 攻击2 最小伤害
+constant unitstate UNIT_STATE_ATTACK2_DAMAGE_MIN= ConvertUnitState(0x42)
+    
+    // 攻击2 最大伤害
+constant unitstate UNIT_STATE_ATTACK2_DAMAGE_MAX= ConvertUnitState(0x43)
+    
+    // 攻击2 弹射弧度
+constant unitstate UNIT_STATE_ATTACK2_BACK_SWING= ConvertUnitState(0x44)
+    
+    // 攻击2 目标允许类型
+constant unitstate UNIT_STATE_ATTACK2_TARGET_TYPES= ConvertUnitState(0x45)
+    
+    // 攻击2 溅出区域
+constant unitstate UNIT_STATE_ATTACK2_SPILL_DIST= ConvertUnitState(0x46)
+    
+    // 攻击2 溅出半径
+constant unitstate UNIT_STATE_ATTACK2_SPILL_RADIUS= ConvertUnitState(0x47)
+    
+    // 攻击2 武器类型
 constant unitstate UNIT_STATE_ATTACK2_WEAPON_TYPE= ConvertUnitState(0x59)
+    
+    // 装甲类型
+constant unitstate UNIT_STATE_ARMOR_TYPE= ConvertUnitState(0x50)
+    
+    // 攻速 取百分比
+constant unitstate UNIT_STATE_RATE_OF_FIRE= ConvertUnitState(0x51)
+// 寻敌 原生cj也有
+constant unitstate UNIT_STATE_ACQUISITION_RANGE= ConvertUnitState(0x52)
+
+    // 生命恢复 当恢复类型为总是时 不知道如何使其刷新
+constant unitstate UNIT_STATE_LIFE_REGEN= ConvertUnitState(0x53)
+    // 魔法恢复  
+constant unitstate UNIT_STATE_MANA_REGEN= ConvertUnitState(0x54)
+    
+    // 最小射程
+constant unitstate UNIT_STATE_MIN_RANGE= ConvertUnitState(0x55)
+    
+    // 目标类型
+constant unitstate UNIT_STATE_AS_TARGET_TYPE= ConvertUnitState(0x60)
+    
+    // 作为目标类型
+constant unitstate UNIT_STATE_TYPE= ConvertUnitState(0x61)
+    // 模型路径
+constant integer UNIT_STRING_MODEL_PATH= 13
+    // 大头像模型路径
+constant integer UNIT_STRING_MODEL_PORTRAIT_PATH= 14
+    // 单位阴影
+constant integer UNIT_STRING_SHADOW_PATH= 0x13
+    // 模型缩放
+constant integer UNIT_REAL_MODEL_SCALE= 0x2c
+    // 阴影图像 - X轴偏移
+constant integer UNIT_REAL_SHADOW_X= 0x20
+    // 阴影图像 - Y轴偏移
+constant integer UNIT_REAL_SHADOW_Y= 0x21
+    // 阴影图像 - 宽度
+constant integer UNIT_REAL_SHADOW_W= 0x22
+    // 阴影图像 - 高度
+constant integer UNIT_REAL_SHADOW_H= 0x23
+//endglobals from YDWEJapi
+//globals from YDWEPlaySoundNull:
+constant boolean LIBRARY_YDWEPlaySoundNull=true
+//endglobals from YDWEPlaySoundNull
+//globals from YDWEPolledWaitNull:
+constant boolean LIBRARY_YDWEPolledWaitNull=true
+//endglobals from YDWEPolledWaitNull
+//globals from YDWESetUnitFacingToFaceLocTimedNull:
+constant boolean LIBRARY_YDWESetUnitFacingToFaceLocTimedNull=true
+//endglobals from YDWESetUnitFacingToFaceLocTimedNull
+//globals from YDWETriggerRegisterEnterRectSimpleNull:
+constant boolean LIBRARY_YDWETriggerRegisterEnterRectSimpleNull=true
+region yd_NullTempRegion
+//endglobals from YDWETriggerRegisterEnterRectSimpleNull
+//globals from math:
+constant boolean LIBRARY_math=true
+hashtable math__Prd= InitHashtable()
+//endglobals from math
+//globals from YDWESetUnitFacingToFaceUnitTimedNull:
+constant boolean LIBRARY_YDWESetUnitFacingToFaceUnitTimedNull=true
+//endglobals from YDWESetUnitFacingToFaceUnitTimedNull
+//globals from base:
+constant boolean LIBRARY_base=true
+        // 最常用的哈希表 一般动态注册的东西都用这个
+hashtable HT= InitHashtable()
+        // 位移坐标修正
+real CorrectionMinX
+real CorrectionMaxX
+real CorrectionMinY
+real CorrectionMaxY
+        // 中心计时器，游戏运行时间
+constant timer base___GameTimer= CreateTimer()
+        // 本地玩家 每个玩家的此变量值不同
+player LocalPlayer= null
+        // 定期清除Trigger
+integer base___DestroyQueueNumber= 0
+trigger array base___DestroyQueue
+real array base___ElapsedTime
+        //单位组线性表 实际上比直接Create和Destroy效率差了2.5倍左右
+constant integer base___MaxGroupAmount= 200
+integer base___OverflowValue= 0
+integer base___GroupIdleValue= 0
+group array base___MainGroup
+boolean array base___GroupInUse
+integer base___MaxGroupHandle= 0
+//endglobals from base
+//globals from Filter:
+constant boolean LIBRARY_Filter=true
+player P2= null
+		//中转用的变量
+unit Filter__TmpUnit2= null
 	
+integer Filter__Tmp_DummyAmount= 0
+		//Dummy 马甲
+rect RectDummy= Rect(0, 0, 0, 0)
+		//获取最近的可破坏物
+destructable Tmp_Destructable= null
+real Tmp_NearestDestructableDistance= 0.
+real Tmp_GetNearestDestructableUnitX= 0.
+real Tmp_GetNearestDestructableUnitY= 0.
+//endglobals from Filter
+//globals from TextTag:
+constant boolean LIBRARY_TextTag=true
+//endglobals from TextTag
+//globals from UnitAttackEvent:
+constant boolean LIBRARY_UnitAttackEvent=true
+constant integer UNIT_ATTACK_EVENT_ATTACK_TARGET=8
+//constant integer AttackReadyTrg = - 101 //捕捉远程攻击弹道出手的触发器
+//constant integer AttackReadyTimer = - 102 //捕捉远程攻击弹道出手的计时器
+constant integer UNIT_ATTACK_EVENT_CRITICAL_STRIKE_VALUE=9
+//endglobals from UnitAttackEvent
+//globals from DamageSystem:
+constant boolean LIBRARY_DamageSystem=true
         // 伤害事件
 constant integer EVENT_DAMAGE_DATA_VAILD= 0
-        //物理伤害
+        // 物理伤害
 constant integer EVENT_DAMAGE_DATA_IS_PHYSICAL= 1
-        //攻击伤害
+        // 攻击伤害
 constant integer EVENT_DAMAGE_DATA_IS_ATTACK= 2
-        //远程伤害
+        // 远程伤害
 constant integer EVENT_DAMAGE_DATA_IS_RANGED= 3
-        //伤害类型
+        // 伤害类型
 constant integer EVENT_DAMAGE_DATA_DAMAGE_TYPE= 4
-        //武器类型
+        // 武器类型
 constant integer EVENT_DAMAGE_DATA_WEAPON_TYPE= 5
-        //攻击类型
+        // 攻击类型
 constant integer EVENT_DAMAGE_DATA_ATTACK_TYPE= 6
-        // Last
-trigger bj_lastCreatedTrigger= null
-        //是否要DeBug
-boolean IsMirage= false
-        // 哈希表KEY 技能需求等级
-constant integer OBJ_KEY_HERO_PRIMARY=6
-constant integer OBJ_KEY_UNIT_SHADOW=8
         
         // 魔法
 constant integer DAMAGE_TYPE_MAGICAL= 1
@@ -191,21 +359,84 @@ constant integer DAMAGE_TYPE_PHYSICAL= 2
         // 纯粹
 constant integer DAMAGE_TYPE_PURE= 3
         
+trigger array DamageEventQueue
+integer array DamageEventNumber
+        //伤害来源
+unit Tmp_DamageSource= null
+//受伤者
+unit Tmp_DamageInjured= null
+        //伤害值
+real Tmp_DamageValue
+boolean array EffectIsEnabled
+timer array EffectEnabledTimer
+//endglobals from DamageSystem
+//globals from Common:
+constant boolean LIBRARY_Common=true
+        //是否要DeBug
+trigger bj_lastCreatedTrigger= null
+boolean IsMirage= false
 unit LastGetMasterUnit= null
 unit LastSummonedUnit= null
 constant integer KEY_MASTERUNIT=10
-constant integer UnitDelayedStandingKey=12
+constant integer UNIT_DELAYED_STANDING=11
 hashtable UnitAbilityTrigger= InitHashtable()
 //endglobals from Common
-//globals from YDWESetUnitFacingToFaceUnitTimedNull:
-constant boolean LIBRARY_YDWESetUnitFacingToFaceUnitTimedNull=true
-//endglobals from YDWESetUnitFacingToFaceUnitTimedNull
+//globals from CustomAnyEvent:
+constant boolean LIBRARY_CustomAnyEvent=true
+        // 类型转换需要用到的哈希表,可以在同继承关系下转换
+hashtable TypeConversion= InitHashtable()
+        //捕获物品死亡
+trigger ItemDeathEventTrigger= CreateTrigger()
+        //YDWE的伤害事件 1.33带排泄事件
+trigger DamageEventTrigger= null
+conditionfunc DamageEventCondition= null
+constant integer DAMAGE_EVENT_SWAP_TIMEOUT= 600
+constant boolean DAMAGE_EVENT_SWAP_ENABLE= true
+//endglobals from CustomAnyEvent
+//globals from BuffSystem:
+constant boolean LIBRARY_BuffSystem=true
+        
+hashtable UnitBuffData= InitHashtable()
+constant integer BUFF_TYPE_POSITIVE=12
+constant integer BUFF_TYPE_NEGATIVE=13
+
+constant integer BUFF_TYPE_MAGIC=14
+constant integer BUFF_TYPE_PHYSICAL=15
+constant integer BUFF_TYPE_AUTODISPEL=16
+
+        // 
+constant integer BUFF_TYPE_BUFFID=17
+
+constant integer BUFF_TYPE_IS_BUFF=18
+
+hashtable BuffSystem___Buff= InitHashtable()
+//endglobals from BuffSystem
 //globals from TestSystem:
 constant boolean LIBRARY_TestSystem=true
     
 //endglobals from TestSystem
+//globals from UnitBonusSystem:
+constant boolean LIBRARY_UnitBonusSystem=true
+        // BonusKey
+constant integer BONUS_DAMAGE=19
+constant integer BONUS_ARMOR=20
+constant integer BONUS_ATTACK=21
+constant integer BONUS_LIFE=22
+constant integer BONUS_MANA=23
+constant integer BONUS_STR=24
+constant integer BONUS_AGI=25
+constant integer BONUS_INT=26
+constant integer BONUS_MOVESPEED=27
+
+constant integer DAMAGE_BASE_BONUS=28
+constant integer ARMOR_BASE_BONUS=29
+//endglobals from UnitBonusSystem
 //globals from UnitStateRefresh:
 constant boolean LIBRARY_UnitStateRefresh=true
+        // 哈希表的Key
+        // DynamicData
+constant integer UNIT_LIFERESTORE_BONUS=30
+constant integer UNIT_MANARESTORE_BONUS=31
 //endglobals from UnitStateRefresh
     // User-defined
 boolean udg_IsSkipCinematic= false
@@ -306,45 +537,83 @@ unit gg_unit_nm06_0024= null
 unit gg_unit_nhew_0025= null
 destructable gg_dest_ZTtw_1356= null
 destructable gg_dest_ZTtw_2470= null
-player P2= null
-constant integer UNITBUFF_STUN= 'BPSE'
+        // BlzApi UIEvent 的一些常量
+    
+        // 按下事件
+constant integer FRAME_EVENT_PRESSED= 1
+        // 鼠标进入
+constant integer FRAME_MOUSE_ENTER= 2
+        // 鼠标离开
+constant integer FRAME_MOUSE_LEAVE= 3
+        // 鼠标按下
+constant integer FRAME_MOUSE_UP= 4
+        // 鼠标弹起
+constant integer FRAME_MOUSE_DOWN= 5
+        // 鼠标滚轮
+constant integer FRAME_MOUSE_WHEEL= 6
+        // 激活焦点
+constant integer FRAME_FOCUS_ENTER= FRAME_MOUSE_ENTER
+        // 取消焦点
+constant integer FRAME_FOCUS_LEAVE= FRAME_MOUSE_LEAVE
+        // 激活复选框
+constant integer FRAME_CHECKBOX_CHECKED= 7
+        // 取消复选框
+constant integer FRAME_CHECKBOX_UNCHECKED= 8
+        // 对话框文字改变
+constant integer FRAME_EDITBOX_TEXT_CHANGED= 9
+        // 开始弹出菜单项目 (POPUPMENU类似于大厅选种族)
+constant integer FRAME_POPUPMENU_ITEM_CHANGE_START= 10
+        // 弹出的菜单项目被更改
+constant integer FRAME_POPUPMENU_ITEM_CHANGED= 11
+        // 鼠标双击 但没找到能响应双击事件的UI
+constant integer FRAME_MOUSE_DOUBLECLICK= 12
+        // 模型动画更新
+constant integer FRAME_SPRITE_ANIM_UPDATE= 13
+    
+        // UI Positions framepointtype
+    
+        // 左上
+constant integer FRAMEPOINT_TOPLEFT= 0
+        // 上
+constant integer FRAMEPOINT_TOP= 1
+        // 右上
+constant integer FRAMEPOINT_TOPRIGHT= 2
+        // 左
+constant integer FRAMEPOINT_LEFT= 3
+        // 中间
+constant integer FRAMEPOINT_CENTER= 4
+        // 右
+constant integer FRAMEPOINT_RIGHT= 5
+        // 左下
+constant integer FRAMEPOINT_BOTTOMLEFT= 6
+        // 下
+constant integer FRAMEPOINT_BOTTOM= 7
+        // 右下
+constant integer FRAMEPOINT_BOTTOMRIGHT= 8
         
-hashtable UnitBuff= InitHashtable()
-hashtable BuffSystem___Buff= InitHashtable()
-constant integer BUFF_TYPE_POSITIVE=14
-constant integer BUFF_TYPE_NEGATIVE=16
-
-constant integer BUFF_TYPE_MAGIC=18
-constant integer BUFF_TYPE_PHYSICAL=20
-constant integer BUFF_TYPE_AUTODISPEL=22
-
-        // 
-constant integer BUFF_TYPE_BUFFID=24
-
-constant integer BUFF_TYPE_IS_BUFF=26
-        //单位状态恢复 生命/魔法
-        //计时器RestoreFrame秒回调一次
-        //timer UnitRestoreTimer = null 
-        //恢复队列
-unit array UnitLifeRestoreQueue
-unit array UnitManaRestoreQueue
-real array LifeRestoreValue
-real array ManaRestoreValue
-        //恢复队列最大值
-integer UnitLifeRestoreNumber= 0
-integer UnitManaRestoreNumber= 0
-        //ObjectData
-constant integer BONUS_DAMAGE=28
-constant integer BONUS_ARMOR=30
-constant integer BONUS_ATTACK=32
-constant integer BONUS_LIFE=34
-constant integer BONUS_MANA=36
-constant integer BONUS_STR=38
-constant integer BONUS_AGI=40
-constant integer BONUS_INT=42
-constant integer BONUS_MOVESPEED=44
-constant integer Image___ImageAbility= 'AIil'
-constant integer UnitIsSummoningIllusions=46
+constant integer OBJ_KEY_COMMON_ORDERID=32
+        // 一些命令Id
+        // 攻击
+constant integer ORDER_ATTACK= 851983
+        // 右键
+constant integer ORDER_SMART= 851971
+        // 移动
+constant integer ORDER_MOVE= 851986
+        // 巡逻
+constant integer ORDER_PATROL= OrderId("patrol")
+        // 停止
+constant integer ORDER_STOP= OrderId("stop")
+        // 肉钩 / 照明弹
+constant integer ORDER_MEATHOOK= 852060
+        // 魔法枷锁
+constant integer ORDER_MAGICLEASH= 852480
+        // 闪电链
+constant integer ORDER_CHAINLIGHTNING= 852119
+        // 嘲讽
+constant integer ORDER_TAUNT= 852520
+        // 采集
+constant integer ORDER_HARVEST= 852018
+        
         //===========================================
         //物品系统
 integer ItemStack_Number= 0
@@ -375,10 +644,30 @@ integer ITEM_MoonShard
         //技能
 trigger AbilityEventTrigger= null
 trigger UnitSpellEffectTrigger= null
+        // temps
+unit Tmp_SpellAbilityUnit= null
+unit Tmp_SpellTargetUnit= null
+integer Tmp_SpellAbilityLevel
+real Tmp_SpellTargetX
+real Tmp_SpellTargetY
+        // 技能事件的哈希表key
+        // 准备释放技能
+constant integer SPELL_CHANNEL=33
+        // 发动技能效果
+constant integer SPELL_EFFECT=34
+        // 学习技能
+constant integer LEARN_SKILL=35
+        // 学习技能1级
+constant integer LEARN_FIRST_LEVEL_SKILL=36
 trigger EnterMapTrigger= CreateTrigger()
 trigger HeroLevelUpTrigger= CreateTrigger()
-constant integer IllusionUnitDataB=48
-constant integer IllusionUnitDataC=50
+constant integer IllusionUnitDataB=37
+constant integer IllusionUnitDataC=38
+constant integer UNITBUFF_STUN= 'BPSE'
+constant integer MagicImmunity___MAGICIMMUNITY=39
+constant integer Image___ImageAbility= 'AIil'
+constant integer IMAGO_UNIT_IS_SUMMONING_ILLUSIONS=40
+constant integer ZeroCast=41
 	
 	//TaxStealer Gold UI
 integer TaxStealerGoldAmount= 0
@@ -386,9 +675,16 @@ integer TaxStealerResourceBarFrame
 integer TaxStealerGoldFrameText
 integer TaxStealerGoldTipBoxedFrame
 integer TaxStealerGoldTipTextTitle
-constant integer StormSpirit__HaveOverload=52
-constant integer StormSpirit__OverloadEffectRight=54
-constant integer StormSpirit__OverloadEffectLeft=56
+constant integer StormSpirit___HaveOverload=42
+constant integer StormSpirit___OverloadEffectRight=43
+constant integer StormSpirit___OverloadEffectLeft=44
+constant integer BallLightningCount=45
+        
+	    // 一些命令Id
+	    // 复制 / 神圣护甲
+constant integer ORDER_COPY= OrderId("divineshield")
+        // 冲锋 / 变羊术
+constant integer ORDER_CHARGE= OrderId("polymorph")
 	//ui的frame
 integer GameUI
 	//控制台UI
@@ -412,6 +708,7 @@ boolean MoveSpeedUIVisible= false
 boolean AttackSpeed1UIVisible= false
 boolean AttackSpeed2UIVisible= false
 	//选英雄的背景
+group AllHerosGroup= CreateGroup()
 integer PickHeroFrame
 integer PickHeroReturnFrame
 integer PickHeroBackDrop
@@ -422,134 +719,40 @@ boolean array HeroIsSelected
 	
 integer array PlayerHeroAmount
 integer PlayerMaxHeroAmount= 1
-	
-region WorldRegion= null
-unit W2= null
-	
-	
-	
-	
-trigger array DamageEventQueue
-integer array DamageEventNumber
-	
-hashtable ObjectData= InitHashtable()
-	
-	//Frame
-	//光环刷新间隔
-constant real AuraFrame= 0.5
-	//单位恢复间隔
-constant real RestoreFrame= 0.2
-	//枷锁闪电效果移动间隔
-constant real LeashFrame= 0.05
-	//单位类型 数据
-	
-	
-	//单位哈希表
-hashtable UnitData= InitHashtable()
-	//===========================================
-constant integer BuffAddType_Positive= 1
-constant integer BuffAddType_Negative= 2
-constant integer BuffAddType_Magic= 8
-constant integer BuffAddType_Physical= 16
-constant integer BuffAddType_Aura= 32
-constant integer BuffAddType_AutoDispel= 64
-
-	//===========================================
-	//主要任务
-quest array MainQuest
-	//支线任务
-quest array SideQuest
-	
-	//中转全局变量
-unit Tmp_SpellAbilityUnit= null
-unit Tmp_SpellTargetUnit= null
-integer Tmp_SpellAbilityLevel
-real Tmp_SpellTargetX
-real Tmp_SpellTargetY
-	// 数组
-integer array Tmp__ArrayInt
-real array Tmp__ArrayReal
-	//中转用的变量
-unit TmpUnit2= null
-integer Tmp_DummyAmount= 0
-	//伤害事件
-	//伤害来源
-unit Tmp_DamageSource= null
-//受伤者
-unit Tmp_DamageInjured= null
-	//伤害值
-real Tmp_DamageValue
-boolean array EffectIsEnabled
-timer array EffectEnabledTimer
-	//哈希表的Key
-	//UnitData
-constant integer UNIT_BASE_ARMOR= 101
-constant integer UNIT_BASE_DAMAGE= 102
-constant integer UNIT_LIFERESTORE= 103
-constant integer UNIT_MANARESTORE= 104
-	
-	//技能事件的哈希表key
-	//准备释放技能
-constant integer SPELL_CHANNEL= 10
-	//发动技能效果
-constant integer SPELL_EFFECT= 11
-	//学习技能
-constant integer LEARN_SKILL= 14
-	//学习技能1级
-constant integer LEARN_FIRST_LEVEL_SKILL= 15
-	// UnitBuff
-	// hashtable UnitBuff = InitHashtable()
-hashtable UnitKeyBuff= InitHashtable()
-constant integer AttackTarget= - 100
-constant integer AttackReadyTrg= - 101
-constant integer AttackReadyTimer= - 102
-constant integer CriticalStrikeDamage= - 99
-
-constant integer Leash= - 1
-constant integer ZeroCast= 1
-constant integer BallLightningCount= 7
-
-constant integer MagicImmunity= 11
-	// 一些命令Id
-	// 攻击
-constant integer Order_Attack= 851983
-	// 右键
-constant integer Order_Smart= 851971
-	// 移动
-constant integer Order_Move= 851986
-	// 照明弹
-constant integer Order_Flare= 852060
-	// 魔法枷锁
-constant integer Order_MagicLeash= 852480
-	// 闪电链
-constant integer Order_Chainlightning= 852119
-	// 嘲讽
-constant integer Order_Taunt= 852520
-	// 采集
-constant integer Order_Harvest= 852018
-	//是否是初始化单位
-boolean IsInitUnit= true
-	//Dummy 马甲
-rect RectDummy= Rect(0, 0, 0, 0)
-	//获取最近的可破坏物
-destructable Tmp_Destructable= null
-real Tmp_NearestDestructableDistance= 0.
-real Tmp_GetNearestDestructableUnitX= 0.
-real Tmp_GetNearestDestructableUnitY= 0.
-	//额外属性马甲
-unit BonusDummy= null
-	//和lua交互数据的全局变量
-string SlkdataType= ""
-string SlkType= ""
 integer array StrHeroTypeId
 integer array IntHeroTypeId
 integer array AgiHeroTypeId
 integer array AllHeroTypeId
-constant integer MaxUserAmount= 5
-	//
 unit array TavernUnit
-unit array MovieDummyUnit
 unit array PlayerHeroUnit
+	// 野外生物起义和基佬岛公用基础库，但会有区别
+constant boolean IS_ISLAND= true
+	// 等价于 GetWorldBounds 只是为了注册事件
+region WorldRegion= null
+	// 以 handleId 为父Key keyType 为子key vj的Key语法保证不会冲突
+hashtable DynamicData= InitHashtable()
+	//中转全局变量
+	// 数组
+integer array Tmp__ArrayInt
+real array Tmp__ArrayReal
+	// Frame
+	// 光环刷新间隔
+constant real AuraFrame= 0.5
+	// 单位恢复间隔
+constant real RestoreFrame= 0.2
+	// 枷锁闪电效果移动间隔
+constant real LeashFrame= 0.05
+constant integer MaxUserAmount= 5
+integer M_OnlinePlayerAmount= 1
+	//===================================
+	//
+	//	Hero
+	//
+	//===================================
+	// 主要任务
+quest array MainQuest
+	// 支线任务
+quest array SideQuest
 	//===================================
 	//
 	//	QuestUnit
@@ -562,652 +765,256 @@ trigger l__library_init
 //JASSHelper struct globals:
 
 endglobals
-    native UnitAlive takes unit id returns boolean
-    native EXGetUnitAbility takes unit u, integer abilcode returns ability
-    native EXGetUnitAbilityByIndex takes unit u, integer index returns ability
-    native EXGetAbilityId takes ability abil returns integer
-    native EXGetAbilityState takes ability abil, integer state_type returns real
-    native EXSetAbilityState takes ability abil, integer state_type, real value returns boolean
-    native EXGetAbilityDataReal takes ability abil, integer level, integer data_type returns real
-    native EXSetAbilityDataReal takes ability abil, integer level, integer data_type, real value returns boolean
-    native EXGetAbilityDataInteger takes ability abil, integer level, integer data_type returns integer
-    native EXSetAbilityDataInteger takes ability abil, integer level, integer data_type, integer value returns boolean
-    native EXGetAbilityDataString takes ability abil, integer level, integer data_type returns string
-    native EXSetAbilityDataString takes ability abil, integer level, integer data_type, string value returns boolean
-    native EXGetEventDamageData takes integer edd_type returns integer
-    native EXSetEventDamage takes real amount returns boolean
-    native EXPauseUnit takes unit u, boolean flag returns nothing
     native EXExecuteScript takes string script returns string
-    native EXSetAbilityAEmeDataA takes ability abil, integer unitid returns boolean
-    native EXGetUnitString takes integer unitcode, integer Type returns string
-    native EXSetUnitString takes integer unitcode,integer Type,string value returns boolean
-    native EXGetItemDataString takes integer itemcode, integer data_type returns string
-    native EXSetItemDataString takes integer itemcode, integer data_type, string value returns boolean
-    native EXGetEffectX takes effect e returns real
-    native EXGetEffectY takes effect e returns real
-    native EXGetEffectZ takes effect e returns real
-    native EXSetEffectXY takes effect e, real x, real y returns nothing
-    native EXSetEffectZ takes effect e, real z returns nothing
-    native EXGetEffectSize takes effect e returns real
-    native EXSetEffectSize takes effect e, real size returns nothing
-    native EXEffectMatRotateX takes effect e, real angle returns nothing
-    native EXEffectMatRotateY takes effect e, real angle returns nothing
-    native EXEffectMatRotateZ takes effect e, real angle returns nothing //特效面对方向
+    native EXDisplayChat takes player p, integer chat_recipient, string message returns nothing
+    native EXGetUnitAbility takes unit u, integer abilcode returns ability
+	native EXGetUnitAbilityByIndex takes unit u, integer index returns ability
+	native EXGetAbilityId takes ability abil returns integer
+	native EXGetAbilityState takes ability abil, integer state_type returns real
+	native EXSetAbilityState takes ability abil, integer state_type, real value returns boolean
+	native EXGetAbilityDataReal takes ability abil, integer level, integer data_type returns real
+	native EXSetAbilityDataReal takes ability abil, integer level, integer data_type, real value returns boolean
+	native EXGetAbilityDataInteger takes ability abil, integer level, integer data_type returns integer
+	native EXSetAbilityDataInteger takes ability abil, integer level, integer data_type, integer value returns boolean
+	native EXGetAbilityDataString takes ability abil, integer level, integer data_type returns string
+	native EXSetAbilityDataString takes ability abil, integer level, integer data_type, string value returns boolean
+	native EXSetAbilityAEmeDataA takes ability abil, integer unitid returns boolean
+    native EXSetUnitFacing takes unit u, real angle returns nothing
+    native EXPauseUnit takes unit u, boolean flag returns nothing
+    native EXSetUnitCollisionType takes boolean enable, unit u, integer t returns nothing
+    native EXSetUnitMoveType takes unit u, integer t returns nothing
+native EXGetUnitString takes integer unitcode, integer Type returns string
+native EXSetUnitString takes integer unitcode,integer Type,string value returns boolean
+native EXGetUnitReal takes integer unitcode, integer Type returns real
+native EXSetUnitReal takes integer unitcode,integer Type,real value returns boolean
+native EXGetUnitInteger takes integer unitcode, integer Type returns integer
+native EXSetUnitInteger takes integer unitcode,integer Type,integer value returns boolean
+native EXGetUnitArrayString takes integer unitcode, integer Type,integer index returns string
+native EXGetItemDataString takes integer itemcode, integer data_type returns string
+native EXSetItemDataString takes integer itemcode, integer data_type, string value returns boolean
+native EXGetEffectX takes effect e returns real
+native EXGetEffectY takes effect e returns real
+native EXGetEffectZ takes effect e returns real
+native EXSetEffectXY takes effect e, real x, real y returns nothing
+native EXSetEffectZ takes effect e, real z returns nothing
+native EXGetEffectSize takes effect e returns real
+native EXSetEffectSize takes effect e, real size returns nothing
+native EXEffectMatRotateX takes effect e, real angle returns nothing
+native EXEffectMatRotateY takes effect e, real angle returns nothing
+native EXEffectMatRotateZ takes effect e, real angle returns nothing //特效面对方向
 native EXEffectMatScale takes effect e, real x, real y, real z returns nothing
-    native EXEffectMatReset takes effect e returns nothing
-    native EXSetEffectSpeed takes effect e, real speed returns nothing
-    native EXGetBuffDataString takes integer buffcode, integer data_type returns string
-    native EXSetBuffDataString takes integer buffcode, integer data_type, string value returns boolean
-native DzGetMouseTerrainX takes nothing returns real
-native DzGetMouseTerrainY takes nothing returns real
-native DzGetMouseTerrainZ takes nothing returns real
-native DzIsMouseOverUI takes nothing returns boolean
-native DzGetMouseX takes nothing returns integer
-native DzGetMouseY takes nothing returns integer
-native DzGetMouseXRelative takes nothing returns integer
-native DzGetMouseYRelative takes nothing returns integer
-native DzSetMousePos takes integer x, integer y returns nothing
-native DzTriggerRegisterMouseEvent takes trigger trig, integer btn, integer status, boolean sync, string func returns nothing
-native DzTriggerRegisterMouseEventByCode takes trigger trig, integer btn, integer status, boolean sync, code funcHandle returns nothing
-native DzTriggerRegisterKeyEvent takes trigger trig, integer key, integer status, boolean sync, string func returns nothing
-native DzTriggerRegisterKeyEventByCode takes trigger trig, integer key, integer status, boolean sync, code funcHandle returns nothing
-native DzTriggerRegisterMouseWheelEvent takes trigger trig, boolean sync, string func returns nothing
-native DzTriggerRegisterMouseWheelEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
-native DzTriggerRegisterMouseMoveEvent takes trigger trig, boolean sync, string func returns nothing
-native DzTriggerRegisterMouseMoveEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
-native DzGetTriggerKey takes nothing returns integer
-native DzGetWheelDelta takes nothing returns integer
-native DzIsKeyDown takes integer iKey returns boolean
-native DzGetTriggerKeyPlayer takes nothing returns player
-native DzGetWindowWidth takes nothing returns integer
-native DzGetWindowHeight takes nothing returns integer
-native DzGetWindowX takes nothing returns integer
-native DzGetWindowY takes nothing returns integer
-native DzTriggerRegisterWindowResizeEvent takes trigger trig, boolean sync, string func returns nothing
-native DzTriggerRegisterWindowResizeEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
-native DzIsWindowActive takes nothing returns boolean
-native DzDestructablePosition takes destructable d, real x, real y returns nothing
-native DzSetUnitPosition takes unit whichUnit, real x, real y returns nothing
-native DzExecuteFunc takes string funcName returns nothing
-native DzGetUnitUnderMouse takes nothing returns unit
-native DzSetUnitTexture takes unit whichUnit, string path, integer texId returns nothing
-native DzSetMemory takes integer address, real value returns nothing
-native DzSetUnitID takes unit whichUnit, integer id returns nothing
-native DzSetUnitModel takes unit whichUnit, string path returns nothing
-native DzSetWar3MapMap takes string map returns nothing
-native DzTriggerRegisterSyncData takes trigger trig, string prefix, boolean server returns nothing
-native DzSyncData takes string prefix, string data returns nothing
-native DzGetTriggerSyncData takes nothing returns string
-native DzGetTriggerSyncPlayer takes nothing returns player
-native DzFrameHideInterface takes nothing returns nothing
-native DzFrameEditBlackBorders takes real upperHeight, real bottomHeight returns nothing
-native DzFrameGetPortrait takes nothing returns integer
-native DzFrameGetMinimap takes nothing returns integer
-native DzFrameGetCommandBarButton takes integer row, integer column returns integer
-native DzFrameGetHeroBarButton takes integer buttonId returns integer
-native DzFrameGetHeroHPBar takes integer buttonId returns integer
-native DzFrameGetHeroManaBar takes integer buttonId returns integer
-native DzFrameGetItemBarButton takes integer buttonId returns integer
-native DzFrameGetMinimapButton takes integer buttonId returns integer
-native DzFrameGetUpperButtonBarButton takes integer buttonId returns integer
-native DzFrameGetTooltip takes nothing returns integer
-native DzFrameGetChatMessage takes nothing returns integer
-native DzFrameGetUnitMessage takes nothing returns integer
-native DzFrameGetTopMessage takes nothing returns integer
-native DzGetColor takes integer r, integer g, integer b, integer a returns integer
-native DzFrameSetUpdateCallback takes string func returns nothing
-native DzFrameSetUpdateCallbackByCode takes code funcHandle returns nothing
-native DzFrameShow takes integer frame, boolean enable returns nothing
-native DzCreateFrame takes string frame, integer parent, integer id returns integer
-native DzCreateSimpleFrame takes string frame, integer parent, integer id returns integer
-native DzDestroyFrame takes integer frame returns nothing
-native DzLoadToc takes string fileName returns nothing
-native DzFrameSetPoint takes integer frame, integer point, integer relativeFrame, integer relativePoint, real x, real y returns nothing
-native DzFrameSetAbsolutePoint takes integer frame, integer point, real x, real y returns nothing
-native DzFrameClearAllPoints takes integer frame returns nothing
-native DzFrameSetEnable takes integer name, boolean enable returns nothing
-native DzFrameSetScript takes integer frame, integer eventId, string func, boolean sync returns nothing
-native DzFrameSetScriptByCode takes integer frame, integer eventId, code funcHandle, boolean sync returns nothing
-native DzGetTriggerUIEventPlayer takes nothing returns player
-native DzGetTriggerUIEventFrame takes nothing returns integer
-native DzFrameFindByName takes string name, integer id returns integer
-native DzSimpleFrameFindByName takes string name, integer id returns integer
-native DzSimpleFontStringFindByName takes string name, integer id returns integer
-native DzSimpleTextureFindByName takes string name, integer id returns integer
-native DzGetGameUI takes nothing returns integer
-native DzClickFrame takes integer frame returns nothing
-native DzSetCustomFovFix takes real value returns nothing
-native DzEnableWideScreen takes boolean enable returns nothing
-native DzFrameSetText takes integer frame, string text returns nothing
-native DzFrameGetText takes integer frame returns string
-native DzFrameSetTextSizeLimit takes integer frame, integer size returns nothing
-native DzFrameGetTextSizeLimit takes integer frame returns integer
-native DzFrameSetTextColor takes integer frame, integer color returns nothing
-native DzGetMouseFocus takes nothing returns integer
-native DzFrameSetAllPoints takes integer frame, integer relativeFrame returns boolean
-native DzFrameSetFocus takes integer frame, boolean enable returns boolean
-native DzFrameSetModel takes integer frame, string modelFile, integer modelType, integer flag returns nothing
-native DzFrameGetEnable takes integer frame returns boolean
-native DzFrameSetAlpha takes integer frame, integer alpha returns nothing
-native DzFrameGetAlpha takes integer frame returns integer
-native DzFrameSetAnimate takes integer frame, integer animId, boolean autocast returns nothing
-native DzFrameSetAnimateOffset takes integer frame, real offset returns nothing
-native DzFrameSetTexture takes integer frame, string texture, integer flag returns nothing
-native DzFrameSetScale takes integer frame, real scale returns nothing
-native DzFrameSetTooltip takes integer frame, integer tooltip returns nothing
-native DzFrameCageMouse takes integer frame, boolean enable returns nothing
-native DzFrameGetValue takes integer frame returns real
-native DzFrameSetMinMaxValue takes integer frame, real minValue, real maxValue returns nothing
-native DzFrameSetStepValue takes integer frame, real step returns nothing
-native DzFrameSetValue takes integer frame, real value returns nothing
-native DzFrameSetSize takes integer frame, real w, real h returns nothing
-native DzCreateFrameByTagName takes string frameType, string name, integer parent, string template, integer id returns integer
-native DzFrameSetVertexColor takes integer frame, integer color returns nothing
-native DzOriginalUIAutoResetPoint takes boolean enable returns nothing
-native DzFrameSetPriority takes integer frame, integer priority returns nothing
-native DzFrameSetParent takes integer frame, integer parent returns nothing
-native DzFrameSetFont takes integer frame, string fileName, real height, integer flag returns nothing
-native DzFrameGetHeight takes integer frame returns real
-native DzFrameSetTextAlignment takes integer frame, integer align returns nothing
-native DzFrameGetParent takes integer frame returns integer
+native EXEffectMatReset takes effect e returns nothing
+native EXSetEffectSpeed takes effect e, real speed returns nothing
+native EXGetBuffDataString takes integer buffcode, integer data_type returns string
+native EXSetBuffDataString takes integer buffcode, integer data_type, string value returns boolean
+    native UnitAlive takes unit whichUnit returns boolean
+	native EXGetEventDamageData takes integer edd_type returns integer
+    native EXSetEventDamage takes real amount returns boolean
+    native DzGetMouseTerrainX takes nothing returns real
+    native DzGetMouseTerrainY takes nothing returns real
+    native DzGetMouseTerrainZ takes nothing returns real
+    native DzIsMouseOverUI takes nothing returns boolean
+    native DzGetMouseX takes nothing returns integer
+    native DzGetMouseY takes nothing returns integer
+    native DzGetMouseXRelative takes nothing returns integer
+    native DzGetMouseYRelative takes nothing returns integer
+    native DzSetMousePos takes integer x, integer y returns nothing
+    native DzTriggerRegisterMouseEvent takes trigger trig, integer btn, integer status, boolean sync, string func returns nothing
+    native DzTriggerRegisterMouseEventByCode takes trigger trig, integer btn, integer status, boolean sync, code funcHandle returns nothing
+    native DzTriggerRegisterKeyEvent takes trigger trig, integer key, integer status, boolean sync, string func returns nothing
+    native DzTriggerRegisterKeyEventByCode takes trigger trig, integer key, integer status, boolean sync, code funcHandle returns nothing
+    native DzTriggerRegisterMouseWheelEvent takes trigger trig, boolean sync, string func returns nothing
+    native DzTriggerRegisterMouseWheelEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
+    native DzTriggerRegisterMouseMoveEvent takes trigger trig, boolean sync, string func returns nothing
+    native DzTriggerRegisterMouseMoveEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
+    native DzGetTriggerKey takes nothing returns integer
+    native DzGetWheelDelta takes nothing returns integer
+    native DzIsKeyDown takes integer iKey returns boolean
+    native DzGetTriggerKeyPlayer takes nothing returns player
+    native DzGetWindowWidth takes nothing returns integer
+    native DzGetWindowHeight takes nothing returns integer
+    native DzGetWindowX takes nothing returns integer
+    native DzGetWindowY takes nothing returns integer
+    native DzTriggerRegisterWindowResizeEvent takes trigger trig, boolean sync, string func returns nothing
+    native DzTriggerRegisterWindowResizeEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
+    native DzIsWindowActive takes nothing returns boolean
+    native DzDestructablePosition takes destructable d, real x, real y returns nothing
+    native DzSetUnitPosition takes unit whichUnit, real x, real y returns nothing
+    native DzExecuteFunc takes string funcName returns nothing
+    native DzGetUnitUnderMouse takes nothing returns unit
+    native DzSetUnitTexture takes unit whichUnit, string path, integer texId returns nothing
+    native DzSetMemory takes integer address, real value returns nothing
+    native DzSetUnitID takes unit whichUnit, integer id returns nothing
+    native DzSetUnitModel takes unit whichUnit, string path returns nothing
+    native DzSetWar3MapMap takes string map returns nothing
+    native DzTriggerRegisterSyncData takes trigger trig, string prefix, boolean server returns nothing
+    native DzSyncData takes string prefix, string data returns nothing
+    native DzGetTriggerSyncData takes nothing returns string
+    native DzGetTriggerSyncPlayer takes nothing returns player
+    native DzFrameHideInterface takes nothing returns nothing
+    native DzFrameEditBlackBorders takes real upperHeight, real bottomHeight returns nothing
+    native DzFrameGetPortrait takes nothing returns integer
+    native DzFrameGetMinimap takes nothing returns integer
+    native DzFrameGetCommandBarButton takes integer row, integer column returns integer
+    native DzFrameGetHeroBarButton takes integer buttonId returns integer
+    native DzFrameGetHeroHPBar takes integer buttonId returns integer
+    native DzFrameGetHeroManaBar takes integer buttonId returns integer
+    native DzFrameGetItemBarButton takes integer buttonId returns integer
+    native DzFrameGetMinimapButton takes integer buttonId returns integer
+    native DzFrameGetUpperButtonBarButton takes integer buttonId returns integer
+    native DzFrameGetTooltip takes nothing returns integer
+    native DzFrameGetChatMessage takes nothing returns integer
+    native DzFrameGetUnitMessage takes nothing returns integer
+    native DzFrameGetTopMessage takes nothing returns integer
+    native DzGetColor takes integer r, integer g, integer b, integer a returns integer
+    native DzFrameSetUpdateCallback takes string func returns nothing
+    native DzFrameSetUpdateCallbackByCode takes code funcHandle returns nothing
+    native DzFrameShow takes integer frame, boolean enable returns nothing
+    native DzCreateFrame takes string frame, integer parent, integer id returns integer
+    native DzCreateSimpleFrame takes string frame, integer parent, integer id returns integer
+    native DzDestroyFrame takes integer frame returns nothing
+    native DzLoadToc takes string fileName returns nothing
+    native DzFrameSetPoint takes integer frame, integer point, integer relativeFrame, integer relativePoint, real x, real y returns nothing
+    native DzFrameSetAbsolutePoint takes integer frame, integer point, real x, real y returns nothing
+    native DzFrameClearAllPoints takes integer frame returns nothing
+    native DzFrameSetEnable takes integer name, boolean enable returns nothing
+    native DzFrameSetScript takes integer frame, integer eventId, string func, boolean sync returns nothing
+    native DzFrameSetScriptByCode takes integer frame, integer eventId, code funcHandle, boolean sync returns nothing
+    native DzGetTriggerUIEventPlayer takes nothing returns player
+    native DzGetTriggerUIEventFrame takes nothing returns integer
+    native DzFrameFindByName takes string name, integer id returns integer
+    native DzSimpleFrameFindByName takes string name, integer id returns integer
+    native DzSimpleFontStringFindByName takes string name, integer id returns integer
+    native DzSimpleTextureFindByName takes string name, integer id returns integer
+    native DzGetGameUI takes nothing returns integer
+    native DzClickFrame takes integer frame returns nothing
+    native DzSetCustomFovFix takes real value returns nothing
+    native DzEnableWideScreen takes boolean enable returns nothing
+    native DzFrameSetText takes integer frame, string text returns nothing
+    native DzFrameGetText takes integer frame returns string
+    native DzFrameSetTextSizeLimit takes integer frame, integer size returns nothing
+    native DzFrameGetTextSizeLimit takes integer frame returns integer
+    native DzFrameSetTextColor takes integer frame, integer color returns nothing
+    native DzGetMouseFocus takes nothing returns integer
+    native DzFrameSetAllPoints takes integer frame, integer relativeFrame returns boolean
+    native DzFrameSetFocus takes integer frame, boolean enable returns boolean
+    native DzFrameSetModel takes integer frame, string modelFile, integer modelType, integer flag returns nothing
+    native DzFrameGetEnable takes integer frame returns boolean
+    native DzFrameSetAlpha takes integer frame, integer alpha returns nothing
+    native DzFrameGetAlpha takes integer frame returns integer
+    native DzFrameSetAnimate takes integer frame, integer animId, boolean autocast returns nothing
+    native DzFrameSetAnimateOffset takes integer frame, real offset returns nothing
+    native DzFrameSetTexture takes integer frame, string texture, integer flag returns nothing
+    native DzFrameSetScale takes integer frame, real scale returns nothing
+    native DzFrameSetTooltip takes integer frame, integer tooltip returns nothing
+    native DzFrameCageMouse takes integer frame, boolean enable returns nothing
+    native DzFrameGetValue takes integer frame returns real
+    native DzFrameSetMinMaxValue takes integer frame, real minValue, real maxValue returns nothing
+    native DzFrameSetStepValue takes integer frame, real step returns nothing
+    native DzFrameSetValue takes integer frame, real value returns nothing
+    native DzFrameSetSize takes integer frame, real w, real h returns nothing
+    native DzCreateFrameByTagName takes string frameType, string name, integer parent, string template, integer id returns integer
+    native DzFrameSetVertexColor takes integer frame, integer color returns nothing
+    native DzOriginalUIAutoResetPoint takes boolean enable returns nothing
+    native DzFrameSetPriority takes integer frame, integer priority returns nothing
+    native DzFrameSetParent takes integer frame, integer parent returns nothing
+    native DzFrameSetFont takes integer frame, string fileName, real height, integer flag returns nothing
+    native DzFrameGetHeight takes integer frame returns real
+    native DzFrameSetTextAlignment takes integer frame, integer align returns nothing
+    native DzFrameGetParent takes integer frame returns integer
 
 
-//library InitSetUp:
-    
-    //单位存活
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //Buff的Japi在1.27a不可用 直到最新的YDWE修复，但官方平台上似乎不可用。
-
-
-            
-    //YDWE封装
-                
-    function YDWEGetUnitAbilityState takes unit u,integer abilcode,integer state_type returns real
-        return EXGetAbilityState(EXGetUnitAbility(u, abilcode), state_type)
+//library ObjectData:
+    // 读取一些物编的数据
+    // 与lua交互获得Slk数据
+    function GetObjectDataBySlk takes integer objectId,string tableName,string dataType returns string
+        set SlkType=tableName
+        set SlkdataType=dataType
+        return AbilityId2String(objectId) // lua hook了此函数 调用slk库
+endfunction
+    function GetUnitSlkData takes integer objectId,string dataType returns string
+        return GetObjectDataBySlk(objectId , "unit" , dataType)
     endfunction
-            
-    function YDWEGetUnitAbilityDataInteger takes unit u,integer abilcode,integer level,integer data_type returns integer
-        return EXGetAbilityDataInteger(EXGetUnitAbility(u, abilcode), level, data_type)
+    //获取英雄单位的主属性 primary: 1 == str  2 == int  3 = agi 
+    function OBJ_GetHeroPrimaryByType takes integer whichType returns string
+        return GetObjectDataBySlk(whichType , "unit" , "Primary")
     endfunction
-            
-    function YDWEGetUnitAbilityDataReal takes unit u,integer abilcode,integer level,integer data_type returns real
-        return EXGetAbilityDataReal(EXGetUnitAbility(u, abilcode), level, data_type)
+    function OBJ_GetHeroPrimary takes unit whichUnit returns string
+        local integer whichType= GetUnitTypeId(whichUnit)
+        local string data= LoadStr(ObjectData, ObjectData__HERO_PRIMARY, whichType)
+        if data == null then
+            set data=GetObjectDataBySlk(whichType , "unit" , "Primary")
+        endif
+        return data
     endfunction
-            
-    function YDWEGetUnitAbilityDataString takes unit u,integer abilcode,integer level,integer data_type returns string
-        return EXGetAbilityDataString(EXGetUnitAbility(u, abilcode), level, data_type)
+    // 原生的阴影 还是从slk库中获取
+    function OBJ_GetUnitOriginShadow takes unit whichUnit returns string
+        local integer whichType= GetUnitTypeId(whichUnit)
+        local string data= LoadStr(ObjectData, ObjectData__UNIT_SHADOW, whichType)
+        if data == null then
+            set data=GetObjectDataBySlk(whichType , "unit" , "Primary")
+        endif
+        return data
     endfunction
-            
-    function YDWESetUnitAbilityState takes unit u,integer abilcode,integer state_type,real value returns boolean
-        return EXSetAbilityState(EXGetUnitAbility(u, abilcode), state_type, value)
+    function OBJ_GetHeroPrimaryValue takes unit whichUnit returns integer
+        local string data= OBJ_GetHeroPrimary(whichUnit)
+        if data == "STR" then
+            return GetHeroStr(whichUnit, true)
+        elseif data == "AGI" then
+            return GetHeroAgi(whichUnit, true)
+        elseif data == "INT" then
+            return GetHeroInt(whichUnit, true)
+        endif
+        return 0
     endfunction
-            
-    function YDWESetUnitAbilityDataInteger takes unit u,integer abilcode,integer level,integer data_type,integer value returns boolean
-        return EXSetAbilityDataInteger(EXGetUnitAbility(u, abilcode), level, data_type, value)
-    endfunction
-            
-    function YDWESetUnitAbilityDataReal takes unit u,integer abilcode,integer level,integer data_type,real value returns boolean
-        return EXSetAbilityDataReal(EXGetUnitAbility(u, abilcode), level, data_type, value)
-    endfunction
-            
-    function YDWESetUnitAbilityDataString takes unit u,integer abilcode,integer level,integer data_type,string value returns boolean
-        return EXSetAbilityDataString(EXGetUnitAbility(u, abilcode), level, data_type, value)
-    endfunction
-    //初始化prd的值
-    function InitPrd takes nothing returns nothing
-        call SaveReal(Prd, - 1, 0, .0038)
-        call SaveReal(Prd, - 1, 1, .0147)
-        call SaveReal(Prd, - 1, 2, .0322)
-        call SaveReal(Prd, - 1, 3, .0557)
-        call SaveReal(Prd, - 1, 4, .0847)
-        call SaveReal(Prd, - 1, 5, .1189)
-        call SaveReal(Prd, - 1, 6, .1579)
-        call SaveReal(Prd, - 1, 7, .2015)
-        call SaveReal(Prd, - 1, 8, .2493)
-        call SaveReal(Prd, - 1, 9, .3021)
-        call SaveReal(Prd, - 1, 10, .3604)
-        call SaveReal(Prd, - 1, 11, .4226)
-        call SaveReal(Prd, - 1, 12, .4811)
-        call SaveReal(Prd, - 1, 13, .5714)
-        call SaveReal(Prd, - 1, 14, .6666)
-        call SaveReal(Prd, - 1, 15, .75)
-        call SaveReal(Prd, - 1, 16, .8235)
-        call SaveReal(Prd, - 1, 17, .8888)
-        call SaveReal(Prd, - 1, 18, .9473)
-        call SaveReal(Prd, - 1, 19, 1.)
-    endfunction
-    //========================================================
-    //Group
-    //========================================================
-    //实际上比直接Create和Destroy效率差了2.5倍左右
-    //好处是不需要set g = null 因为这些预先创建的单位组不会被销毁
-    function LogoutGroup takes group g returns nothing
-        local integer i= GetHandleId(g) - MaxGroupHandle
-        if i < 0 or i > MaxGroupAmount then
+    // 获取攻击方式 1 攻击力
+    function OBJ_GetUnitBaseDamage1 takes unit whichUnit returns integer
+        local integer whichType= GetUnitTypeId(whichUnit)
+        local integer data
+        if HaveSavedInteger(ObjectData, ObjectData__UNIT_ATTACK1_DAMAGE_BASE, whichType) then
+            return LoadInteger(ObjectData, ObjectData__UNIT_ATTACK1_DAMAGE_BASE, whichType)
         else
-            call GroupClear(g)
-            set GroupInUse[i]=false
-            set GroupIdleValue=i
+            set data=S2I(GetObjectDataBySlk(whichType , "unit" , "dmgplus1"))
+            call SaveInteger(ObjectData, ObjectData__UNIT_ATTACK1_DAMAGE_BASE, whichType, data)
         endif
+        return data
     endfunction
-    function LoginGroup takes nothing returns group
-        local integer i= GroupIdleValue
-        loop
-            exitwhen i == GroupIdleValue - 1
-            if not GroupInUse[i] then
-                set GroupIdleValue=i + 1
-                if GroupIdleValue == MaxGroupAmount then
-                    set GroupIdleValue=1
-                endif
-                set GroupInUse[i]=true
-                return MainGroup[i]
-            endif
-            set i=i + 1
-            if i == MaxGroupAmount then
-                set i=0
-            endif
-        endloop
-        call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 20, "|c00ff0303严重错误: 找不到可用的单位组。|r")
-        return CreateGroup()
-    endfunction
-    function CreateMainGroup takes nothing returns nothing
-        local integer i= 0
-        set MainGroup[i]=CreateGroup()
-        set i=i + 1
-        set MaxGroupHandle=GetHandleId(MainGroup[0])
-        loop
-            exitwhen i == MaxGroupAmount
-            set MainGroup[i]=CreateGroup()
-            set i=i + 1
-        endloop
-    endfunction
-    //========================================================
-    //TriggerClear
-    //========================================================
-    function destroy_error takes string s returns nothing
-        //if bj_isSinglePlayer then
-		call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 120, "|c00ff0303内部检验失败|r")
-		call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 120, "|c00ff0303这可能不是一个严重的故障，但对我来说这个信息十分重要|r")
-		call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 120, "|c00ff0303错误代码: " + s + "|r")
-        //endif
-    endfunction
-    function ClearTrigger takes trigger t returns nothing
-        call DisableTrigger(t)
-        set DestroyQueueNumber=DestroyQueueNumber + 1
-        set DestroyQueue[DestroyQueueNumber]=t
-        set ElapsedTime[DestroyQueueNumber]=( TimerGetElapsed(GameTimer) ) + 60
-        if DestroyQueueNumber > 8000 then
-            call destroy_error("8k")
-        endif
-    endfunction
-    function setnil takes integer i returns nothing
-        if i != DestroyQueueNumber then
-            set DestroyQueue[i]=DestroyQueue[DestroyQueueNumber]
-            set ElapsedTime[i]=ElapsedTime[DestroyQueueNumber]
-        endif
-        set DestroyQueue[DestroyQueueNumber]=null
-        set ElapsedTime[DestroyQueueNumber]=0
-        set DestroyQueueNumber=DestroyQueueNumber - 1
-    endfunction
-    function TimedCleanupTrigger takes nothing returns boolean
-        local real r= TimerGetElapsed(GameTimer)
-        local integer i
-        set i=1
-        loop
-            exitwhen i > DestroyQueueNumber
-            if ElapsedTime[i] < r then
-                if DestroyQueue[i] == null then
-                    call destroy_error("nil")
-                elseif IsTriggerEnabled(DestroyQueue[i]) then
-                    call destroy_error(I2S(GetHandleId(DestroyQueue[i])))
-                else
-                    call DestroyTrigger(DestroyQueue[i])
-                endif
-                call setnil(i)
-            else
-                set i=i + 1
-            endif
-        endloop
-        return false
-    endfunction
-    //创建一个计时器事件触发器，返回值是触发器的整数地址，需要手动销毁。注意func为触发器的条件Condition而不是动作Action。
-    function CreateTimerEventTrigger takes real timeout,boolean periodic,code func returns integer
-        local trigger trig= CreateTrigger()
-        local integer iHandleId= GetHandleId(trig)
-        call TriggerAddCondition(trig, Condition(func))
-        call TriggerRegisterTimerEvent(trig, timeout, periodic)
-        set trig=null
-        return iHandleId
-    endfunction
-    //将物件转成物品
-    function Widget2Item takes widget whichWidget returns item
-        call SaveFogStateHandle(TypeConversion, 0, 0, ConvertFogState(GetHandleId(whichWidget)))
-        return LoadItemHandle(TypeConversion, 0, 0)
-    endfunction
-    function ItemDelayRemove takes nothing returns boolean
-        local trigger trig= GetTriggeringTrigger()
-        local integer iHandleId= GetHandleId(trig)
-        local item deathItem= LoadItemHandle(HT, iHandleId, 0)
-   
-        if GetHandleId(deathItem) > 0 then
-            call SetWidgetLife(deathItem, 1)
-            call RemoveItem(deathItem)
-        endif
-        call FlushChildHashtable(HT, iHandleId)
-        call ClearTrigger(trig)
-        set trig=null
-        set deathItem=null
-        return false
-    endfunction
-    function ItemDeathEventTriggerCallBack takes nothing returns boolean
-        local item deathItem= Widget2Item(GetTriggerWidget())
-        local integer iHandleId
-        //call SetWidgetLife(deathItem, 1)
-        //等待,让物品播放完死亡动画,3.633秒是大部分书的死亡时间,似乎物品模型里死亡动画没有比这个更高的.
-        //注意 普通物品死亡时间为0.5,书虽然3.633,但后面很大一部分时间都是播放最小化的书
-        set iHandleId=CreateTimerEventTrigger(1. , false , function ItemDelayRemove)
-        call SaveItemHandle(HT, iHandleId, 0, deathItem)
-        set deathItem=null
-        return false
-    endfunction
-    //封装的创建物品,因为物品被a掉后会永久存在于地图之中,所以要特殊操作一下.
-    function EXCreateItem takes integer itemid,real x,real y returns item
-        set bj_lastCreatedItem=CreateItem(itemid, x, y)
-        call TriggerRegisterDeathEvent(ItemDeathEventTrigger, bj_lastCreatedItem)
-        return bj_lastCreatedItem
-    endfunction
-    //得到XY之间的角度
-    function AngleBetweenXY takes real x1,real y1,real x2,real y2 returns real
-        return bj_RADTODEG * Atan2(y2 - y1, x2 - x1)
-    endfunction
-    //单位之间的角度
-    function AngleBetweenUnit takes unit u1,unit u2 returns real
-        return bj_RADTODEG * Atan2(GetUnitY(u2) - GetUnitY(u1), GetUnitX(u2) - GetUnitX(u1))
-    endfunction
-    //xy距离
-    function GetDistanceBetween takes real x1,real y1,real x2,real y2 returns real
-        return SquareRoot(( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) * ( y1 - y2 ))
-    endfunction
-    //单位之间的距离
-    function GetDistanceBetweenUnits takes unit u1,unit u2 returns real
-        return SquareRoot(( GetUnitX(u1) - GetUnitX(u2) ) * ( GetUnitX(u1) - GetUnitX(u2) ) + ( GetUnitY(u1) - GetUnitY(u2) ) * ( GetUnitY(u1) - GetUnitY(u2) ))
-    endfunction
-    //添加技能并且设置永久性
-    function UnitAddPermanentAbility takes unit u,integer id returns boolean
-        return UnitAddAbility(u, id) and UnitMakeAbilityPermanent(u, true, id)
-    endfunction
-    //添加技能并且设置永久性和技能等级
-    function UnitAddPermanentAbilitySetlevel takes unit u,integer id,integer lv returns nothing
-        if GetUnitAbilityLevel(u, id) == 0 then
-            call UnitAddPermanentAbility(u , id)
-        endif
-        call SetUnitAbilityLevel(u, id, lv)
-    endfunction
-    //Prd随机数 取5的整数
-    function PrdRandom takes unit u,integer abId,real value returns boolean
-        local integer h= GetHandleId(u)
-        local real newValue
-        if not IsUnitType(u, UNIT_TYPE_HERO) then
-            return GetRandomInt(1, 100) < value //如果不是英雄 则直接返回随机数
-endif
-        set newValue=LoadReal(Prd, - 1, R2I(R2I(value * .2) * 5. * .2) - 1) + LoadReal(Prd, h, abId)
-        //call Debug("log","几率: " + R2S(newValue) )
-        if GetRandomReal(.0, 1.) < newValue then
-            call SaveReal(Prd, h, abId, .0)
-            return true
+    // 获取基础护甲
+    function OBJ_GetUnitBaseArmor takes unit whichUnit returns real
+        local integer whichType= GetUnitTypeId(whichUnit)
+        local real data
+        if HaveSavedReal(ObjectData, ObjectData__UNIT_ARMOR_BASE, whichType) then
+            return LoadReal(ObjectData, ObjectData__UNIT_ARMOR_BASE, whichType)
         else
-            call SaveReal(Prd, h, abId, newValue)
-            return false
+            set data=S2I(GetObjectDataBySlk(whichType , "unit" , "def"))
+            call SaveReal(ObjectData, ObjectData__UNIT_ARMOR_BASE, whichType, data)
         endif
+        return data
     endfunction
-    //修正坐标X 防止SetUnitX超出地图
-    function CoordinateX takes real x returns real
-        if x < CorrectionMinX then
-            return CorrectionMinX
+    // 获取攻击方式 1 攻击力
+    function OBJ_GetUnitBaseDamage1ByType takes integer whichType returns integer
+        local integer data
+        if HaveSavedInteger(ObjectData, ObjectData__UNIT_ATTACK1_DAMAGE_BASE, whichType) then
+            return LoadInteger(ObjectData, ObjectData__UNIT_ATTACK1_DAMAGE_BASE, whichType)
+        else
+            set data=S2I(GetObjectDataBySlk(whichType , "unit" , "dmgplus1"))
+            call SaveInteger(ObjectData, ObjectData__UNIT_ATTACK1_DAMAGE_BASE, whichType, data)
         endif
-        if x > CorrectionMaxX then
-            return CorrectionMaxX
+        return data
+    endfunction
+    // 获取基础护甲
+    function OBJ_GetUnitBaseArmorByType takes integer whichType returns real
+        local real data
+        if HaveSavedReal(ObjectData, ObjectData__UNIT_ARMOR_BASE, whichType) then
+            return LoadReal(ObjectData, ObjectData__UNIT_ARMOR_BASE, whichType)
+        else
+            set data=S2I(GetObjectDataBySlk(whichType , "unit" , "def"))
+            call SaveReal(ObjectData, ObjectData__UNIT_ARMOR_BASE, whichType, data)
         endif
-        return x
-    endfunction
-    //修正坐标Y 防止SetUnitY超出地图
-    function CoordinateY takes real y returns real
-        if y < CorrectionMinY then
-            return CorrectionMinY
-        endif
-        if y > CorrectionMaxY then
-            return CorrectionMaxY
-        endif
-        return y
-    endfunction
-    //========================================================
-    //从单位组以某个条件获取单位
-    //========================================================
-    //Nearest Farthest
-    //得到单位组距离xy最远的单位
-    function GetFarthestUnitByGroup takes group whichGroup,real x,real y returns unit
-        local group dummyGroup= LoginGroup()
-        local real rFarthestDistance= 0
-        local unit dummyUnit
-        local unit farthestUnit= null
-        local real rDistance= .0
-        call GroupAddGroup(whichGroup, dummyGroup)
-        loop
-            set dummyUnit=FirstOfGroup(dummyGroup)
-            exitwhen dummyUnit == null
-            set rDistance=GetDistanceBetween(GetUnitX(dummyUnit) , GetUnitY(dummyUnit) , x , y)
-            if rDistance > rFarthestDistance then
-                set farthestUnit=dummyUnit
-                set rFarthestDistance=rDistance
-            endif
-            call GroupRemoveUnit(dummyGroup, dummyUnit)
-        endloop
-        set TmpUnit2=farthestUnit
-        call LogoutGroup(dummyGroup)
-        set dummyUnit=null
-        set farthestUnit=null
-        set dummyGroup=null
-        return TmpUnit2
-    endfunction
-    //得到单位组距离xy最近的单位
-    function GetNearestUnitByGroup takes group whichGroup,real x,real y returns unit
-        local group dummyGroup= LoginGroup()
-        local real rNearestDistance= 99999
-        local unit dummyUnit
-        local unit neareststUnit= null
-        local real rDistance= 0.
-        call GroupAddGroup(whichGroup, dummyGroup)
-        loop
-            set dummyUnit=FirstOfGroup(dummyGroup)
-            exitwhen dummyUnit == null
-            set rDistance=GetDistanceBetween(GetUnitX(dummyUnit) , GetUnitY(dummyUnit) , x , y)
-            if rDistance < rNearestDistance then
-                set neareststUnit=dummyUnit
-                set rNearestDistance=rDistance
-            endif
-            call GroupRemoveUnit(dummyGroup, dummyUnit)
-        endloop
-        set TmpUnit2=neareststUnit
-        call LogoutGroup(dummyGroup)
-        set dummyUnit=null
-        set neareststUnit=null
-        set dummyGroup=null
-        return TmpUnit2
-    endfunction
-    //得到单位组中生命值百分比最小的单位
-    function GetMinPercentLifeUnitByGroup takes group whichGroup returns unit
-        local group dummyGroup= LoginGroup()
-        local real rMinPercentLife= 101
-        local unit dummyUnit
-        local unit minPercentLifeUnit= null
-        local real rPercentLife= 0.
-        call GroupAddGroup(whichGroup, dummyGroup)
-        loop
-            set dummyUnit=FirstOfGroup(dummyGroup)
-            exitwhen dummyUnit == null
-            set rPercentLife=GetUnitStatePercent(dummyUnit, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE)
-            if rPercentLife < rMinPercentLife then
-                set minPercentLifeUnit=dummyUnit
-                set rMinPercentLife=rPercentLife
-            endif
-            call GroupRemoveUnit(dummyGroup, dummyUnit)
-        endloop
-        call LogoutGroup(dummyGroup)
-        set dummyGroup=null
-        set dummyUnit=null
-        set TmpUnit2=minPercentLifeUnit
-        set minPercentLifeUnit=null
-        return TmpUnit2
-    endfunction
-    //得到单位组中生命值最小的单位
-    function GetMinLifeUnitByGroup takes group whichGroup returns unit
-        local group dummyGroup= LoginGroup()
-        local real rMinLife= 999999
-        local unit dummyUnit
-        local unit minLifeUnit= null
-        local real rLife= 0.
-        call GroupAddGroup(whichGroup, dummyGroup)
-        loop
-            set dummyUnit=FirstOfGroup(dummyGroup)
-            exitwhen dummyUnit == null
-            set rLife=GetWidgetLife(dummyUnit)
-            if rLife < rMinLife then
-                set minLifeUnit=dummyUnit
-                set rMinLife=rLife
-            endif
-            call GroupRemoveUnit(dummyGroup, dummyUnit)
-        endloop
-        call LogoutGroup(dummyGroup)
-        set dummyGroup=null
-        set dummyUnit=null
-        set TmpUnit2=minLifeUnit
-        set minLifeUnit=null
-        return TmpUnit2
-    endfunction
-    function YDWEAnyUnitDamagedFilter takes nothing returns boolean
-        if GetUnitAbilityLevel(GetFilterUnit(), 'Aloc') <= 0 then
-            call TriggerRegisterUnitEvent(DamageEventTrigger, GetFilterUnit(), EVENT_UNIT_DAMAGED)
-        endif
-        return false
-    endfunction
-    function AnyItemDeathFilter takes nothing returns boolean
-        local item it= GetFilterItem()
-        if GetWidgetLife(it) > 0 then
-            call TriggerRegisterDeathEvent(ItemDeathEventTrigger, it)
-        endif
-        set it=null
-        return false
-    endfunction
-    function YDWEAnyUnitDamagedEnumUnit takes nothing returns nothing
-        local group g= LoginGroup()
-        local integer i= 0
-        loop
-            call GroupEnumUnitsOfPlayer(g, Player(i), Condition(function YDWEAnyUnitDamagedFilter))
-            set i=i + 1
-            exitwhen i == bj_MAX_PLAYER_SLOTS
-        endloop
-        call LogoutGroup(g)
-        set g=null
-    endfunction
-    //重建物品死亡事件
-    function M_AnyItemDeathEnumItem takes nothing returns nothing
-        local rect world= GetWorldBounds()
-        call EnumItemsInRect(world, Condition(function AnyItemDeathFilter), null)
-        call RemoveRect(world)
-        set world=null
-    endfunction
-    // 将 DamageEventTrigger 移入销毁队列, 从而排泄触发器事件
-    function YDWESyStemAnyUnitDamagedSwap takes nothing returns nothing
-        local boolean isEnabled= IsTriggerEnabled(DamageEventTrigger)
-        call ClearTrigger(DamageEventTrigger)
-        set DamageEventTrigger=CreateTrigger()
-        if not isEnabled then
-            call DisableTrigger(DamageEventTrigger)
-        endif
-        set isEnabled=IsTriggerEnabled(ItemDeathEventTrigger)
-        call ClearTrigger(ItemDeathEventTrigger)
-        set ItemDeathEventTrigger=CreateTrigger()
-        if not isEnabled then
-            call DisableTrigger(ItemDeathEventTrigger)
-        endif
-        call TriggerAddCondition(DamageEventTrigger, DamageEventCondition)
-        call TriggerAddCondition(ItemDeathEventTrigger, Condition(function ItemDeathEventTriggerCallBack))
-        call YDWEAnyUnitDamagedEnumUnit()
-        call M_AnyItemDeathEnumItem()
-    endfunction
-    //改装了一下YDWE的任意单位受伤。
-    function YDWESyStemAnyUnitDamagedRegistTrigger takes nothing returns nothing
-        set DamageEventTrigger=CreateTrigger()
-        call TriggerAddCondition(DamageEventTrigger, DamageEventCondition)
-        if DAMAGE_EVENT_SWAP_ENABLE then
-            // 每隔 DAMAGE_EVENT_SWAP_TIMEOUT 秒, 将正在使用的 DamageEventTrigger 和 ItemDeathEventTrigger 移入销毁队列
-            call TimerStart(CreateTimer(), DAMAGE_EVENT_SWAP_TIMEOUT, true, function YDWESyStemAnyUnitDamagedSwap)
-        endif
-    endfunction
-    //给所有玩家共享此单位的视野
-    function UnitShareVisionToAllPlayer takes unit whichUnit,boolean share returns nothing
-        local integer i= 0
-        loop
-            call UnitShareVision(whichUnit, Player(i), share)
-            set i=i + 1
-            exitwhen i == bj_MAX_PLAYER_SLOTS
-        endloop
-    endfunction
-    function InitSetUp___Init takes nothing returns nothing
-        call InitPrd()
-        set LocalPlayer=GetLocalPlayer()
-        // 使用 TimerGetElapsed(GameTimer) 获取游戏逝去时间
-        call TimerStart(GameTimer, 99999., false, null)
-        // 定期清触发器
-        call CreateTimerEventTrigger(15 , true , function TimedCleanupTrigger)
-        // 物品被a掉
-        call TriggerAddCondition(ItemDeathEventTrigger, Condition(function ItemDeathEventTriggerCallBack))
-        call M_AnyItemDeathEnumItem()
-        // 初始化单位组线性表
-        call CreateMainGroup()
-        //用于修正坐标
-        set CorrectionMinX=GetRectMinX(bj_mapInitialPlayableArea) + 75
-        set CorrectionMaxX=GetRectMaxX(bj_mapInitialPlayableArea) - 75
-        set CorrectionMinY=GetRectMinY(bj_mapInitialPlayableArea) + 75
-        set CorrectionMaxY=GetRectMaxY(bj_mapInitialPlayableArea) - 75
-    
+        return data
     endfunction
 
-//library InitSetUp ends
+//library ObjectData ends
 //library UITips:
 	
 	//创建提示信息
@@ -1236,8 +1043,142 @@ endif
 	endfunction
 
 //library UITips ends
+//library UnitRestore:
+    
+    //生命恢复,所有生命恢复都以这条函数来进行	/*不包括生命移除*/
+    function UnitRestoreLife takes unit u,real r returns nothing
+
+            if r != 0 then
+                if IsUnitType(u, UNIT_TYPE_UNDEAD) then //不死族单位在荒芜地表享受两倍生命恢复效果
+if IsPointBlighted(GetUnitX(u), GetUnitY(u)) then
+                        set r=r * 2.00
+                    endif
+                endif
+                call SetWidgetLife(u, GetWidgetLife(u) + r)
+            endif
+
+
+
+    endfunction
+    
+    //魔法恢复,所有魔法恢复都以这条函数来进行  /*不包括魔法移除*/
+    function UnitRestoreMana takes unit u,real r returns nothing
+        if r != 0 then
+            call SetUnitState(u, UNIT_STATE_MANA, GetUnitState(u, UNIT_STATE_MANA) + r)
+        endif
+    endfunction
+    function RefreshLifeUnitRestore takes unit u returns nothing
+        local integer h= GetHandleId(u)
+        local integer index= LoadInteger(DynamicData, h, UNIT_LIFERESTORE)
+        set LifeRestoreValue[index]=( LoadReal(DynamicData, h, UNIT_LIFERESTORE) + ( GetHeroStr(u, true) * 0.04 ) ) * RestoreFrame
+    endfunction
+    function RefreshManaUnitRestore takes unit u returns nothing
+        local integer h= GetHandleId(u)
+        local integer index= LoadInteger(DynamicData, h, UNIT_MANARESTORE)
+        set ManaRestoreValue[index]=( LoadReal(DynamicData, h, UNIT_MANARESTORE) + ( GetHeroInt(u, true) * 0.03 ) ) * RestoreFrame
+    endfunction
+    function RefreshUnitRestore takes unit u returns nothing
+        local integer h= GetHandleId(u)
+        set LifeRestoreValue[LoadInteger(DynamicData, h, UNIT_LIFERESTORE)]=( LoadReal(DynamicData, h, UNIT_LIFERESTORE) + ( GetHeroStr(u, true) * 0.04 ) ) * RestoreFrame
+        set ManaRestoreValue[LoadInteger(DynamicData, h, UNIT_MANARESTORE)]=( LoadReal(DynamicData, h, UNIT_MANARESTORE) + ( GetHeroInt(u, true) * 0.03 ) ) * RestoreFrame
+    endfunction
+    function UnitCanRestoreLife takes unit whichUnit returns boolean
+        return HaveSavedInteger(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE)
+    endfunction
+    function UnitCanRestoreMana takes unit whichUnit returns boolean
+        return HaveSavedInteger(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE)
+    endfunction
+    //使单位加入恢复队列,允许其恢复 生命/魔法
+    function QueuedUnitLifeRestoreAdd takes unit whichUnit returns nothing
+        set UnitLifeRestoreNumber=UnitLifeRestoreNumber + 1
+        set UnitLifeRestoreQueue[UnitLifeRestoreNumber]=whichUnit
+        set LifeRestoreValue[UnitLifeRestoreNumber]=0. //可能不需要set 0
+call SaveInteger(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE, UnitLifeRestoreNumber)
+    endfunction
+    //使单位加入恢复队列,允许其恢复 生命/魔法
+    function QueuedUnitManaRestoreAdd takes unit whichUnit returns nothing
+        set UnitManaRestoreNumber=UnitManaRestoreNumber + 1
+        set UnitManaRestoreQueue[UnitManaRestoreNumber]=whichUnit
+        set ManaRestoreValue[UnitManaRestoreNumber]=0.
+        call SaveInteger(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE, UnitManaRestoreNumber)
+    endfunction
+    //使单位加入恢复队列,允许其恢复 生命/魔法
+    function QueuedUnitRestoreAdd takes unit whichUnit returns nothing
+        call QueuedUnitLifeRestoreAdd(whichUnit)
+        call QueuedUnitManaRestoreAdd(whichUnit)
+    endfunction
+    //将单位移出恢复队列,禁用其恢复 生命
+    function QueuedUnitLifeRestoreRemove takes unit whichUnit returns nothing
+        local integer iHandleId= GetHandleId(whichUnit)
+        local integer index= LoadInteger(DynamicData, iHandleId, UNIT_LIFERESTORE)
+        if index != UnitLifeRestoreNumber then
+            set UnitLifeRestoreQueue[index]=UnitLifeRestoreQueue[UnitLifeRestoreNumber]
+            set LifeRestoreValue[index]=LifeRestoreValue[UnitLifeRestoreNumber]
+            call SaveInteger(DynamicData, iHandleId, UNIT_LIFERESTORE, 0)
+            set iHandleId=GetHandleId(UnitLifeRestoreQueue[UnitLifeRestoreNumber])
+            call SaveInteger(DynamicData, iHandleId, UNIT_LIFERESTORE, index)
+        endif
+        set UnitLifeRestoreQueue[UnitLifeRestoreNumber]=null
+        set LifeRestoreValue[UnitLifeRestoreNumber]=0.
+        set UnitLifeRestoreNumber=UnitLifeRestoreNumber - 1
+    endfunction
+    //将单位移出恢复队列,禁用其恢复 魔法
+    function QueuedUnitManaRestoreRemove takes unit whichUnit returns nothing
+        local integer iHandleId= GetHandleId(whichUnit)
+        local integer index= LoadInteger(DynamicData, iHandleId, UNIT_MANARESTORE)
+        if index != UnitManaRestoreNumber then
+            set UnitManaRestoreQueue[index]=UnitManaRestoreQueue[UnitManaRestoreNumber]
+            set ManaRestoreValue[index]=ManaRestoreValue[UnitManaRestoreNumber]
+            call SaveInteger(DynamicData, iHandleId, UNIT_MANARESTORE, 0)
+	
+            set iHandleId=GetHandleId(UnitManaRestoreQueue[UnitManaRestoreNumber])
+            call SaveInteger(DynamicData, iHandleId, UNIT_MANARESTORE, index)
+        endif
+        set UnitManaRestoreQueue[UnitManaRestoreNumber]=null
+        set ManaRestoreValue[UnitManaRestoreNumber]=0.
+        set UnitManaRestoreNumber=UnitManaRestoreNumber - 1
+    endfunction
+    //将单位移出恢复队列,禁用其恢复 生命/魔法
+    function QueuedUnitRestoreRemove takes unit whichUnit returns nothing
+        call QueuedUnitLifeRestoreRemove(whichUnit)
+        call QueuedUnitManaRestoreRemove(whichUnit)
+    endfunction
+    //RestoreFrame秒回调一次,恢复单位 生命/魔法
+    function RestoreAllUnitLife takes nothing returns boolean
+        local integer i= 1
+        loop
+            exitwhen i > UnitLifeRestoreNumber
+            if UnitAlive(UnitLifeRestoreQueue[i]) then
+                call UnitRestoreLife(UnitLifeRestoreQueue[i] , LifeRestoreValue[i])
+                //call UnitRestoreMana(UnitRestoreQueue[i], ManaRestoreValue[i])
+            endif
+            set i=i + 1
+        endloop
+        return false
+    endfunction
+    function RestoreAllUnitMana takes nothing returns boolean
+        local integer i= 1
+        loop
+            exitwhen i > UnitManaRestoreNumber
+            if UnitAlive(UnitManaRestoreQueue[i]) then
+                call UnitRestoreMana(UnitManaRestoreQueue[i] , ManaRestoreValue[i])
+            endif
+            set i=i + 1
+        endloop
+        return false
+    endfunction
+    function InitUnitRestore takes nothing returns nothing
+        local trigger trig= CreateTrigger()
+        call TriggerRegisterTimerEvent(trig, RestoreFrame, true)
+        call TriggerAddCondition(trig, Condition(function RestoreAllUnitLife))
+        set trig=CreateTrigger()
+        call TriggerRegisterTimerEvent(trig, RestoreFrame, true)
+        call TriggerAddCondition(trig, Condition(function RestoreAllUnitMana))
+    endfunction
+
+//library UnitRestore ends
 //library YDTriggerSaveLoadSystem:
-    function YDTriggerSaveLoadSystem___Init takes nothing returns nothing
+    function YDTriggerSaveLoadSystem__Init takes nothing returns nothing
             set YDHT=InitHashtable()
         set YDLOC=InitHashtable()
     endfunction
@@ -1850,11 +1791,11 @@ endfunction
 function YDWESyStemAbilityCastingOverTriggerAction takes unit hero,integer index returns nothing
  local integer i= 0
     loop
-        exitwhen i >= YDWEBase__AbilityCastingOverEventNumber
-        if YDWEBase__AbilityCastingOverEventType[i] == index then
+        exitwhen i >= YDWEBase___AbilityCastingOverEventNumber
+        if YDWEBase___AbilityCastingOverEventType[i] == index then
             set bj_lastAbilityCastingUnit=hero
-			if YDWEBase__AbilityCastingOverEventQueue[i] != null and TriggerEvaluate(YDWEBase__AbilityCastingOverEventQueue[i]) and IsTriggerEnabled(YDWEBase__AbilityCastingOverEventQueue[i]) then
-				call TriggerExecute(YDWEBase__AbilityCastingOverEventQueue[i])
+			if YDWEBase___AbilityCastingOverEventQueue[i] != null and TriggerEvaluate(YDWEBase___AbilityCastingOverEventQueue[i]) and IsTriggerEnabled(YDWEBase___AbilityCastingOverEventQueue[i]) then
+				call TriggerExecute(YDWEBase___AbilityCastingOverEventQueue[i])
 			endif
 		endif
         set i=i + 1
@@ -1864,9 +1805,9 @@ endfunction
 //YDWE技能捕捉事件 
 //===========================================================================  
 function YDWESyStemAbilityCastingOverRegistTrigger takes trigger trg,integer index returns nothing
-	set YDWEBase__AbilityCastingOverEventQueue[YDWEBase__AbilityCastingOverEventNumber]=trg
-	set YDWEBase__AbilityCastingOverEventType[YDWEBase__AbilityCastingOverEventNumber]=index
-	set YDWEBase__AbilityCastingOverEventNumber=YDWEBase__AbilityCastingOverEventNumber + 1
+	set YDWEBase___AbilityCastingOverEventQueue[YDWEBase___AbilityCastingOverEventNumber]=trg
+	set YDWEBase___AbilityCastingOverEventType[YDWEBase___AbilityCastingOverEventNumber]=index
+	set YDWEBase___AbilityCastingOverEventNumber=YDWEBase___AbilityCastingOverEventNumber + 1
 endfunction 
 //===========================================================================
 //系统函数完善
@@ -1903,7 +1844,7 @@ endfunction
 //unitpool bj_lastCreatedPool=null
 //unit bj_lastPoolAbstractedUnit=null
 function YDWEGetPlayerColorString takes player p,string s returns string
-    return YDWEBase__yd_PlayerColor[GetHandleId(GetPlayerColor(p))] + s + "|r"
+    return YDWEBase___yd_PlayerColor[GetHandleId(GetPlayerColor(p))] + s + "|r"
 endfunction
 //===========================================================================
 //===========================================================================
@@ -1950,27 +1891,127 @@ function InitializeYD takes nothing returns nothing
 	set yd_MapMaxX=GetCameraBoundMaxX() + GetCameraMargin(CAMERA_MARGIN_RIGHT)
 	set yd_MapMaxY=GetCameraBoundMaxY() + GetCameraMargin(CAMERA_MARGIN_TOP)
 	
-    set YDWEBase__yd_PlayerColor[0]="|cFFFF0303"
-    set YDWEBase__yd_PlayerColor[1]="|cFF0042FF"
-    set YDWEBase__yd_PlayerColor[2]="|cFF1CE6B9"
-    set YDWEBase__yd_PlayerColor[3]="|cFF540081"
-    set YDWEBase__yd_PlayerColor[4]="|cFFFFFC01"
-    set YDWEBase__yd_PlayerColor[5]="|cFFFE8A0E"
-    set YDWEBase__yd_PlayerColor[6]="|cFF20C000"
-    set YDWEBase__yd_PlayerColor[7]="|cFFE55BB0"
-    set YDWEBase__yd_PlayerColor[8]="|cFF959697"
-    set YDWEBase__yd_PlayerColor[9]="|cFF7EBFF1"
-    set YDWEBase__yd_PlayerColor[10]="|cFF106246"
-    set YDWEBase__yd_PlayerColor[11]="|cFF4E2A04"
-    set YDWEBase__yd_PlayerColor[12]="|cFF282828"
-    set YDWEBase__yd_PlayerColor[13]="|cFF282828"
-    set YDWEBase__yd_PlayerColor[14]="|cFF282828"
-    set YDWEBase__yd_PlayerColor[15]="|cFF282828"
+    set YDWEBase___yd_PlayerColor[0]="|cFFFF0303"
+    set YDWEBase___yd_PlayerColor[1]="|cFF0042FF"
+    set YDWEBase___yd_PlayerColor[2]="|cFF1CE6B9"
+    set YDWEBase___yd_PlayerColor[3]="|cFF540081"
+    set YDWEBase___yd_PlayerColor[4]="|cFFFFFC01"
+    set YDWEBase___yd_PlayerColor[5]="|cFFFE8A0E"
+    set YDWEBase___yd_PlayerColor[6]="|cFF20C000"
+    set YDWEBase___yd_PlayerColor[7]="|cFFE55BB0"
+    set YDWEBase___yd_PlayerColor[8]="|cFF959697"
+    set YDWEBase___yd_PlayerColor[9]="|cFF7EBFF1"
+    set YDWEBase___yd_PlayerColor[10]="|cFF106246"
+    set YDWEBase___yd_PlayerColor[11]="|cFF4E2A04"
+    set YDWEBase___yd_PlayerColor[12]="|cFF282828"
+    set YDWEBase___yd_PlayerColor[13]="|cFF282828"
+    set YDWEBase___yd_PlayerColor[14]="|cFF282828"
+    set YDWEBase___yd_PlayerColor[15]="|cFF282828"
     //=================显示版本=====================
     call YDWEVersion_Init()
 endfunction
 
 //library YDWEBase ends
+//library YDWEJapi:
+
+
+    // Abilitys
+
+
+
+
+
+
+
+
+
+
+
+
+        // 技能属性 [JAPI]
+        function YDWEGetUnitAbilityState takes unit u,integer abilcode,integer state_type returns real
+            return EXGetAbilityState(EXGetUnitAbility(u, abilcode), state_type)
+        endfunction
+        // 技能数据 (整数) [JAPI]
+        function YDWEGetUnitAbilityDataInteger takes unit u,integer abilcode,integer level,integer data_type returns integer
+            return EXGetAbilityDataInteger(EXGetUnitAbility(u, abilcode), level, data_type)
+        endfunction
+        // 技能数据 (实数) [JAPI]
+        function YDWEGetUnitAbilityDataReal takes unit u,integer abilcode,integer level,integer data_type returns real
+            return EXGetAbilityDataReal(EXGetUnitAbility(u, abilcode), level, data_type)
+        endfunction
+        // 技能数据 (字符串) [JAPI]
+        function YDWEGetUnitAbilityDataString takes unit u,integer abilcode,integer level,integer data_type returns string
+            return EXGetAbilityDataString(EXGetUnitAbility(u, abilcode), level, data_type)
+        endfunction
+        // 设置技能属性 [JAPI]
+        function YDWESetUnitAbilityState takes unit u,integer abilcode,integer state_type,real value returns boolean
+            return EXSetAbilityState(EXGetUnitAbility(u, abilcode), state_type, value)
+        endfunction
+        // 设置技能数据 (整数) [JAPI]
+        function YDWESetUnitAbilityDataInteger takes unit u,integer abilcode,integer level,integer data_type,integer value returns boolean
+            return EXSetAbilityDataInteger(EXGetUnitAbility(u, abilcode), level, data_type, value)
+        endfunction
+        // 设置技能数据 (实数) [JAPI]
+        function YDWESetUnitAbilityDataReal takes unit u,integer abilcode,integer level,integer data_type,real value returns boolean
+            return EXSetAbilityDataReal(EXGetUnitAbility(u, abilcode), level, data_type, value)
+        endfunction
+        // 设置技能数据 (字符串) [JAPI]
+        function YDWESetUnitAbilityDataString takes unit u,integer abilcode,integer level,integer data_type,string value returns boolean
+            return EXSetAbilityDataString(EXGetUnitAbility(u, abilcode), level, data_type, value)
+        endfunction
+
+
+    
+    
+    //==============================================================================
+    // units
+    //==============================================================================
+
+
+
+
+        
+    
+    
+//==============================================================================
+
+
+
+
+
+
+
+//==============================================================================
+// Items
+//==============================================================================
+
+
+                
+//==============================================================================
+// Effects
+//==============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Buffs
+//==============================================================================
+// Buff的Japi在1.27a不可用，最新的YDWE版本修复了这个问题，但官方平台上似乎不可用。
+
+
+
+//library YDWEJapi ends
 //library YDWEPlaySoundNull:
 function YDWEPlaySoundNull takes string soundName returns nothing
     local sound soundHandle= CreateSound(soundName, false, false, true, 12700, 12700, "")
@@ -2024,129 +2065,642 @@ function YDWETriggerRegisterEnterRectSimpleNull takes trigger trig,rect r return
 endfunction
 
 //library YDWETriggerRegisterEnterRectSimpleNull ends
-//library Common:
-    //常量
-    function Debug takes string debugtype,string msg returns nothing
-        if IsMirage then
-            call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 60, msg)
+//library math:
+    
+    // 得到XY之间的角度
+    function AngleBetweenXY takes real x1,real y1,real x2,real y2 returns real
+        return bj_RADTODEG * Atan2(y2 - y1, x2 - x1)
+    endfunction
+    // 单位之间的角度
+    function AngleBetweenUnit takes unit u1,unit u2 returns real
+        return bj_RADTODEG * Atan2(GetUnitY(u2) - GetUnitY(u1), GetUnitX(u2) - GetUnitX(u1))
+    endfunction
+    // xy距离
+    function GetDistanceBetween takes real x1,real y1,real x2,real y2 returns real
+        return SquareRoot(( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) * ( y1 - y2 ))
+    endfunction
+    // 单位之间的距离
+    function GetDistanceBetweenUnits takes unit u1,unit u2 returns real
+        return SquareRoot(( GetUnitX(u1) - GetUnitX(u2) ) * ( GetUnitX(u1) - GetUnitX(u2) ) + ( GetUnitY(u1) - GetUnitY(u2) ) * ( GetUnitY(u1) - GetUnitY(u2) ))
+    endfunction
+    //初始化prd的值
+    function math__InitPrd takes nothing returns nothing
+        call SaveReal(math__Prd, - 1, 0, .0038)
+        call SaveReal(math__Prd, - 1, 1, .0147)
+        call SaveReal(math__Prd, - 1, 2, .0322)
+        call SaveReal(math__Prd, - 1, 3, .0557)
+        call SaveReal(math__Prd, - 1, 4, .0847)
+        call SaveReal(math__Prd, - 1, 5, .1189)
+        call SaveReal(math__Prd, - 1, 6, .1579)
+        call SaveReal(math__Prd, - 1, 7, .2015)
+        call SaveReal(math__Prd, - 1, 8, .2493)
+        call SaveReal(math__Prd, - 1, 9, .3021)
+        call SaveReal(math__Prd, - 1, 10, .3604)
+        call SaveReal(math__Prd, - 1, 11, .4226)
+        call SaveReal(math__Prd, - 1, 12, .4811)
+        call SaveReal(math__Prd, - 1, 13, .5714)
+        call SaveReal(math__Prd, - 1, 14, .6666)
+        call SaveReal(math__Prd, - 1, 15, .75)
+        call SaveReal(math__Prd, - 1, 16, .8235)
+        call SaveReal(math__Prd, - 1, 17, .8888)
+        call SaveReal(math__Prd, - 1, 18, .9473)
+        call SaveReal(math__Prd, - 1, 19, 1.)
+    endfunction
+    // Prd随机数 取5的整数
+    function GetPrdRandom takes unit u,integer abId,real value returns boolean
+        local integer h= GetHandleId(u)
+        local real newValue
+        if not IsUnitType(u, UNIT_TYPE_HERO) then
+            return GetRandomInt(1, 100) < value //如果不是英雄 则直接返回随机数
+endif
+        set newValue=LoadReal(math__Prd, - 1, R2I(R2I(value * .2) * 5. * .2) - 1) + LoadReal(math__Prd, h, abId)
+        //call Debug("log","几率: " + R2S(newValue) )
+        if GetRandomReal(.0, 1.) < newValue then
+            call SaveReal(math__Prd, h, abId, .0)
+            return true
+        else
+            call SaveReal(math__Prd, h, abId, newValue)
+            return false
         endif
     endfunction
-    function GetPlayerSelectedUnit takes nothing returns unit
-        return GetDetectedUnit()
+    function math__Init takes nothing returns nothing
+        call math__InitPrd()
     endfunction
-    // 与lua交互获得Slk数据
-    function GetObjectDataBySlk takes integer objectId,string tableName,string dataType returns string
-        set SlkType=tableName
-        set SlkdataType=dataType
-        return AbilityId2String(objectId) // lua hook了此函数 调用slk库
+
+//library math ends
+//library YDWESetUnitFacingToFaceUnitTimedNull:
+function YDWESetUnitFacingToFaceUnitTimedNull takes unit whichUnit,unit target,real duration returns nothing
+    local location unitLoc= GetUnitLoc(target)
+    call YDWESetUnitFacingToFaceLocTimedNull(whichUnit , unitLoc , duration)
+    call RemoveLocation(unitLoc)
+    set unitLoc=null
 endfunction
-    function GetUnitSlkData takes integer objectId,string dataType returns string
-        return GetObjectDataBySlk(objectId , "unit" , dataType)
+
+//library YDWESetUnitFacingToFaceUnitTimedNull ends
+//library base:
+    // 单位存活
+
+    //创建一个计时器事件触发器，返回值是触发器的整数地址，需要手动销毁。注意func为触发器的条件Condition而不是动作Action。
+    function CreateTimerEventTrigger takes real timeout,boolean periodic,code func returns integer
+        local trigger trig= CreateTrigger()
+        local integer iHandleId= GetHandleId(trig)
+    
+        call TriggerAddCondition(trig, Condition(func))
+        call TriggerRegisterTimerEvent(trig, timeout, periodic)
+    
+        set trig=null
+        return iHandleId
     endfunction
-    //获取英雄单位的主属性 primary: 1 == str  2 == int  3 = agi 
-    function GetHeroPrimaryById takes integer whichType returns string
-        return GetObjectDataBySlk(whichType , "unit" , "Primary")
+    function GetNewTimerHandleId takes real timeout,boolean periodic,code func returns integer
+        local timer t= CreateTimer()
+        local integer i= GetHandleId(t)
+        call TimerStart(t, timeout, periodic, func)
+        set t=null
+        return i
     endfunction
-    function GetHeroPrimary takes unit whichUnit returns string
-        local integer whichType= GetUnitTypeId(whichUnit)
-        local string data= LoadStr(ObjectData, OBJ_KEY_HERO_PRIMARY, whichType)
-        if data == null then
-            set data=GetObjectDataBySlk(whichType , "unit" , "Primary")
+    // 游戏进行时间
+    function GetGameTime takes nothing returns real
+        return TimerGetElapsed(base___GameTimer)
+    endfunction
+    //==============================================================================
+    // Triggers
+    //==============================================================================
+    function base___DestroyError takes string s returns nothing
+        //if bj_isSinglePlayer then
+		call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 120, "|c00ff0303内部检验失败|r")
+		call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 120, "|c00ff0303这可能不是一个严重的故障，但对我来说这个信息十分重要|r")
+		call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 120, "|c00ff0303错误代码: " + s + "|r")
+        //endif
+    endfunction
+    function ClearTrigger takes trigger t returns nothing
+        call DisableTrigger(t)
+        set base___DestroyQueueNumber=base___DestroyQueueNumber + 1
+        set base___DestroyQueue[base___DestroyQueueNumber]=t
+        set base___ElapsedTime[base___DestroyQueueNumber]=( (TimerGetElapsed(base___GameTimer)) ) + 60 // INLINED!!
+        if base___DestroyQueueNumber > 8000 then
+            call base___DestroyError("8k")
         endif
-        return data
     endfunction
-    // 原生的阴影 还是从slk库中获取
-    function GetUnitOriginShadow takes unit whichUnit returns string
-        local integer whichType= GetUnitTypeId(whichUnit)
-        local string data= LoadStr(ObjectData, OBJ_KEY_UNIT_SHADOW, whichType)
-        if data == null then
-            set data=GetObjectDataBySlk(whichType , "unit" , "Primary")
+    function base___SetNull takes integer i returns nothing
+        if i != base___DestroyQueueNumber then
+            set base___DestroyQueue[i]=base___DestroyQueue[base___DestroyQueueNumber]
+            set base___ElapsedTime[i]=base___ElapsedTime[base___DestroyQueueNumber]
         endif
-        return data
+        set base___DestroyQueue[base___DestroyQueueNumber]=null
+        set base___ElapsedTime[base___DestroyQueueNumber]=0
+        set base___DestroyQueueNumber=base___DestroyQueueNumber - 1
     endfunction
-    function GetHeroPrimaryValue takes unit whichUnit returns integer
-        local string data= GetHeroPrimary(whichUnit)
-        if data == "STR" then
-            return GetHeroStr(whichUnit, true)
-        elseif data == "AGI" then
-            return GetHeroAgi(whichUnit, true)
-        elseif data == "INT" then
-            return GetHeroInt(whichUnit, true)
+    function TimedCleanupTrigger takes nothing returns boolean
+        local real r= (TimerGetElapsed(base___GameTimer)) // INLINED!!
+        local integer i
+        set i=1
+        loop
+            exitwhen i > base___DestroyQueueNumber
+            if base___ElapsedTime[i] < r then
+                if base___DestroyQueue[i] == null then
+                    call base___DestroyError("nil")
+                elseif IsTriggerEnabled(base___DestroyQueue[i]) then
+                    call base___DestroyError(I2S(GetHandleId(base___DestroyQueue[i])))
+                else
+                    call DestroyTrigger(base___DestroyQueue[i])
+                endif
+                call base___SetNull(i)
+            else
+                set i=i + 1
+            endif
+        endloop
+        return false
+    endfunction
+    //==============================================================================
+    //==============================================================================
+    // Groups
+    //==============================================================================
+    //实际上比直接Create和Destroy效率差了2.5倍左右
+    //好处是不需要set g = null 因为这些预先创建的单位组不会被销毁
+    function LogoutGroup takes group g returns nothing
+        local integer i= GetHandleId(g) - base___MaxGroupHandle
+        if i < 0 or i > base___MaxGroupAmount then
+        else
+            call GroupClear(g)
+            set base___GroupInUse[i]=false
+            set base___GroupIdleValue=i
+        endif
+    endfunction
+    function LoginGroup takes nothing returns group
+        local integer i= base___GroupIdleValue
+        loop
+            exitwhen i == base___GroupIdleValue - 1
+            if not base___GroupInUse[i] then
+                set base___GroupIdleValue=i + 1
+                if base___GroupIdleValue == base___MaxGroupAmount then
+                    set base___GroupIdleValue=1
+                endif
+                set base___GroupInUse[i]=true
+                return base___MainGroup[i]
+            endif
+            set i=i + 1
+            if i == base___MaxGroupAmount then
+                set i=0
+            endif
+        endloop
+        call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 20, "|c00ff0303严重错误: 找不到可用的单位组。|r")
+        return CreateGroup()
+    endfunction
+    function CreateMainGroup takes nothing returns nothing
+        local integer i= 0
+        set base___MainGroup[i]=CreateGroup()
+        set i=i + 1
+        set base___MaxGroupHandle=GetHandleId(base___MainGroup[0])
+        loop
+            exitwhen i == base___MaxGroupAmount
+            set base___MainGroup[i]=CreateGroup()
+            set i=i + 1
+        endloop
+    endfunction
+    //==============================================================================
+    // Coordinate
+    //==============================================================================
+    //修正坐标X 防止SetUnitX超出地图
+    function CoordinateX takes real x returns real
+        if x < CorrectionMinX then
+            return CorrectionMinX
+        endif
+        if x > CorrectionMaxX then
+            return CorrectionMaxX
+        endif
+        return x
+    endfunction
+    //修正坐标Y 防止SetUnitY超出地图
+    function CoordinateY takes real y returns real
+        if y < CorrectionMinY then
+            return CorrectionMinY
+        endif
+        if y > CorrectionMaxY then
+            return CorrectionMaxY
+        endif
+        return y
+    endfunction
+    //==============================================================================
+    function base___Init takes nothing returns nothing
+        
+        set LocalPlayer=GetLocalPlayer()
+        // 启动中心计时器?
+        call TimerStart(base___GameTimer, 999999, false, null)
+        // 定期清触发器
+        call CreateTimerEventTrigger(15 , true , function TimedCleanupTrigger)
+        // 初始化单位组线性表
+        call CreateMainGroup()
+        //用于修正坐标
+        set CorrectionMinX=GetRectMinX(bj_mapInitialPlayableArea) + 75
+        set CorrectionMaxX=GetRectMaxX(bj_mapInitialPlayableArea) - 75
+        set CorrectionMinY=GetRectMinY(bj_mapInitialPlayableArea) + 75
+        set CorrectionMaxY=GetRectMaxY(bj_mapInitialPlayableArea) - 75
+        
+        // 玩家数量和玩家能拥有的英雄数量
+        if M_OnlinePlayerAmount == 1 then
+            set PlayerMaxHeroAmount=4
+        elseif M_OnlinePlayerAmount == 2 then
+            set PlayerMaxHeroAmount=2
+        endif
+    endfunction
+
+//library base ends
+//library Filter:
+	// 获取是否拥有法术护盾
+ function HaveSpellShield takes unit u returns boolean
+		return false
+	endfunction
+	// filter 条件
+	// 检查玩家对单位的可见性
+ function UnitVisibleToPlayer takes unit whichUnit,player whichPlayer returns boolean
+return IsUnitVisible(whichUnit, whichPlayer) or ( IsUnitAlly(whichUnit, whichPlayer) )
+	endfunction
+	// 敌对 非建筑
+	// 大部分物理攻击特效的筛选
+ function CommonAttackEffectFilter takes unit whichUnit,unit targetUnit returns boolean
+		return IsUnitEnemy(whichUnit, GetOwningPlayer(targetUnit)) and not IsUnitType(targetUnit, UNIT_TYPE_STRUCTURE)
+	endfunction
+	// 联盟 存活 非建筑
+ function IsAllyAliveNoStructure takes unit u returns boolean
+		return IsUnitAlly(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
+	endfunction
+	// 联盟 存活 非建筑
+ function IsAllyAliveNoStructureIsHero takes unit u returns boolean
+		return IsUnitAlly(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and IsUnitType(u, UNIT_TYPE_HERO)
+	endfunction
+	// 联盟 存活
+ function IsAllyAlive takes unit u returns boolean
+		return IsUnitAlly(u, P2) and UnitAlive(u)
+	endfunction
+	
+	// 敌对 存活
+ function IsEnemyAlive takes unit u returns boolean
+		return IsUnitEnemy(u, P2) and UnitAlive(u)
+	endfunction
+	// 敌对 存活 地面
+ function IsEnemyAliveNotFly takes unit u returns boolean
+		return IsUnitEnemy(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_FLYING)
+	endfunction
+	// 敌对 存活 非建筑
+ function IsEnemyAliveNoStructure takes unit u returns boolean
+		return IsUnitEnemy(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
+	endfunction
+	
+	// 敌对 存活 非建筑 非魔免
+ function IsEnemyAliveNoStructureNoImmune takes unit u returns boolean
+		return IsUnitEnemy(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and not IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE)
+	endfunction
+	// 存活 非建筑
+ function Alive_NoStructure takes unit u returns boolean
+		return UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
+	endfunction
+	// 非空军 非机械 存活 非建筑 敌军
+ function IsGroundNotMechanicalEnemyAliveNoStructure takes unit u returns boolean
+		return not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitType(u, UNIT_TYPE_MECHANICAL) and IsUnitEnemy(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
+	endfunction
+	// 非机械 存活 非建筑 友军
+ function IsMechanicalAllyAliveNoStructure takes unit u returns boolean
+		return not IsUnitType(u, UNIT_TYPE_MECHANICAL) and IsUnitAlly(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
+	endfunction
+	//========================================================
+	// 从单位组以某个条件获取单位
+	//========================================================
+	// Nearest Farthest
+	// 得到单位组距离xy最远的单位
+ function GetFarthestUnitByGroup takes group whichGroup,real x,real y returns unit
+  local group dummyGroup= LoginGroup()
+  local real rFarthestDistance= 0
+  local unit dummyUnit
+  local unit farthestUnit= null
+  local real rDistance= .0
+		call GroupAddGroup(whichGroup, dummyGroup)
+		loop
+			set dummyUnit=FirstOfGroup(dummyGroup)
+			exitwhen dummyUnit == null
+			set rDistance=GetDistanceBetween(GetUnitX(dummyUnit) , GetUnitY(dummyUnit) , x , y)
+			if rDistance > rFarthestDistance then
+				set farthestUnit=dummyUnit
+				set rFarthestDistance=rDistance
+			endif
+			call GroupRemoveUnit(dummyGroup, dummyUnit)
+		endloop
+		set Filter__TmpUnit2=farthestUnit
+		call LogoutGroup(dummyGroup)
+		set dummyUnit=null
+		set farthestUnit=null
+		set dummyGroup=null
+		return Filter__TmpUnit2
+	endfunction
+	// 得到单位组距离xy最近的单位
+ function GetNearestUnitByGroup takes group whichGroup,real x,real y returns unit
+  local group dummyGroup= LoginGroup()
+  local real rNearestDistance= 99999
+  local unit dummyUnit
+  local unit neareststUnit= null
+  local real rDistance= 0.
+		call GroupAddGroup(whichGroup, dummyGroup)
+		loop
+			set dummyUnit=FirstOfGroup(dummyGroup)
+			exitwhen dummyUnit == null
+			set rDistance=GetDistanceBetween(GetUnitX(dummyUnit) , GetUnitY(dummyUnit) , x , y)
+			if rDistance < rNearestDistance then
+				set neareststUnit=dummyUnit
+				set rNearestDistance=rDistance
+			endif
+			call GroupRemoveUnit(dummyGroup, dummyUnit)
+		endloop
+		set Filter__TmpUnit2=neareststUnit
+		call LogoutGroup(dummyGroup)
+		set dummyUnit=null
+		set neareststUnit=null
+		set dummyGroup=null
+		return Filter__TmpUnit2
+	endfunction
+	// 得到单位组中生命值百分比最小的单位
+ function GetMinPercentLifeUnitByGroup takes group whichGroup returns unit
+  local group dummyGroup= LoginGroup()
+  local real rMinPercentLife= 101
+  local unit dummyUnit
+  local unit minPercentLifeUnit= null
+  local real rPercentLife= 0.
+		call GroupAddGroup(whichGroup, dummyGroup)
+		loop
+			set dummyUnit=FirstOfGroup(dummyGroup)
+			exitwhen dummyUnit == null
+			set rPercentLife=GetUnitStatePercent(dummyUnit, UNIT_STATE_LIFE, UNIT_STATE_MAX_LIFE)
+			if rPercentLife < rMinPercentLife then
+				set minPercentLifeUnit=dummyUnit
+				set rMinPercentLife=rPercentLife
+			endif
+			call GroupRemoveUnit(dummyGroup, dummyUnit)
+		endloop
+		call LogoutGroup(dummyGroup)
+		set dummyGroup=null
+		set dummyUnit=null
+		set Filter__TmpUnit2=minPercentLifeUnit
+		set minPercentLifeUnit=null
+		return Filter__TmpUnit2
+	endfunction
+	// 得到单位组中生命值最小的单位
+ function GetMinLifeUnitByGroup takes group whichGroup returns unit
+  local group dummyGroup= LoginGroup()
+  local real rMinLife= 999999
+  local unit dummyUnit
+  local unit minLifeUnit= null
+  local real rLife= 0.
+		call GroupAddGroup(whichGroup, dummyGroup)
+		loop
+			set dummyUnit=FirstOfGroup(dummyGroup)
+			exitwhen dummyUnit == null
+			set rLife=GetWidgetLife(dummyUnit)
+			if rLife < rMinLife then
+				set minLifeUnit=dummyUnit
+				set rMinLife=rLife
+			endif
+			call GroupRemoveUnit(dummyGroup, dummyUnit)
+		endloop
+		call LogoutGroup(dummyGroup)
+		set dummyGroup=null
+		set dummyUnit=null
+		set Filter__TmpUnit2=minLifeUnit
+		set minLifeUnit=null
+		return Filter__TmpUnit2
+	endfunction
+	
+ function KillDestructablesInCircle_Actions takes nothing returns nothing
+		if GetDestructableLife(GetEnumDestructable()) > 0.00 then
+			call KillDestructable(GetEnumDestructable())
+		endif
+	endfunction
+	//用一个中心区域来当马甲
+	//摧毁范围内的可破坏物
+ function KillDestructablesInCircle takes real x,real y,real d returns nothing
+		call SetRect(RectDummy, x - d, y - d, x + d, y + d)
+		call EnumDestructablesInRect(RectDummy, null, function KillDestructablesInCircle_Actions)
+	endfunction
+ function GetDestructablesAmountInCircle_Actions takes nothing returns nothing
+		if GetDestructableLife(GetEnumDestructable()) > 0.00 then
+			set Filter__Tmp_DummyAmount=Filter__Tmp_DummyAmount + 1
+		endif
+	endfunction
+ function GetDestructablesAmountInCircle takes real x,real y,real d returns integer
+		call SetRect(RectDummy, x - d, y - d, x + d, y + d)
+		set Filter__Tmp_DummyAmount=0
+		call EnumDestructablesInRect(RectDummy, null, function GetDestructablesAmountInCircle_Actions)
+		return Filter__Tmp_DummyAmount
+	endfunction
+ function FindNearestDestructable takes nothing returns nothing
+  local destructable enumDestructable= GetEnumDestructable()
+  local real x= GetWidgetX(enumDestructable)
+  local real y= GetWidgetY(enumDestructable)
+  local real dis= GetDistanceBetween(Tmp_GetNearestDestructableUnitX , Tmp_GetNearestDestructableUnitY , x , y)
+	
+		if dis > Tmp_NearestDestructableDistance then
+			set Tmp_NearestDestructableDistance=dis
+			set Tmp_Destructable=enumDestructable
+		endif
+		set Tmp_Destructable=enumDestructable
+		set enumDestructable=null
+	endfunction
+	// 获取单位范围内的最近可破坏物
+ function GetNearestDestructable takes unit whichUnit,real radius returns destructable
+  local real x= GetUnitX(whichUnit)
+  local real y= GetUnitY(whichUnit)
+		set Tmp_GetNearestDestructableUnitX=x
+		set Tmp_GetNearestDestructableUnitY=y
+		call SetRect(RectDummy, x - radius, y - radius, x + radius, y + radius)
+		set Tmp_Destructable=null
+		set Tmp_NearestDestructableDistance=0.
+		call EnumDestructablesInRect(RectDummy, null, function FindNearestDestructable)
+		return Tmp_Destructable
+	endfunction
+
+//library Filter ends
+//library TextTag:
+    
+    //***************************************************************************
+    //*
+    //*  Text Tag Utility Functions
+    //*
+    //***************************************************************************
+    //暴击漂浮文字 只会出现一次
+    function CriticalStrikeTextTag takes unit whichUnit,real damage returns nothing
+        local texttag t= CreateTextTag()
+        call SetTextTagText(t, I2S(R2I(damage)) + "!", 0.025) //文字 字体大小
+call SetTextTagPos(t, GetUnitX(whichUnit), GetUnitY(whichUnit), .0) //高度偏移
+call SetTextTagColor(t, 255, 0, 0, 255)
+        call SetTextTagVelocity(t, 0, .04)
+        call SetTextTagFadepoint(t, 2) //淡入时间
+call SetTextTagPermanent(t, false) //永久性
+call SetTextTagLifespan(t, 5) //生命周期
+call SetTextTagVisibility(t, UnitVisibleToPlayer(whichUnit , LocalPlayer))
+        set t=null
+    endfunction
+    
+    //通用漂浮文字
+    function CommonTextTag takes string msg,real lifespan,unit whichUnit,real height,integer r,integer g,integer b,integer a,integer heightOffset returns nothing
+        local texttag t= CreateTextTag()
+        call SetTextTagText(t, msg, height) //文字 字体大小
+call SetTextTagPosUnit(t, whichUnit, heightOffset) //高度偏移
+call SetTextTagColor(t, r, g, b, a)
+        call SetTextTagVelocity(t, 0, .0355)
+        call SetTextTagFadepoint(t, 2) //淡入时间
+call SetTextTagPermanent(t, false) //永久性
+call SetTextTagLifespan(t, lifespan) //生命周期
+//call SetTextTagVisibility(tt,TYV(U,GetLocalPlayer())or RBX(GetLocalPlayer()))
+set t=null
+    endfunction
+    
+    //黄金漂浮文字
+    function GoldTextTag takes player sourcePlayer,unit whichUnit,integer goldAmount returns nothing
+        local texttag tag
+        local string effectPath= ""
+        local boolean islocalPlayer= LocalPlayer == sourcePlayer
+        set tag=CreateTextTag()
+        if GetHandleId(tag) > 0 then
+            call SetTextTagText(tag, "+" + I2S(goldAmount), .025)
+            call SetTextTagPosUnit(tag, whichUnit, - 0.4)
+            if islocalPlayer then
+                call SetTextTagColor(tag, 255, 220, 0, 255)
+            endif
+            call SetTextTagVelocity(tag, 0, .03)
+            call SetTextTagVisibility(tag, islocalPlayer)
+            call SetTextTagFadepoint(tag, 2)
+            call SetTextTagLifespan(tag, 3)
+            call SetTextTagPermanent(tag, false)
+        else
+            call DestroyTextTag(tag)
+        endif
+        if islocalPlayer then
+            set effectPath="UI\\Feedback\\GoldCredit\\GoldCredit.mdl"
+        endif
+        call DestroyEffect(AddSpecialEffectTarget(effectPath, whichUnit, "overhead"))
+        set tag=null
+    endfunction
+
+//library TextTag ends
+//library UnitAttackEvent:
+    //获取暴击光环等级 因为获取不了Buff等级 只能通过不同的魔法效果来判断等级
+    function GetCriticalStrikeAuraLevel takes unit u returns integer
+        if GetUnitAbilityLevel(u, 'Blc6') == 1 then
+            return 4
+        elseif GetUnitAbilityLevel(u, 'Blc5') == 1 then
+            return 3
+        elseif GetUnitAbilityLevel(u, 'Blc4') == 1 then
+            return 2
+        elseif GetUnitAbilityLevel(u, 'Blc3') == 1 then
+            return 1
         endif
         return 0
     endfunction
-    //关于Buff的思考
-    //移除魔法效果用Loop来遍历一个数组删除应该合理些
-    //Buff相关 一般为添加龙卷风破坏光环
-    function unitAddAbilityTimed_CallBack takes nothing returns boolean
-        local trigger trig= GetTriggeringTrigger()
-        local integer iHandleId= GetHandleId(trig)
-        local unit whichUnit= LoadUnitHandle(HT, iHandleId, 17)
-        local integer abilityId= LoadInteger(HT, iHandleId, 59)
-        local integer buffId= LoadInteger(HT, iHandleId, 60)
-        local timer durTimer= LoadTimerHandle(HT, iHandleId, 10)
-        call SaveBoolean(HT, iHandleId, 0, true)
-        call UnitRemoveAbility(whichUnit, abilityId)
-        call UnitRemoveAbility(whichUnit, buffId)
-        if GetUnitAbilityLevel(whichUnit, abilityId) == 0 then
-            call FlushChildHashtable(HT, iHandleId)
-            call ClearTrigger(trig)
-            call DestroyTimer(durTimer)
-            call RemoveSavedHandle(HT, GetHandleId(whichUnit), 0 - abilityId)
-        else
-            call TimerStart(durTimer, 1, true, null)
+    //得到单位的暴击伤害值(倍率) 无则为0.
+    function GetCriticalStrikeDamage takes unit attacker returns real
+        local real damage= 0.
+        local integer lv
+        if EffectIsEnabled[1] then
+            set lv=GetCriticalStrikeAuraLevel(attacker)
+            if lv > 0 then
+                if GetPrdRandom(attacker , 'Alc3' , 15) then //概率
+set damage=damage + ( lv * 0.1 + 0.1 ) //括号里的值为此暴击的倍率
+endif
+            endif
         endif
-        set whichUnit=null
-        set trig=null
-        set durTimer=null
+        if damage != 0. then
+            call SetUnitAnimation(attacker, "Attack slam") //播放暴击动画
+call QueueUnitAnimation(attacker, "Stand Ready") //不把Stand Ready加入队列的话 动作会很僵硬
+endif
+        return damage
+    endfunction
+    // 模拟一次攻击
+    function UnitAttackEvent___UnitAttack takes unit whichUnit,unit target,boolean isAttack returns nothing
+        local real amount= GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_BASE) + GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_DICE) * GetRandomInt(1, R2I(GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_SIDE)))
+        local integer weapon_type= R2I(GetUnitState(whichUnit, UNIT_STATE_ATTACK1_ATTACK_TYPE))
+call UnitDamageTarget(whichUnit, target, amount, isAttack, false, ConvertAttackType(weapon_type), DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+    endfunction
+    function SetUnitAttackTarget takes integer iHandleId,unit targetUnit returns nothing
+        call SaveUnitHandle(DynamicData, iHandleId, UNIT_ATTACK_EVENT_ATTACK_TARGET, targetUnit)
+    endfunction
+    function GetUnitAttackTarget takes integer iHandleId returns unit
+        return LoadUnitHandle(DynamicData, iHandleId, UNIT_ATTACK_EVENT_ATTACK_TARGET)
+    endfunction
+    function SetUnitCriticalStrike takes integer iHandleId,real value returns nothing
+        call SaveReal(DynamicData, iHandleId, UNIT_ATTACK_EVENT_CRITICAL_STRIKE_VALUE, value)
+    endfunction
+    function GetUnitCriticalStrike takes integer iHandleId returns real
+        return LoadReal(DynamicData, iHandleId, UNIT_ATTACK_EVENT_CRITICAL_STRIKE_VALUE)
+    endfunction
+    //任意单位被攻击
+    function UnitAttackEvent___UnitAttackedActions takes nothing returns boolean
+        local unit targetUnit= GetTriggerUnit()
+local unit attackerUnit= GetAttacker()
+local integer h= GetHandleId(attackerUnit)
+        call SaveUnitHandle(DynamicData, (h ), UNIT_ATTACK_EVENT_ATTACK_TARGET, ( targetUnit)) // INLINED!!
+        if EffectIsEnabled[0] then //暴击运算
+if CommonAttackEffectFilter(attackerUnit , targetUnit) then
+                call SaveReal(DynamicData, (h ), UNIT_ATTACK_EVENT_CRITICAL_STRIKE_VALUE, (( GetCriticalStrikeDamage(attackerUnit))*1.0)) // INLINED!!
+            endif
+        endif
+        //捕捉弹道出手
+        if IsUnitIdType(GetUnitTypeId(attackerUnit), UNIT_TYPE_RANGED_ATTACKER) then
+            // call AttackReadyToGoInit(attackerUnit, targetUnit, h)
+        endif
+        set attackerUnit=null
+        set targetUnit=null
         return false
     endfunction
-    function UnitAddAbilityTimed takes unit whichUnit,integer abilityId,integer level,real duration,integer buffId,integer i returns nothing
-        local trigger trig
-        local integer iHandleId
-        local real remaining
-        local timer durTimer
-        if not UnitAlive(whichUnit) then
-            return
-        endif
-        if HaveSavedHandle(HT, GetHandleId(whichUnit), 0 - abilityId) then
-            set trig=LoadTriggerHandle(HT, GetHandleId(whichUnit), 0 - abilityId)
-            set iHandleId=GetHandleId(trig)
-            set durTimer=LoadTimerHandle(HT, iHandleId, 10)
-        else
-            set trig=CreateTrigger()
-            set iHandleId=GetHandleId(trig)
-            set durTimer=CreateTimer()
-            call FlushChildHashtable(HT, iHandleId)
-            call SaveUnitHandle(HT, iHandleId, 17, whichUnit)
-            call SaveInteger(HT, iHandleId, 59, abilityId)
-            call SaveInteger(HT, iHandleId, 60, buffId)
-            call SaveReal(HT, iHandleId, 0, 0)
-            call TriggerRegisterDeathEvent(trig, whichUnit)
-            call SaveTimerHandle(HT, iHandleId, 10, durTimer)
-            call TriggerRegisterTimerExpireEvent(trig, durTimer)
-            call TriggerAddCondition(trig, Condition(function unitAddAbilityTimed_CallBack))
-            call SaveTriggerHandle(HT, GetHandleId(whichUnit), 0 - abilityId, trig)
-        endif
-        call RemoveSavedBoolean(HT, iHandleId, 0)
-        set remaining=TimerGetRemaining(durTimer)
-        if remaining < duration then
-            call TimerStart(durTimer, duration, false, null)
-        endif
-        call UnitAddPermanentAbilitySetlevel(whichUnit , abilityId , level)
+    function UnitAttackEvent___Init takes nothing returns nothing
+        local trigger trig= CreateTrigger()
+        call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_ATTACKED)
+        call TriggerAddCondition(trig, Condition(function UnitAttackEvent___UnitAttackedActions))
         set trig=null
-        set durTimer=null
+    endfunction
+
+//library UnitAttackEvent ends
+//library DamageSystem:
+    //==============================================================================
+    // DamagedEvent
+    //==============================================================================
+    
+
+
+        
+    function YDWEIsEventPhysicalDamage takes nothing returns boolean
+        return 0 != EXGetEventDamageData(EVENT_DAMAGE_DATA_IS_PHYSICAL)
+    endfunction
+    
+    function YDWEIsEventAttackDamage takes nothing returns boolean
+        return 0 != EXGetEventDamageData(EVENT_DAMAGE_DATA_IS_ATTACK)
+    endfunction
+        
+    function YDWEIsEventRangedDamage takes nothing returns boolean
+        return 0 != EXGetEventDamageData(EVENT_DAMAGE_DATA_IS_RANGED)
+    endfunction
+        
+    function YDWEIsEventDamageType takes damagetype damageType returns boolean
+        return damageType == ConvertDamageType(EXGetEventDamageData(EVENT_DAMAGE_DATA_DAMAGE_TYPE))
+    endfunction
+    
+    function YDWEIsEventWeaponType takes weapontype weaponType returns boolean
+        return weaponType == ConvertWeaponType(EXGetEventDamageData(EVENT_DAMAGE_DATA_WEAPON_TYPE))
+    endfunction
+        
+    function YDWEIsEventAttackType takes attacktype attackType returns boolean
+        return attackType == ConvertAttackType(EXGetEventDamageData(EVENT_DAMAGE_DATA_ATTACK_TYPE))
+    endfunction
+    
+    function YDWESetEventDamage takes real amount returns boolean
+        return EXSetEventDamage(amount)
     endfunction
     //造成伤害 脚本中除了普攻以外的伤害都由此造成
     function DamageUnit takes unit whichUnit,unit target,integer Type,real amount returns nothing
         if Type == 0 or amount < 0 then
             return
         endif
-        if Type == 1 then //法术,火焰伤害(魔法伤害)
+        if Type == DAMAGE_TYPE_MAGICAL then //法术,火焰伤害(魔法伤害)
 call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_FIRE, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 2 then //英雄,普通伤害(物理伤害)
+        elseif Type == DAMAGE_TYPE_PHYSICAL then //英雄,普通伤害(物理伤害)
 call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_HERO, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
-        elseif Type == 3 then //英雄,魔法伤害(纯粹伤害)
+        elseif Type == DAMAGE_TYPE_PURE then //英雄,魔法伤害(纯粹伤害)
 call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_HERO, DAMAGE_TYPE_MAGIC, WEAPON_TYPE_WHOKNOWS)
         elseif Type == 4 then //穿刺，普通伤害(?)
 call UnitDamageTarget(whichUnit, target, amount, false, false, ATTACK_TYPE_PIERCE, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
@@ -2166,149 +2720,89 @@ endif
         call UnitRemoveBuffs(target, true, true)
         return UnitDamageTarget(whichUnit, target, 10000000, false, false, ATTACK_TYPE_PIERCE, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
     endfunction
-    
-    
-    //移除单位枷锁
-    function UnitRemoveLeash takes unit u,integer abid,integer buffId returns nothing
-	
+    //吸血
+    function GetUnitLifestealValue takes unit stealUnit returns real
+        if EffectIsEnabled[2] then
+            if GetUnitAbilityLevel(stealUnit, 'Acs0') == 1 then
+                return 0.10
+            endif
+        endif
+        return 0.
     endfunction
-    //GetTriggerEventId() == EVENT_UNIT_SPELL_ENDCAST and GetSpellAbilityId() == LoadInteger(HT, h, 50)//
-    //似乎不需要记录技能Id
-    function UnitSetLeash_Actions takes nothing returns boolean
-        local trigger t= GetTriggeringTrigger()
-        local integer h= GetHandleId(t)
-        local unit u= LoadUnitHandle(HT, h, 1)
-        local unit target= LoadUnitHandle(HT, h, 0)
-        local integer c= GetTriggerEvalCount(t)
-        local real damage
-        local eventid trigEventId= GetTriggerEventId()
-        //时间到期 或 Buff等级为0 或 单位死亡
-        if c == LoadInteger(HT, h, 30) or GetUnitAbilityLevel(target, LoadInteger(HT, h, 2)) == 0 or trigEventId == EVENT_WIDGET_DEATH or ( trigEventId == EVENT_UNIT_SPELL_ENDCAST and GetSpellAbilityId() == LoadInteger(HT, h, 55) ) then
-            call DestroyLightning(LoadLightningHandle(HT, h, 10))
-            call EXPauseUnit(target, false)
-            call UnitRemoveAbility(target, LoadInteger(HT, h, 1))
-            call UnitRemoveAbility(target, LoadInteger(HT, h, 2))
-            call FlushChildHashtable(HT, h)
-            call ClearTrigger(t)
-        else
-            if HaveSavedHandle(HT, h, 10) then
-                call MoveLightning(LoadLightningHandle(HT, h, 10), true, GetUnitX(u), GetUnitY(u), GetUnitX(target), GetUnitY(target))
-                if ModuloInteger(c, 20) == 1 then //伤害单位
-set damage=LoadReal(HT, h, 30)
-                    if damage != 0 then
-                        call DamageUnit(u , target , 1 , damage) //枷锁只会造成法术攻击 魔法伤害
+    function SetUnitLifesteal takes nothing returns nothing
+        local real value
+set value=GetUnitLifestealValue(Tmp_DamageSource)
+        if value == 0. then
+            return
+        endif
+        if not IsUnitIllusion(Tmp_DamageSource) and not IsUnitIllusion(Tmp_DamageInjured) then
+            call UnitRestoreLife(Tmp_DamageSource , Tmp_DamageValue * value)
+        endif
+        call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Undead\\VampiricAura\\VampiricAuraTarget.mdl", Tmp_DamageSource, "origin"))
+    endfunction
+    function TraversalDamagedEvent takes integer id returns nothing
+        local integer i= id * 200
+        loop //遍历其他攻击特效
+exitwhen i >= DamageEventNumber[id]
+            if DamageEventQueue[i] != null and IsTriggerEnabled(DamageEventQueue[i]) then
+                call TriggerEvaluate(DamageEventQueue[i])
+            endif
+            set i=i + 1
+        endloop
+    endfunction
+    // 减伤
+    function DamageReduction takes nothing returns nothing
+        local integer level
+        if EffectIsEnabled[3] then
+            set level=GetUnitAbilityLevel(Tmp_DamageInjured, 'Acs3')
+            if level > 0 then
+                if IsPointBlighted(GetUnitX(Tmp_DamageInjured), GetUnitY(Tmp_DamageInjured)) then
+                    //call Debug("log", "减少"+R2S( Tmp_DamageValue * 0.05 * level))
+                    set Tmp_DamageValue=Tmp_DamageValue - Tmp_DamageValue * 0.05 * level
+                    call EXSetEventDamage(Tmp_DamageValue) //设置伤害值
 endif
+            endif
+        endif
+    endfunction
+    // 任意单位受伤事件
+    function YDWEAnyUnitDamagedTriggerAction takes nothing returns boolean
+        local integer i
+        local real c
+        local boolean isAttackTarget
+        set Tmp_DamageValue=GetEventDamage() //伤害值
+if Tmp_DamageValue > 0 then
+            set Tmp_DamageSource=GetEventDamageSource() //伤害来源
+set Tmp_DamageInjured=GetTriggerUnit() //受伤单位
+set i=GetHandleId(Tmp_DamageSource)
+            //伤害减免
+            call DamageReduction()
+            if EXGetEventDamageData(EVENT_DAMAGE_DATA_IS_ATTACK) != 0 then //如果是物理伤害则运行此部分
+//伤害减免后运行暴击
+set isAttackTarget=(LoadUnitHandle(DynamicData, (i), UNIT_ATTACK_EVENT_ATTACK_TARGET)) == Tmp_DamageInjured // INLINED!!
+                set c=(LoadReal(DynamicData, (i), UNIT_ATTACK_EVENT_CRITICAL_STRIKE_VALUE)) // INLINED!!
+                if c != .0 then // 先运行暴击
+set Tmp_DamageValue=Tmp_DamageValue + Tmp_DamageValue * c //设置这个全局值为暴击后的伤害
+call EXSetEventDamage(Tmp_DamageValue) //设置伤害值
+if isAttackTarget then
+                        call CriticalStrikeTextTag(Tmp_DamageSource , Tmp_DamageValue)
+                    endif
                 endif
-            else
-                set damage=LoadReal(HT, h, 30)
-                if damage != 0 then
-                    call DamageUnit(u , target , 1 , damage) //如果没存闪电效果则每次回调造成一次伤害
-endif
+                // 所有伤害调整完毕后 运行攻击特效
+                // 这里是判断一下该单位是否是普通攻击的目标(排除溅射伤害)
+                if isAttackTarget then
+                    if CommonAttackEffectFilter(Tmp_DamageSource , Tmp_DamageInjured) then
+                        call TraversalDamagedEvent(1)
+                        call SetUnitLifesteal()
+                    endif
+                endif
             endif
         endif
-        set trigEventId=null
-        set t=null
-        set target=null
-        set u=null
         return false
     endfunction
-    //关于单位枷锁，Buff的叠加类型为 同类型Buff重复释放刷新持续时间。
-    //codeName填 "_" 则不会有闪电效果 如果需要单位持续施法，使用UnitSetLeashByAbility。
-    function UnitSetLeash takes unit spellUnit,unit targetUnit,string codeName,integer spellAbility,integer abilityId,integer buffId,real dur,real herodur,real damage,boolean ignoreMagicImmunes returns boolean
-        local integer h
-        local trigger t
-        local real time= 0.
-        if IsUnitType(targetUnit, UNIT_TYPE_MAGIC_IMMUNE) and not ignoreMagicImmunes then
-            return false
-        endif
-        set h=GetHandleId(targetUnit)
-        if GetUnitAbilityLevel(targetUnit, 'AHer') == 1 then
-            set dur=herodur
-        endif
-        if GetUnitAbilityLevel(targetUnit, buffId) == 1 then
-            set t=LoadTriggerHandle(UnitKeyBuff, h, Leash + buffId) //防止buff的key冲突所以加一下
-        else
-            call EXPauseUnit(targetUnit, true)
-            call SaveInteger(UnitKeyBuff, h, UNITBUFF_STUN, LoadInteger(UnitKeyBuff, h, UNITBUFF_STUN) + 1)
-            set t=CreateTrigger()
-            call TriggerAddCondition(t, Condition(function UnitSetLeash_Actions))
-            call SaveTriggerHandle(UnitKeyBuff, h, Leash + buffId, t)
-            set h=GetHandleId(t)
-            if spellAbility != 0 then
-                call SaveInteger(HT, h, 55, spellAbility)
-                call TriggerRegisterUnitEvent(t, spellUnit, EVENT_UNIT_SPELL_ENDCAST)
-            endif
-            call UnitAddAbility(targetUnit, abilityId)
-            call UnitMakeAbilityPermanent(targetUnit, true, abilityId)
-            call SaveUnitHandle(HT, h, 0, targetUnit)
-            call SaveUnitHandle(HT, h, 1, spellUnit)
-            if codeName != "_" then
-                call SaveLightningHandle(HT, h, 10, AddLightning(codeName, true, GetUnitX(spellUnit), GetUnitY(spellUnit), GetUnitX(targetUnit), GetUnitY(targetUnit)))
-                call TriggerRegisterTimerEvent(t, LeashFrame, true) //
-else
-                call TriggerRegisterTimerEvent(t, 1, true) //如果没有闪电特效，则一秒回调一次。
-endif
-            if damage != 0 then //直接存入伤害值
-call SaveReal(HT, h, 30, damage)
-            endif
-            call SaveInteger(HT, h, 1, abilityId)
-            call SaveInteger(HT, h, 2, buffId)
-            call SaveInteger(HT, h, 30, R2I(dur / LeashFrame)) //此项为最大赋值次数(持续时间)  dur / (LeashFrame)
-endif
-        if time < dur then
-            set time=dur
-        endif
-        if time != 0 then
-            call TriggerRegisterDeathEvent(t, spellUnit)
-            call TriggerRegisterDeathEvent(t, targetUnit)
-        endif
-        set t=null
-        return true
-    endfunction
-    function UnitRemoveInvulnerable takes unit whichUnit returns nothing
-        call SetUnitInvulnerable(whichUnit, true)
-    endfunction
-    //设置单位无敌 封装了一层 不会因为独立更改而导致无敌失效
-    function UnitAddInvulnerable takes unit whichUnit returns nothing
-        call SetUnitInvulnerable(whichUnit, true)
-    endfunction
-    function UnitSetMagicImmunityRemove takes nothing returns boolean
-        local trigger trig= GetTriggeringTrigger()
-        local integer iHandleId= GetHandleId(trig)
-        local unit whichUnit= LoadUnitHandle(HT, iHandleId, 0)
-        call UnitRemoveAbility(whichUnit, 'Amai')
-        set trig=null
-        return false
-    endfunction
-    function UnitSetMagicImmunity takes unit whichUnit,real time returns nothing
-        local integer iHandleId= GetHandleId(whichUnit)
-        local trigger trig= LoadTriggerHandle(UnitKeyBuff, iHandleId, MagicImmunity)
-        local real elapsed
-        if trig == null then
-            set trig=CreateTrigger()
-            set iHandleId=GetHandleId(trig)
-            call UnitAddPermanentAbility(whichUnit , 'Amai')
-            call UnitMakeAbilityPermanent(whichUnit, true, 'Amim')
-            call TriggerRegisterTimerEvent(trig, time, false)
-            call TriggerAddCondition(trig, Condition(function UnitSetMagicImmunityRemove))
-            call SaveUnitHandle(HT, iHandleId, 0, whichUnit)
-            call SaveReal(HT, iHandleId, 0, time + TimerGetElapsed(GameTimer))
-        else
-            set iHandleId=GetHandleId(trig)
-            set elapsed=TimerGetElapsed(GameTimer) - LoadReal(HT, iHandleId, 0)
-            if elapsed < time then
-                call FlushChildHashtable(HT, iHandleId)
-                call ClearTrigger(trig)
-                call RemoveSavedHandle(UnitKeyBuff, GetHandleId(whichUnit), MagicImmunity)
-                call UnitSetMagicImmunity(whichUnit , time)
-            endif
-        endif
-        set trig=null
-    endfunction
-    //注意filterId的值不宜过高,Jass的数值最大值为8191
-    //每个filterId可以注册200个事件,通常不会用那么多
-    //给触发器注册任意单位受伤事件
-    //通常一个攻击特效filterId用1, (敌对,非建筑)CommonAttackEffectFilter
+    // 注意filterId的值不宜过高,Jass的数值最大值为8191
+    // 每个filterId可以注册200个事件,通常不会用那么多
+    // 给触发器注册任意单位受伤事件
+    // 通常一个攻击特效filterId用1, (敌对,非建筑)CommonAttackEffectFilter
     function TriggerRegisterAnyUnitDamagedEvent takes trigger trig,integer filterId returns nothing
         local integer id= filterId * 200
         if trig == null then
@@ -2318,28 +2812,11 @@ endif
         set DamageEventNumber[filterId]=id + DamageEventNumber[filterId] + 1
         //call Debug("log","register" + I2S(GetHandleId(DamageEventQueue[200])))
     endfunction
-    //此函数会将触发器推入队列顶端,每次loop时优先触发,适用于会更改伤害值的事件/*暂时不需要此函数 因为暴击的计算独立了
-    //function ExTriggerRegisterAnyUnitDamagedEvent takes trigger trig returns nothing
-    //	local integer i = DamageEventNumber + 1
-    //	if trig == null then
-    //		return
-    //	endif
-    //	if DamageEventNumber == 0 then
-    //		call TriggerRegisterAnyUnitDamagedEvent(trig)
-    //	endif
-    //	loop
-    //		set DamageEventQueue[i - 1] = DamageEventQueue[i]
-    //		set i = i - 1
-    //		exitwhen i == 0
-    //	endloop
-    //	set DamageEventQueue[0] = trig
-    //	set DamageEventNumber = DamageEventNumber + 1
-    //endfunction
-    //计时器回调到期则设置变量为false
+    // 计时器回调到期则设置变量为false
     function DisableAttackEffect takes nothing returns nothing
         set EffectIsEnabled[LoadInteger(HT, GetHandleId(GetExpiredTimer()), 0)]=false
     endfunction
-    //在一定时间内激活暴击 key的值不能为0  time为0则是永久激活
+    // 在一定时间内激活攻击特效 key的值不能为0  time为0则是永久激活
     function EnabledAttackEffect takes integer key,real time returns nothing
         if not EffectIsEnabled[0] then
             set EffectIsEnabled[0]=true
@@ -2355,60 +2832,59 @@ endif
             call TimerStart(EffectEnabledTimer[key], time, false, function DisableAttackEffect)
         endif
     endfunction
-    function KillDestructablesInCircle_Actions takes nothing returns nothing
-        if GetDestructableLife(GetEnumDestructable()) > 0.00 then
-            call KillDestructable(GetEnumDestructable())
+
+//library DamageSystem ends
+//library Common:
+    function Debug takes string debugtype,string msg returns nothing
+        if IsMirage then
+            call DisplayTimedTextToPlayer(LocalPlayer, 0, 0, 60, msg)
         endif
     endfunction
-    //用一个中心区域来当马甲
-    //摧毁范围内的可破坏物
-    function KillDestructablesInCircle takes real x,real y,real d returns nothing
-        call SetRect(RectDummy, x - d, y - d, x + d, y + d)
-        call EnumDestructablesInRect(RectDummy, null, function KillDestructablesInCircle_Actions)
+    function GetPlayerSelectedUnit takes nothing returns unit
+        return GetDetectedUnit()
     endfunction
-    function GetDestructablesAmountInCircle_Actions takes nothing returns nothing
-        if GetDestructableLife(GetEnumDestructable()) > 0.00 then
-            set Tmp_DummyAmount=Tmp_DummyAmount + 1
+    // 添加技能并且设置永久性
+    function UnitAddPermanentAbility takes unit u,integer id returns boolean
+        return UnitAddAbility(u, id) and UnitMakeAbilityPermanent(u, true, id)
+    endfunction
+    // 添加技能并且设置永久性和技能等级
+    function UnitAddPermanentAbilitySetlevel takes unit u,integer id,integer lv returns nothing
+        if GetUnitAbilityLevel(u, id) == 0 then
+            call UnitAddPermanentAbility(u , id)
         endif
+        call SetUnitAbilityLevel(u, id, lv)
     endfunction
-    function GetDestructablesAmountInCircle takes real x,real y,real d returns integer
-        call SetRect(RectDummy, x - d, y - d, x + d, y + d)
-        set Tmp_DummyAmount=0
-        call EnumDestructablesInRect(RectDummy, null, function GetDestructablesAmountInCircle_Actions)
-        return Tmp_DummyAmount
+    // 给所有玩家共享此单位的视野
+    function UnitShareVisionToAllPlayer takes unit whichUnit,boolean share returns nothing
+        local integer i= 0
+        loop
+            call UnitShareVision(whichUnit, Player(i), share)
+            set i=i + 1
+            exitwhen i == bj_MAX_PLAYER_SLOTS
+        endloop
     endfunction
-    function FindNearestDestructable takes nothing returns nothing
-        local destructable enumDestructable= GetEnumDestructable()
-        local real x= GetWidgetX(enumDestructable)
-        local real y= GetWidgetY(enumDestructable)
-        local real dis= GetDistanceBetween(Tmp_GetNearestDestructableUnitX , Tmp_GetNearestDestructableUnitY , x , y)
-	
-        if dis > Tmp_NearestDestructableDistance then
-            set Tmp_NearestDestructableDistance=dis
-            set Tmp_Destructable=enumDestructable
-        endif
-        set Tmp_Destructable=enumDestructable
-        set enumDestructable=null
+    function UnitRemoveInvulnerable takes unit whichUnit returns nothing
+        call SetUnitInvulnerable(whichUnit, true)
     endfunction
-    // 获取单位范围内的最近可破坏物
-    function GetNearestDestructable takes unit whichUnit,real radius returns destructable
-        local real x= GetUnitX(whichUnit)
-        local real y= GetUnitY(whichUnit)
-        set Tmp_GetNearestDestructableUnitX=x
-        set Tmp_GetNearestDestructableUnitY=y
-        call SetRect(RectDummy, x - radius, y - radius, x + radius, y + radius)
-        set Tmp_Destructable=null
-        set Tmp_NearestDestructableDistance=0.
-        call EnumDestructablesInRect(RectDummy, null, function FindNearestDestructable)
-        return Tmp_Destructable
+    //设置单位无敌 封装了一层 不会因为独立更改而导致无敌失效
+    function UnitAddInvulnerable takes unit whichUnit returns nothing
+        call SetUnitInvulnerable(whichUnit, true)
     endfunction
-    //逆变身 使用后需要刷新一下单位的基础攻击力
+    // 获取基础攻击力奖励
+    function GetUnitBaseDamageBonus takes integer h returns integer
+        return LoadInteger(DynamicData, h, DAMAGE_BASE_BONUS)
+    endfunction
+    // 获取基础护甲奖励
+    function GetUnitBaseArmorBonus takes integer h returns real
+        return LoadReal(DynamicData, h, ARMOR_BASE_BONUS)
+    endfunction
+    // 逆变身 使用后需要刷新一下单位的基础攻击力
     function YDWEUnitTransform takes unit u,integer targetid returns nothing
         local integer i= GetUnitTypeId(u)
         local real value
         if i != targetid and i != 0 then
             // 刷新基础攻击力
-            set value=GetHeroPrimaryValue(u) + LoadInteger(UnitData, GetHandleId(u), UNIT_BASE_DAMAGE)
+            set value=(LoadInteger(DynamicData, (GetHandleId(u)), DAMAGE_BASE_BONUS)) + OBJ_GetUnitBaseDamage1(u) // INLINED!!
             call UnitAddAbility(u, 'Abrf')
             call EXSetAbilityDataInteger(EXGetUnitAbility(u, 'Abrf'), 1, ABILITY_DATA_UNITID, i)
             call EXSetAbilityAEmeDataA(EXGetUnitAbility(u, 'Abrf'), i)
@@ -2451,20 +2927,42 @@ endif
         call SaveWidgetHandle(HT, iHandleId, 1, targetWidget)
         set trig=null
     endfunction
+    function IssuePointOrderByIdWait0S_CallBack takes nothing returns boolean
+        local trigger trig= CreateTrigger()
+        local integer iHandleId= GetHandleId(trig)
+        local integer order= LoadInteger(HT, iHandleId, 0)
+        local unit whichUnit= LoadUnitHandle(HT, iHandleId, 0)
+        local real targetX= LoadReal(HT, iHandleId, 1)
+        local real targetY= LoadReal(HT, iHandleId, 2)
+        call IssuePointOrderById(whichUnit, order, targetX, targetY)
+        call FlushChildHashtable(HT, iHandleId)
+        call ClearTrigger(trig)
+        set trig=null
+        set whichUnit=null
+        return false
+    endfunction
+    // 点目标技能 等待0秒
+    function IssuePointOrderByIdWait0S takes unit whichUnit,integer order,real x,real y returns nothing
+        local integer iHandleId= CreateTimerEventTrigger(0. , false , function IssuePointOrderByIdWait0S_CallBack)
+        call SaveInteger(HT, iHandleId, 0, order)
+        call SaveUnitHandle(HT, iHandleId, 0, whichUnit)
+        call SaveReal(HT, iHandleId, 1, x)
+        call SaveReal(HT, iHandleId, 2, y)
+    endfunction
     
-    //不推荐使用
-    //本质上只是使用两次逆变身来刷新，whichType则是刷新后的状态
+    // 不推荐使用
+    // 本质上只是使用两次逆变身来刷新，whichType则是刷新后的状态
     function RefreshUnitModelById takes unit whichUnit,integer whichType returns nothing
         call YDWEUnitTransform(whichUnit , 'Uwar')
         call YDWEUnitTransform(whichUnit , whichType)
     endfunction
-    //与上面不同的是，此函数不会改变单位类别，始终会变回原来的类别
+    // 与上面不同的是，此函数不会改变单位类别，始终会变回原来的类别
     function RefreshUnitModel takes unit whichUnit returns nothing
         local integer unitType= GetUnitTypeId(whichUnit)
         call YDWEUnitTransform(whichUnit , 'Uwar')
         call YDWEUnitTransform(whichUnit , unitType)
     endfunction
-    //设置单位阴影，参数可填 Shadow 或 _ ,会进行一次逆变身
+    // 设置单位阴影，参数可填 Shadow 或 _ ,会进行一次逆变身
     function SetUnitShadow takes unit whichUnit,string modelName returns nothing
         call EXSetUnitString(GetUnitTypeId(whichUnit), 0x13, modelName)
         call RefreshUnitModel(whichUnit)
@@ -2508,7 +3006,7 @@ endif
         endif
         return LastGetMasterUnit
     endfunction
-    // 
+    
     function UnitDelayStandActions takes nothing returns nothing
         local timer hTimer= GetExpiredTimer()
         local integer iHandleId= GetHandleId(hTimer)
@@ -2516,7 +3014,7 @@ endif
         if UnitAlive(whichUnit) then
             call SetUnitAnimation(whichUnit, "Stand")
         endif
-        call RemoveSavedHandle(UnitKeyBuff, GetHandleId(whichUnit), UnitDelayedStandingKey)
+        call RemoveSavedHandle(DynamicData, GetHandleId(whichUnit), UNIT_DELAYED_STANDING)
         call FlushChildHashtable(HT, iHandleId)
         call DestroyTimer(hTimer)
         set hTimer=null
@@ -2525,11 +3023,11 @@ endif
     // 让单位在等待一段时间后播放Stand动作 重复使用会覆盖
     function UnitDelayedStanding takes unit whichUnit,real dur returns nothing
         local integer iHandleId= GetHandleId(whichUnit)
-        local timer hTimer= LoadTimerHandle(UnitKeyBuff, iHandleId, UnitDelayedStandingKey)
+        local timer hTimer= LoadTimerHandle(DynamicData, iHandleId, UNIT_DELAYED_STANDING)
         if hTimer == null then
             set hTimer=CreateTimer()
             call SaveUnitHandle(HT, GetHandleId(hTimer), 0, whichUnit)
-            call SaveTimerHandle(UnitKeyBuff, iHandleId, UnitDelayedStandingKey, hTimer)
+            call SaveTimerHandle(DynamicData, iHandleId, UNIT_DELAYED_STANDING, hTimer)
         endif
         call TimerStart(hTimer, dur, false, function UnitDelayStandActions)
         set hTimer=null
@@ -2541,78 +3039,254 @@ endif
         call SaveTriggerHandle(UnitAbilityTrigger, iHandleId, iAbilityId, bj_lastCreatedTrigger)
         return bj_lastCreatedTrigger
     endfunction
-    //检查玩家对单位的可见性
-    function UnitVisibleToPlayer takes unit whichUnit,player whichPlayer returns boolean
-return IsUnitVisible(whichUnit, whichPlayer) or ( IsUnitAlly(whichUnit, whichPlayer) )
-    endfunction
-    //***************************************************************************
-    //*
-    //*  Text Tag Utility Functions
-    //*
-    //***************************************************************************
-    //暴击漂浮文字 只会出现一次
-    function CriticalStrikeTextTag takes unit whichUnit,real damage returns nothing
-        local texttag t= CreateTextTag()
-        call SetTextTagText(t, I2S(R2I(damage)) + "!", 0.025) //文字 字体大小
-call SetTextTagPos(t, GetUnitX(whichUnit), GetUnitY(whichUnit), .0) //高度偏移
-call SetTextTagColor(t, 255, 0, 0, 255)
-        call SetTextTagVelocity(t, 0, .04)
-        call SetTextTagFadepoint(t, 2) //淡入时间
-call SetTextTagPermanent(t, false) //永久性
-call SetTextTagLifespan(t, 5) //生命周期
-call SetTextTagVisibility(t, UnitVisibleToPlayer(whichUnit , LocalPlayer))
-        set t=null
-    endfunction
-    //通用漂浮文字
-    function CommonTextTag takes string msg,real lifespan,unit whichUnit,real height,integer r,integer g,integer b,integer a,integer heightOffset returns nothing
-        local texttag t= CreateTextTag()
-        call SetTextTagText(t, msg, height) //文字 字体大小
-call SetTextTagPosUnit(t, whichUnit, heightOffset) //高度偏移
-call SetTextTagColor(t, r, g, b, a)
-        call SetTextTagVelocity(t, 0, .0355)
-        call SetTextTagFadepoint(t, 2) //淡入时间
-call SetTextTagPermanent(t, false) //永久性
-call SetTextTagLifespan(t, lifespan) //生命周期
-//call SetTextTagVisibility(tt,TYV(U,GetLocalPlayer())or RBX(GetLocalPlayer()))
-set t=null
-    endfunction
-    //黄金漂浮文字
-    function GoldTextTag takes player sourcePlayer,unit whichUnit,integer goldAmount returns nothing
-        local texttag tag
-        local string effectPath= ""
-        local boolean islocalPlayer= LocalPlayer == sourcePlayer
-        set tag=CreateTextTag()
-        if GetHandleId(tag) > 0 then
-            call SetTextTagText(tag, "+" + I2S(goldAmount), .025)
-            call SetTextTagPosUnit(tag, whichUnit, - 0.4)
-            if islocalPlayer then
-                call SetTextTagColor(tag, 255, 220, 0, 255)
-            endif
-            call SetTextTagVelocity(tag, 0, .03)
-            call SetTextTagVisibility(tag, islocalPlayer)
-            call SetTextTagFadepoint(tag, 2)
-            call SetTextTagLifespan(tag, 3)
-            call SetTextTagPermanent(tag, false)
-        else
-            call DestroyTextTag(tag)
-        endif
-        if islocalPlayer then
-            set effectPath="UI\\Feedback\\GoldCredit\\GoldCredit.mdl"
-        endif
-        call DestroyEffect(AddSpecialEffectTarget(effectPath, whichUnit, "overhead"))
-        set tag=null
-    endfunction
 
 //library Common ends
-//library YDWESetUnitFacingToFaceUnitTimedNull:
-function YDWESetUnitFacingToFaceUnitTimedNull takes unit whichUnit,unit target,real duration returns nothing
-    local location unitLoc= GetUnitLoc(target)
-    call YDWESetUnitFacingToFaceLocTimedNull(whichUnit , unitLoc , duration)
-    call RemoveLocation(unitLoc)
-    set unitLoc=null
-endfunction
+//library CustomAnyEvent:
+    //将物件转成物品
+    function Widget2Item takes widget whichWidget returns item
+        call SaveFogStateHandle(TypeConversion, 0, 0, ConvertFogState(GetHandleId(whichWidget)))
+        return LoadItemHandle(TypeConversion, 0, 0)
+    endfunction
+    
+    function ItemDelayRemove takes nothing returns boolean
+        local trigger trig= GetTriggeringTrigger()
+        local integer iHandleId= GetHandleId(trig)
+        local item deathItem= LoadItemHandle(HT, iHandleId, 0)
+    
+        if GetHandleId(deathItem) > 0 then
+            call SetWidgetLife(deathItem, 1)
+            call RemoveItem(deathItem)
+        endif
+    
+        call FlushChildHashtable(HT, iHandleId)
+        call ClearTrigger(trig)
+    
+        set trig=null
+        set deathItem=null
+        return false
+    endfunction
+    
+    function ItemDeathEvent_CallBack takes nothing returns boolean
+        local item deathItem= Widget2Item(GetTriggerWidget())
+        local integer iHandleId
+        // 等待,让物品播放完死亡动画,3.633秒是大部分书的死亡时间,似乎物品模型里死亡动画没有比这个更高的.
+        // 注意 普通物品死亡时间为0.5,书虽然3.633,但后面很大一部分时间都是播放最小化的书
+        set iHandleId=CreateTimerEventTrigger(1. , false , function ItemDelayRemove)
+        call SaveItemHandle(HT, iHandleId, 0, deathItem)
+        set deathItem=null
+        return false
+    endfunction
+    
+    // 封装的创建物品,因为物品被a掉后会永久存在于地图之中,所以要特殊操作一下.
+    function EXCreateItem takes integer itemid,real x,real y returns item
+        set bj_lastCreatedItem=CreateItem(itemid, x, y)
+        call TriggerRegisterDeathEvent(ItemDeathEventTrigger, bj_lastCreatedItem)
+        return bj_lastCreatedItem
+    endfunction
+    
+    function YDWEAnyUnitDamagedFilter takes nothing returns boolean
+        if GetUnitAbilityLevel(GetFilterUnit(), 'Aloc') <= 0 then
+            call TriggerRegisterUnitEvent(DamageEventTrigger, GetFilterUnit(), EVENT_UNIT_DAMAGED)
+        endif
+        return false
+    endfunction
+    
+    function AnyItemDeathFilter takes nothing returns boolean
+        local item it= GetFilterItem()
+        if GetWidgetLife(it) > 0 then
+            call TriggerRegisterDeathEvent(ItemDeathEventTrigger, it)
+        endif
+        set it=null
+        return false
+    endfunction
+    
+    function YDWEAnyUnitDamagedEnumUnit takes nothing returns nothing
+        local group g= CreateGroup()
+        local integer i= 0
+        loop
+            call GroupEnumUnitsOfPlayer(g, Player(i), Condition(function YDWEAnyUnitDamagedFilter))
+            set i=i + 1
+            exitwhen i == bj_MAX_PLAYER_SLOTS
+        endloop
+        call DestroyGroup(g)
+        set g=null
+    endfunction
+    
+    // 重建物品死亡事件
+    function AnyItemDeathEventEnumItem takes nothing returns nothing
+        local rect world= GetWorldBounds()
+        call EnumItemsInRect(world, Condition(function AnyItemDeathFilter), null)
+        call RemoveRect(world)
+        set world=null
+    endfunction
+    // 将 DamageEventTrigger 移入销毁队列, 从而排泄触发器事件
+    function YDWESyStemAnyUnitDamagedSwap takes nothing returns nothing
+        local boolean isEnabled= IsTriggerEnabled(DamageEventTrigger)
+    
+        call ClearTrigger(DamageEventTrigger)
+        set DamageEventTrigger=CreateTrigger()
+        if not isEnabled then
+            call DisableTrigger(DamageEventTrigger)
+        endif
+    
+        set isEnabled=IsTriggerEnabled(ItemDeathEventTrigger)
+        call ClearTrigger(ItemDeathEventTrigger)
+        set ItemDeathEventTrigger=CreateTrigger()
+        if not isEnabled then
+            call DisableTrigger(ItemDeathEventTrigger)
+        endif
+    
+        call TriggerAddCondition(DamageEventTrigger, DamageEventCondition)
+        call TriggerAddCondition(ItemDeathEventTrigger, Condition(function ItemDeathEvent_CallBack))
+        call YDWEAnyUnitDamagedEnumUnit()
+        call AnyItemDeathEventEnumItem()
+    endfunction
+    //改装了一下YDWE的任意单位受伤。
+    function YDWESyStemAnyUnitDamagedRegistTrigger takes nothing returns nothing
+    
+        set DamageEventTrigger=CreateTrigger()
+        call TriggerAddCondition(DamageEventTrigger, DamageEventCondition)
+    
+        if DAMAGE_EVENT_SWAP_ENABLE then
+            // 每隔 DAMAGE_EVENT_SWAP_TIMEOUT 秒, 将正在使用的 DamageEventTrigger 和 ItemDeathEventTrigger 移入销毁队列
+            call TimerStart(CreateTimer(), DAMAGE_EVENT_SWAP_TIMEOUT, true, function YDWESyStemAnyUnitDamagedSwap)
+        endif
+    
+    endfunction
+        
+    function CustomAnyEvent__Init takes nothing returns nothing
+        set DamageEventCondition=Condition(function YDWEAnyUnitDamagedTriggerAction)
+        call YDWESyStemAnyUnitDamagedRegistTrigger()
+        call AnyItemDeathEventEnumItem()
+        
+    endfunction
+    
 
-//library YDWESetUnitFacingToFaceUnitTimedNull ends
+//library CustomAnyEvent ends
+//library BuffSystem:
+    
+    
+    function BuffSystem___SetBuffType takes integer whichAbilityId,integer whichBuffId,integer whichPolarity,integer whichType,boolean autodispel returns nothing
+        call SaveBoolean(BuffSystem___Buff, whichType, whichAbilityId, true)
+        call SaveInteger(BuffSystem___Buff, whichAbilityId, BUFF_TYPE_BUFFID, whichBuffId)
+        if whichPolarity != 0 then
+            call SaveBoolean(BuffSystem___Buff, whichPolarity, whichAbilityId, true)
+        endif
+        call SaveBoolean(BuffSystem___Buff, BUFF_TYPE_IS_BUFF, whichAbilityId, true)
+        if autodispel then
+            call SaveBoolean(BuffSystem___Buff, BUFF_TYPE_AUTODISPEL, whichAbilityId, true)
+        endif
+    endfunction
+    // 初始化Buff表
+    // 技能Id BuffId 极性 类型 是不可驱散
+    function BuffSystem___InitBuff takes nothing returns nothing
+        // 晕眩 负面 物理 可驱散
+        call BuffSystem___SetBuffType('Aasl' , 'BPSE' , BUFF_TYPE_NEGATIVE , BUFF_TYPE_PHYSICAL , false)
+    endfunction
+    // 获取Buff的类型
+    function BuffSystem___IsBuffType takes integer whichAbilityId,integer whichType returns boolean
+        return LoadBoolean(BuffSystem___Buff, whichType, whichAbilityId)
+    endfunction
+    function BuffSystem___GetAbilityBuff takes integer whichAbilityId returns integer
+        return LoadInteger(BuffSystem___Buff, whichAbilityId, BUFF_TYPE_BUFFID)
+    endfunction
+    // 移除单位身上指定类型的Buff
+    function EXUnitRemoveBuffs takes unit whichUnit,integer whichType returns nothing
+        local integer id= 0
+        local integer i= 0
+        local trigger trig
+        local integer h= GetHandleId(whichUnit)
+        // 遍历单位的所有技能来移除Buff
+        loop
+            set id=EXGetAbilityId(EXGetUnitAbilityByIndex(whichUnit, i))
+            exitwhen id == 0
+            // 技能是否是buff? 可以被驱散?
+            if BuffSystem___IsBuffType(id , whichType) and not BuffSystem___IsBuffType(id , BUFF_TYPE_AUTODISPEL) then
+                call UnitRemoveAbility(whichUnit, id)
+                set id=(LoadInteger(BuffSystem___Buff, (id), BUFF_TYPE_BUFFID)) // INLINED!!
+                if id != 0 then // 找到Buff相关的触发器 先删除Buff 再运行一次
+set trig=LoadTriggerHandle(UnitBuffData, h, id)
+                    call UnitRemoveAbility(whichUnit, id)
+                    if trig != null then
+                        call TriggerEvaluate(trig)
+                    endif
+                endif
+            endif
+            set i=i + 1
+        endloop
+        set trig=null
+    endfunction
+    
+    // 创建一个绑定单位Buff的触发器
+    function CreateUnitBuffTrigger takes unit whichUnit,integer whichBuffId returns trigger
+        local integer iHandleId= GetHandleId(whichUnit)
+        set bj_lastCreatedTrigger=CreateTrigger()
+        call SaveTriggerHandle(UnitBuffData, iHandleId, whichBuffId, bj_lastCreatedTrigger)
+        return bj_lastCreatedTrigger
+    endfunction
+    function BuffSystem___RemoveAbility takes nothing returns boolean
+        local trigger trig= GetTriggeringTrigger()
+        local integer iHandleId= GetHandleId(trig)
+        local unit whichUnit= LoadUnitHandle(HT, iHandleId, 17)
+        local integer abilityId= LoadInteger(HT, iHandleId, 59)
+        local integer buffId= LoadInteger(HT, iHandleId, 60)
+        local timer durTimer= LoadTimerHandle(HT, iHandleId, 10)
+        call SaveBoolean(HT, iHandleId, 0, true)
+        call UnitRemoveAbility(whichUnit, abilityId)
+        call UnitRemoveAbility(whichUnit, buffId)
+        if GetUnitAbilityLevel(whichUnit, abilityId) == 0 then
+            call FlushChildHashtable(HT, iHandleId)
+            call ClearTrigger(trig)
+            call DestroyTimer(durTimer)
+            call RemoveSavedHandle(HT, GetHandleId(whichUnit), 0 - abilityId)
+        else
+            call TimerStart(durTimer, 1, true, null)
+        endif
+        set whichUnit=null
+        set trig=null
+        set durTimer=null
+        return false
+    endfunction
+    // 在一段时间内添加技能 一般用于添加Buff
+    // 技能id必填 level可以1 dur不能 <= 0 buffId可以没有
+    function UnitAddAbilityTimed takes unit whichUnit,integer abilityId,integer level,real duration,integer buffId returns nothing
+        local trigger trig
+        local integer iHandleId
+        local real remaining
+        local timer durTimer
+        if not UnitAlive(whichUnit) then
+            return
+        endif
+        if HaveSavedHandle(HT, GetHandleId(whichUnit), 0 - abilityId) then
+            set trig=LoadTriggerHandle(HT, GetHandleId(whichUnit), 0 - abilityId)
+            set iHandleId=GetHandleId(trig)
+            set durTimer=LoadTimerHandle(HT, iHandleId, 10)
+        else
+            set trig=CreateTrigger()
+            set iHandleId=GetHandleId(trig)
+            set durTimer=CreateTimer()
+            call FlushChildHashtable(HT, iHandleId)
+            call SaveUnitHandle(HT, iHandleId, 17, whichUnit)
+            call SaveInteger(HT, iHandleId, 59, abilityId)
+            call SaveInteger(HT, iHandleId, 60, buffId)
+            call SaveReal(HT, iHandleId, 0, 0)
+            call TriggerRegisterDeathEvent(trig, whichUnit)
+            call SaveTimerHandle(HT, iHandleId, 10, durTimer)
+            call TriggerRegisterTimerExpireEvent(trig, durTimer)
+            call TriggerAddCondition(trig, Condition(function BuffSystem___RemoveAbility))
+            call SaveTriggerHandle(HT, GetHandleId(whichUnit), 0 - abilityId, trig)
+        endif
+        call RemoveSavedBoolean(HT, iHandleId, 0)
+        set remaining=TimerGetRemaining(durTimer)
+        if remaining < duration then
+            call TimerStart(durTimer, duration, false, null)
+        endif
+        call UnitAddPermanentAbilitySetlevel(whichUnit , abilityId , level)
+        set trig=null
+        set durTimer=null
+    endfunction
+
+//library BuffSystem ends
 //library TestSystem:
     function TestSystem___ExecuteTestOrderFunc takes string msg,boolean execute returns nothing
         if execute and msg != null then
@@ -2622,7 +3296,7 @@ endfunction
     function TestSystem___AddAbility takes nothing returns nothing
         local string idStr= SubString(GetEventPlayerChatString(), 4, 99999)
         local integer abilityId= YDWES2Id(idStr)
-        if UnitAddAbility(GetPlayerSelectedUnit(), abilityId) then
+        if UnitAddAbility((GetDetectedUnit()), abilityId) then // INLINED!!
             call Debug("Test" , "AddAbility 成功 " + idStr)
         else
             call Debug("Test" , "AddAbility 失败 " + idStr)
@@ -2631,7 +3305,7 @@ endfunction
     function TestSystem___AddItem takes nothing returns nothing
         local string idStr= SubString(GetEventPlayerChatString(), 4, 99999)
         local integer abilityId= YDWES2Id(idStr)
-        if UnitAddItemById(GetPlayerSelectedUnit(), abilityId) != null then
+        if UnitAddItemById((GetDetectedUnit()), abilityId) != null then // INLINED!!
             call Debug("Test" , "AddItem 成功 " + idStr)
         else
             call Debug("Test" , "AddItem 失败 " + idStr)
@@ -2657,13 +3331,406 @@ endfunction
         
         return false
     endfunction
+    function funcTestSpeed takes nothing returns nothing
+        
+        local integer i= 0
+        loop
+            exitwhen i == 1000
+            call GetDetectedUnit()
+            set i=i + 1
+        endloop
+    endfunction
+    
+    function TestEsc takes nothing returns boolean
+    
+        local integer i= 0
+        local real time
+    
+        call ClearTextMessages()
+    
+        if false then
+            set time=S2R(EXExecuteScript("os.clock()"))
+            loop
+                exitwhen i == 100
+                call ExecuteFunc("funcTestSpeed")
+                set i=i + 1
+            endloop
+    
+            //call ClearTextMessages()
+    
+            call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "运行时间" + R2S(S2R(EXExecuteScript("os.clock()")) - time))
+            call BJDebugMsg(R2S(GetUnitState(LocalPlayerSelectUnit, UNIT_STATE_RATE_OF_FIRE)))
+        endif
+    
+        //call GetLocalizedHotkey("yd_leak_monitor::create_report")
+        //call EnableNewUnitStateUI(not NewUnitStateUIIsEnable)
+        return false
+    endfunction
     function TestSystem___Init takes nothing returns nothing
         local trigger trig= CreateTrigger()
         call TriggerRegisterPlayerChatEvent(trig, LocalPlayer, null, false)
         call TriggerAddCondition(trig, Condition(function TestSystem___TestPlayerChat__CallBack))
+        //单机测试
+        if bj_isSinglePlayer then
+            call SetPlayerState(Player(0), PLAYER_STATE_RESOURCE_GOLD, 99999)
+            //测试时Esc清屏
+            set IsMirage=true
+            call FogEnable(false)
+            call FogMaskEnable(false)
+            set trig=CreateTrigger()
+            call TriggerRegisterPlayerEvent(trig, Player(0), EVENT_PLAYER_END_CINEMATIC)
+            call TriggerAddCondition(trig, Condition(function TestEsc))
+        endif
+        set trig=null
     endfunction
 
 //library TestSystem ends
+//library UnitBonusSystem:
+    //设置单位生命恢复速度 这里GetHandleId用了三次 待优化
+    function UnitSetLifeRestore takes unit whichUnit,real newValue returns nothing
+        local integer h= GetHandleId(whichUnit)
+        local integer index= LoadInteger(DynamicData, h, UNIT_LIFERESTORE)
+        if index == 0 then
+            call QueuedUnitLifeRestoreAdd(whichUnit)
+        endif
+        call SaveReal(DynamicData, h, UNIT_LIFERESTORE, newValue)
+        call RefreshLifeUnitRestore(whichUnit)
+    endfunction
+    function UnitAddLifeRestore takes unit whichUnit,real value returns nothing
+        call UnitSetLifeRestore(whichUnit , LoadReal(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE) + value)
+    endfunction
+    function UnitReduceLifeRestore takes unit whichUnit,real value returns nothing
+        call UnitSetLifeRestore(whichUnit , LoadReal(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE) - value)
+    endfunction
+    //设置单位魔法恢复速度
+    function UnitSetManaRestore takes unit whichUnit,real newValue returns nothing
+        local integer h= GetHandleId(whichUnit)
+        local integer index= LoadInteger(DynamicData, h, UNIT_MANARESTORE)
+        if index == 0 then
+            call QueuedUnitManaRestoreAdd(whichUnit)
+        endif
+        call SaveReal(DynamicData, h, UNIT_MANARESTORE, newValue)
+        call RefreshManaUnitRestore(whichUnit)
+    endfunction
+    function UnitAddManaRestore takes unit whichUnit,real value returns nothing
+        call UnitSetManaRestore(whichUnit , LoadReal(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE) + value)
+    endfunction
+    function UnitReduceManaRestore takes unit whichUnit,real value returns nothing
+        call UnitSetManaRestore(whichUnit , LoadReal(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE) - value)
+    endfunction
+    //JAPI修改技能数据，并且刷新。
+    //*额外 攻击 防御 攻速*/
+    //升级并降低技能等级以此达到刷新属性的目的
+    function UnitAddAttackSpeedBonus takes unit whichUnit,real value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIsx')
+        endif
+        set value=LoadReal(DynamicData, h, BONUS_ATTACK) + value
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, value)
+        call IncUnitAbilityLevel(whichUnit, 'AIsx')
+        call DecUnitAbilityLevel(whichUnit, 'AIsx')
+        call SaveReal(DynamicData, h, BONUS_ATTACK, value)
+    endfunction
+    function UnitReduceAttackSpeedBonus takes unit whichUnit,real value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIsx')
+        endif
+        set value=LoadReal(DynamicData, h, BONUS_ATTACK) - value
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, value)
+        call IncUnitAbilityLevel(whichUnit, 'AIsx')
+        call DecUnitAbilityLevel(whichUnit, 'AIsx')
+        call SaveReal(DynamicData, h, BONUS_ATTACK, value)
+    endfunction
+    function UnitSetAttackSpeedBonus takes unit whichUnit,real newValue returns nothing
+        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIsx')
+        endif
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, newValue)
+        call IncUnitAbilityLevel(whichUnit, 'AIsx')
+        call DecUnitAbilityLevel(whichUnit, 'AIsx')
+        call SaveReal(DynamicData, GetHandleId(whichUnit), BONUS_ATTACK, newValue)
+    endfunction
+    function UnitAddArmorBonus takes unit whichUnit,real value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AId1')
+        endif
+        set value=LoadReal(DynamicData, h, BONUS_ARMOR) + value
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, value)
+        call IncUnitAbilityLevel(whichUnit, 'AId1')
+        call DecUnitAbilityLevel(whichUnit, 'AId1')
+        call SaveReal(DynamicData, h, BONUS_ARMOR, value)
+    endfunction
+    function UnitReduceArmorBonus takes unit whichUnit,real value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AId1')
+        endif
+        set value=LoadReal(DynamicData, h, BONUS_ARMOR) - value
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, value)
+        call IncUnitAbilityLevel(whichUnit, 'AId1')
+        call DecUnitAbilityLevel(whichUnit, 'AId1')
+        call SaveReal(DynamicData, h, BONUS_ARMOR, value)
+    endfunction
+    function UnitSetArmorBonus takes unit whichUnit,real newValue returns nothing
+        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AId1')
+        endif
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, newValue)
+        call IncUnitAbilityLevel(whichUnit, 'AId1')
+        call DecUnitAbilityLevel(whichUnit, 'AId1')
+        call SaveReal(DynamicData, GetHandleId(whichUnit), BONUS_ARMOR, newValue)
+    endfunction
+    //增加单位移动速度
+    function UnitAddMoveSpeedBonus takes unit whichUnit,real value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIms')
+        endif
+        set value=LoadReal(DynamicData, h, BONUS_MOVESPEED) + value
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, value)
+        call IncUnitAbilityLevel(whichUnit, 'AIms')
+        call DecUnitAbilityLevel(whichUnit, 'AIms')
+        call SaveReal(DynamicData, h, BONUS_MOVESPEED, value)
+    endfunction
+    //减少单位移动速度
+    function UnitReduceMoveSpeedBonus takes unit whichUnit,real value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIms')
+        endif
+        set value=LoadReal(DynamicData, h, BONUS_MOVESPEED) - value
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, value)
+        call IncUnitAbilityLevel(whichUnit, 'AIms')
+        call DecUnitAbilityLevel(whichUnit, 'AIms')
+        call SaveReal(DynamicData, h, BONUS_MOVESPEED, value)
+    endfunction
+    //设置单位移动速度
+    function UnitSetMoveSpeedBonus takes unit whichUnit,real newValue returns nothing
+        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIms')
+        endif
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, newValue)
+        call IncUnitAbilityLevel(whichUnit, 'AIms')
+        call DecUnitAbilityLevel(whichUnit, 'AIms')
+        call SaveReal(DynamicData, GetHandleId(whichUnit), BONUS_MOVESPEED, newValue)
+    endfunction
+    function UnitAddDamageBonus takes unit whichUnit,real value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIat')
+        endif
+        set value=LoadReal(DynamicData, h, BONUS_DAMAGE) + value
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, value)
+        call IncUnitAbilityLevel(whichUnit, 'AIat')
+        call DecUnitAbilityLevel(whichUnit, 'AIat')
+        call SaveReal(DynamicData, h, BONUS_DAMAGE, value)
+    endfunction
+    function UnitReduceDamageBonus takes unit whichUnit,real value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIat')
+        endif
+        set value=LoadReal(DynamicData, h, BONUS_DAMAGE) - value
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, value)
+        call IncUnitAbilityLevel(whichUnit, 'AIat')
+        call DecUnitAbilityLevel(whichUnit, 'AIat')
+        call SaveReal(DynamicData, h, BONUS_DAMAGE, value)
+    endfunction
+    function UnitSetDamageBonus takes unit whichUnit,real newValue returns nothing
+        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'AIat')
+        endif
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, newValue)
+        call IncUnitAbilityLevel(whichUnit, 'AIat')
+        call DecUnitAbilityLevel(whichUnit, 'AIat')
+        call SaveReal(DynamicData, GetHandleId(whichUnit), BONUS_DAMAGE, newValue)
+    endfunction
+    function UnitAddStrBonus takes unit whichUnit,integer value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        local ability abAamk= EXGetUnitAbility(whichUnit, 'Aamk')
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'Aamk')
+        endif
+        set value=LoadInteger(DynamicData, h, BONUS_STR) + value
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, value)
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(DynamicData, h, BONUS_INT))
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, LoadInteger(DynamicData, h, BONUS_AGI))
+        call IncUnitAbilityLevel(whichUnit, 'Aamk')
+        call DecUnitAbilityLevel(whichUnit, 'Aamk')
+        call SaveInteger(DynamicData, h, BONUS_STR, value)
+        set abAamk=null
+    endfunction
+    function UnitReduceStrBonus takes unit whichUnit,integer value returns nothing
+        local integer h= GetHandleId(whichUnit)
+        local ability abAamk= EXGetUnitAbility(whichUnit, 'Aamk')
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'Aamk')
+        endif
+        set value=LoadInteger(DynamicData, h, BONUS_STR) - value
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, value)
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(DynamicData, h, BONUS_INT))
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, LoadInteger(DynamicData, h, BONUS_AGI))
+        call IncUnitAbilityLevel(whichUnit, 'Aamk')
+        call DecUnitAbilityLevel(whichUnit, 'Aamk')
+        call SaveInteger(DynamicData, h, BONUS_STR, value)
+        set abAamk=null
+    endfunction
+    function UnitSetStrBonus takes unit whichUnit,integer newValue returns nothing
+        local integer h= GetHandleId(whichUnit)
+        local ability abAamk= EXGetUnitAbility(whichUnit, 'Aamk')
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'Aamk')
+        endif
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, newValue)
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(DynamicData, h, BONUS_INT))
+        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, LoadInteger(DynamicData, h, BONUS_AGI))
+        call IncUnitAbilityLevel(whichUnit, 'Aamk')
+        call DecUnitAbilityLevel(whichUnit, 'Aamk')
+        call SaveInteger(DynamicData, h, BONUS_STR, newValue)
+        set abAamk=null
+    endfunction
+    //设置单位最大生命值 会按当前比例改变
+    function UnitAddMaxLife takes unit whichUnit,real value returns nothing
+        local real maxlife= GetUnitState(whichUnit, UNIT_STATE_MAX_LIFE)
+        local real currentLife
+        set value=maxlife + value
+        call SetUnitState(whichUnit, UNIT_STATE_MAX_LIFE, value)
+        set currentLife=GetWidgetLife(whichUnit)
+        if UnitAlive(whichUnit) and currentLife != value then
+            call SetWidgetLife(whichUnit, currentLife * ( value / maxlife ))
+        endif
+    endfunction
+    function UnitReduceMaxLife takes unit whichUnit,real value returns nothing
+        local real maxlife= GetUnitState(whichUnit, UNIT_STATE_MAX_LIFE)
+        local real life= GetWidgetLife(whichUnit)
+        set value=maxlife - value
+        call SetUnitState(whichUnit, UNIT_STATE_MAX_LIFE, value)
+        if UnitAlive(whichUnit) and maxlife != life then
+            call SetWidgetLife(whichUnit, life * ( value / maxlife ))
+        endif
+    endfunction
+    function UnitSetMaxLife takes unit whichUnit,real newVal returns nothing
+        local real maxlife= GetUnitState(whichUnit, UNIT_STATE_MAX_LIFE)
+        call SetUnitState(whichUnit, UNIT_STATE_MAX_LIFE, newVal)
+        if UnitAlive(whichUnit) then
+            call SetWidgetLife(whichUnit, GetWidgetLife(whichUnit) * ( newVal / maxlife )) //按比例改变血量
+endif
+    endfunction
+    //设置单位最大魔法值 会按当前比例改变
+    function UnitAddMaxMana takes unit whichUnit,real value returns nothing
+        local real maxmana= GetUnitState(whichUnit, UNIT_STATE_MAX_MANA)
+        local real mana= GetUnitState(whichUnit, UNIT_STATE_MANA)
+        set value=maxmana + value
+        call SetUnitState(whichUnit, UNIT_STATE_MAX_MANA, value)
+        if UnitAlive(whichUnit) then
+            if maxmana == mana then
+                call SetUnitState(whichUnit, UNIT_STATE_MANA, value)
+            else
+                call SetUnitState(whichUnit, UNIT_STATE_MANA, GetUnitState(whichUnit, UNIT_STATE_MANA) * ( value / maxmana ))
+            endif
+        endif
+    endfunction
+    function UnitReduceMaxMana takes unit whichUnit,real value returns nothing
+        local real maxmana= GetUnitState(whichUnit, UNIT_STATE_MAX_MANA)
+        local real mana= GetUnitState(whichUnit, UNIT_STATE_MANA)
+        set value=maxmana - value
+        call SetUnitState(whichUnit, UNIT_STATE_MAX_MANA, value)
+        if UnitAlive(whichUnit) and maxmana != mana then
+            call SetUnitState(whichUnit, UNIT_STATE_MANA, mana * ( value / maxmana ))
+        endif
+    endfunction
+    function UnitSetMaxMana takes unit whichUnit,real newVal returns nothing
+        local real maxmana= GetUnitState(whichUnit, UNIT_STATE_MAX_MANA)
+        call SetUnitState(whichUnit, UNIT_STATE_MAX_MANA, newVal)
+        if UnitAlive(whichUnit) then
+            call SetUnitState(whichUnit, UNIT_STATE_MANA, GetUnitState(whichUnit, UNIT_STATE_MANA) * ( newVal / maxmana ))
+        endif
+    endfunction
+    //仅用作物品刷新属性
+    function UnitAddAttribute takes unit whichUnit,integer itemId returns nothing
+        local integer h= GetHandleId(whichUnit)
+        local integer str= LoadInteger(DynamicData, h, BONUS_STR) + LoadInteger(ObjectData, itemId, BONUS_STR)
+        local integer agi= LoadInteger(DynamicData, h, BONUS_AGI) + LoadInteger(ObjectData, itemId, BONUS_AGI)
+        local integer int= LoadInteger(DynamicData, h, BONUS_INT) + LoadInteger(ObjectData, itemId, BONUS_INT)
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'Aamk')
+        endif
+        call SaveInteger(DynamicData, h, BONUS_STR, str)
+        call SaveInteger(DynamicData, h, BONUS_AGI, agi)
+        call SaveInteger(DynamicData, h, BONUS_INT, int)
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_C, str)
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_B, int)
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_A, agi)
+        call IncUnitAbilityLevel(whichUnit, 'Aamk')
+        call DecUnitAbilityLevel(whichUnit, 'Aamk')
+    endfunction
+    function UnitReduceAttribute takes unit whichUnit,integer itemId returns nothing
+        local integer h= GetHandleId(whichUnit)
+        local integer str= LoadInteger(DynamicData, h, BONUS_STR) - LoadInteger(ObjectData, itemId, BONUS_STR)
+        local integer agi= LoadInteger(DynamicData, h, BONUS_AGI) - LoadInteger(ObjectData, itemId, BONUS_AGI)
+        local integer int= LoadInteger(DynamicData, h, BONUS_INT) - LoadInteger(ObjectData, itemId, BONUS_INT)
+        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
+            call UnitAddPermanentAbility(whichUnit , 'Aamk')
+        endif
+        call SaveInteger(DynamicData, h, BONUS_STR, str)
+        call SaveInteger(DynamicData, h, BONUS_AGI, agi)
+        call SaveInteger(DynamicData, h, BONUS_INT, int)
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_C, str)
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_B, int)
+        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_A, agi)
+        call IncUnitAbilityLevel(whichUnit, 'Aamk')
+        call DecUnitAbilityLevel(whichUnit, 'Aamk')
+    endfunction
+    function AddUnitVision takes unit whichUnit,integer value returns nothing
+        call UnitAddAbility(whichUnit, 'AIsi')
+        call YDWESetUnitAbilityDataReal(whichUnit , 'AIsi' , 2 , ABILITY_DATA_DATA_A , - value)
+        call IncUnitAbilityLevel(whichUnit, 'AIsi')
+        call UnitRemoveAbility(whichUnit, 'AIsi')
+    endfunction
+    function GetUnitStateBonus takes unit whichUnit,integer iBonusType returns real
+        return LoadReal(DynamicData, GetHandleId(whichUnit), iBonusType)
+    endfunction
+    // 通过句柄来查单位的额外属性加成 会被内联
+    function GetUnitStateBonusByHandleId takes integer whichHandleId,integer iBonusType returns real
+        return LoadReal(DynamicData, whichHandleId, iBonusType)
+    endfunction
+    // 同步镜像与本体的属性
+    function SyncIllusionUnitState takes unit hIllusionUnit,unit hMasterUnit returns nothing
+        local real value= 0.
+        local ability hAbilityAamk
+        local integer iMasterUnitHandleId= GetHandleId(hMasterUnit)
+        // 攻击力
+        set value=(LoadReal(DynamicData, (iMasterUnitHandleId ), ( BONUS_DAMAGE))) // INLINED!!
+        call UnitSetDamageBonus(hIllusionUnit , value)
+        // 护甲
+        set value=(LoadReal(DynamicData, (iMasterUnitHandleId ), ( BONUS_ARMOR))) // INLINED!!
+        call UnitSetArmorBonus(hIllusionUnit , value)
+        // 攻速
+        set value=(LoadReal(DynamicData, (iMasterUnitHandleId ), ( BONUS_ATTACK))) // INLINED!!
+        call UnitAddAttackSpeedBonus(hIllusionUnit , value)
+        // 如果AHer ＞ 0 就是英雄单位镜像
+        if GetUnitAbilityLevel(hIllusionUnit, 'AHer') > 0 and GetUnitAbilityLevel(hMasterUnit, 'Aamk') > 0 then
+            set hAbilityAamk=EXGetUnitAbility(hIllusionUnit, 'Aamk')
+            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_C, (LoadReal(DynamicData, (iMasterUnitHandleId ), ( BONUS_STR)))) // INLINED!!
+            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_B, (LoadReal(DynamicData, (iMasterUnitHandleId ), ( BONUS_INT)))) // INLINED!!
+            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_A, (LoadReal(DynamicData, (iMasterUnitHandleId ), ( BONUS_AGI)))) // INLINED!!
+            set hAbilityAamk=null
+            call IncUnitAbilityLevel(hIllusionUnit, 'Aamk')
+            call DecUnitAbilityLevel(hIllusionUnit, 'Aamk')
+            // 生命值和魔法值默认同步 但如果修改了额外属性可能会导致不一致
+            // 最大生命值
+            set value=GetUnitState(hMasterUnit, UNIT_STATE_MAX_LIFE)
+            call SetUnitState(hIllusionUnit, UNIT_STATE_MAX_LIFE, value)
+            // 最大魔法值
+            set value=GetUnitState(hMasterUnit, UNIT_STATE_MAX_MANA)
+            call SetUnitState(hIllusionUnit, UNIT_STATE_MAX_MANA, value)
+        endif
+    endfunction
+
+//library UnitBonusSystem ends
 //library UnitStateRefresh:
     //UNIT_LIFERESTORE
     //UNIT_MANARESTORE
@@ -2685,40 +3752,25 @@ loop
         endif
         set abil=null
     endfunction
-    function RefreshLifeUnitRestore takes unit u returns nothing
-        local integer h= GetHandleId(u)
-        local integer index= LoadInteger(UnitData, h, UNIT_LIFERESTORE)
-        set LifeRestoreValue[index]=( LoadReal(UnitData, h, UNIT_LIFERESTORE) + ( GetHeroStr(u, true) * 0.04 ) ) * RestoreFrame
-    endfunction
-    function RefreshManaUnitRestore takes unit u returns nothing
-        local integer h= GetHandleId(u)
-        local integer index= LoadInteger(UnitData, h, UNIT_MANARESTORE)
-        set ManaRestoreValue[index]=( LoadReal(UnitData, h, UNIT_MANARESTORE) + ( GetHeroInt(u, true) * 0.03 ) ) * RestoreFrame
-    endfunction
-    function RefreshUnitRestore takes unit u returns nothing
-        local integer h= GetHandleId(u)
-        set LifeRestoreValue[LoadInteger(UnitData, h, UNIT_LIFERESTORE)]=( LoadReal(UnitData, h, UNIT_LIFERESTORE) + ( GetHeroStr(u, true) * 0.04 ) ) * RestoreFrame
-        set ManaRestoreValue[LoadInteger(UnitData, h, UNIT_MANARESTORE)]=( LoadReal(UnitData, h, UNIT_MANARESTORE) + ( GetHeroInt(u, true) * 0.03 ) ) * RestoreFrame
-    endfunction
-    //刷新单位属性
-    //call RefreshUnitArmor(u)		//刷新护甲
-    //call RefreshUnitBaseAttack(u)	//刷新基础攻击力
-    //call RefreshUnitRestor(u)		//刷新状态恢复
+    
+    //刷新单位属性 攻击 护甲 生命恢复
     function RefreshUnitState takes unit u returns nothing
         local integer h= GetHandleId(u)
-local real value= LoadReal(UnitData, h, BONUS_ARMOR) + LoadReal(UnitData, UNIT_BASE_ARMOR, h)
-        local real newValue= ( GetHeroAgi(u, true) / 6.00 ) * 1. + value
-        local integer i
+        local real value
+        local real newValue
+        //刷新基础护甲
+        // 先获得单位的白字护甲 - 单位的基础护甲和基础护甲奖励
+        set value=(LoadInteger(DynamicData, (h), DAMAGE_BASE_BONUS)) + OBJ_GetUnitBaseDamage1(u) // INLINED!!
+        set newValue=( GetHeroAgi(u, true) / 6.00 ) * 1. + value
         call SetUnitState(u, UNIT_STATE_ARMOR, newValue)
-        //刷新基础攻击力
-        set value=GetHeroPrimaryValue(u)
-        set newValue=value + LoadInteger(UnitData, h, UNIT_BASE_DAMAGE)
+        //刷新基础攻击力 攻击方式 1
+        set value=(LoadReal(DynamicData, (h), ARMOR_BASE_BONUS)) + OBJ_GetUnitBaseArmor(u) // INLINED!!
+        set newValue=value + OBJ_GetHeroPrimaryValue(u)
         call SetUnitState(u, UNIT_STATE_ATTACK1_DAMAGE_BASE, newValue)
         //刷新 生命/魔法恢复速度
         call RefreshUnitRestore(u)
-         call Debug("log" , GetUnitName(u) + "生命/魔法 恢复：" + R2S(LoadReal(UnitData, h, UNIT_LIFERESTORE) + GetHeroStr(u, true) * 0.04) + "/" + R2S(LoadReal(UnitData, h, UNIT_MANARESTORE) + GetHeroInt(u, true) * 0.03))
-        //同时刷新面板
-        //call UnitStateUpdateCallback()
+        // 同时刷新面板
+        // call UnitStateUpdateCallback()
     endfunction
 
 //library UnitStateRefresh ends
@@ -2728,7 +3780,7 @@ local real value= LoadReal(UnitData, h, BONUS_ARMOR) + LoadReal(UnitData, UNIT_B
 // 
 //   Warcraft III map script
 //   Generated by the Warcraft III World Editor
-//   Date: Thu Dec 09 16:23:28 2021
+//   Date: Thu Dec 23 17:12:32 2021
 //   Map Author: 未知
 // 
 //===========================================================================
@@ -3309,984 +4361,253 @@ endfunction
 //***************************************************************************
 //TESH.scrollpos=0
 //TESH.alwaysfold=0
-// 初始化的函数
-// 大部分的常用函数
-// 单位选取的过滤条件
-// 获取是否拥有法术护盾
-function HaveSpellShield takes unit u returns boolean
-	return false
-endfunction
-//filter 条件
-// 敌对 非建筑
-// 大部分物理攻击特效的筛选
-function CommonAttackEffectFilter takes unit whichUnit,unit targetUnit returns boolean
-	return IsUnitEnemy(whichUnit, GetOwningPlayer(targetUnit)) and not IsUnitType(targetUnit, UNIT_TYPE_STRUCTURE)
-endfunction
-// 联盟 存活 非建筑
-function Ally_Alive_NoStructure takes unit u returns boolean
-	return IsUnitAlly(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
-endfunction
-// 联盟 存活 非建筑
-function Ally_Alive_NoStructure_IsHero takes unit u returns boolean
-	return IsUnitAlly(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE) and IsUnitType(u, UNIT_TYPE_HERO)
-endfunction
-// 联盟 存活
-function Ally_Alive takes unit u returns boolean
-	return IsUnitAlly(u, P2) and UnitAlive(u)
-endfunction
-	
-// 敌对 存活
-function Enemy_Alive takes unit u returns boolean
-	return IsUnitEnemy(u, P2) and UnitAlive(u)
-endfunction
-// 敌对 存活 地面
-function Enemy_Alive_NotFly takes unit u returns boolean
-	return IsUnitEnemy(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_FLYING)
-endfunction
-// 敌对 存活 非建筑
-function Enemy_Alive_NoStructure takes unit u returns boolean
-	return IsUnitEnemy(u, P2) and UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
-endfunction
-	
-// 敌对 存活 非建筑 非魔免
-function Enemy_Alive_NoStructure_NoImmune takes unit u returns boolean
-	return Enemy_Alive_NoStructure(u) and not IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE)
-endfunction
-// 存活 非建筑
-function Alive_NoStructure takes unit u returns boolean
-	return UnitAlive(u) and not IsUnitType(u, UNIT_TYPE_STRUCTURE)
-endfunction
-// 非空军 非机械 存活 非建筑 敌军
-function IsGround_NotMechanical_Enemy_Alive_NoStructure takes unit u returns boolean
-	return not IsUnitType(u, UNIT_TYPE_FLYING) and not IsUnitType(u, UNIT_TYPE_MECHANICAL) and Enemy_Alive_NoStructure(u)
-endfunction
-// 非机械 存活 非建筑 友军
-function IsMechanical_Ally_Alive_NoStructure takes unit u returns boolean
-	return not IsUnitType(u, UNIT_TYPE_MECHANICAL) and Ally_Alive_NoStructure(u)
-endfunction
-// scope Stun begins
-    //模拟行为限制
-    //模拟晕眩
-    //EXPauseUnit内部自带计数 为true时+1 false时-1 计数 <=0 时单位不再晕眩
-    //移除晕眩
-    function UnitRemoveStun takes unit u returns boolean
-        local integer h
-        local integer uh= GetHandleId(u)
-        local timer t= null
-        if HaveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN) then
-            set t=LoadTimerHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-            set h=GetHandleId(t)
-            call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-            call RemoveSavedHandle(HT, h, 0)
-            call DestroyTimer(t)
-            call EXPauseUnit(u, false) //此函数内部自带计数
-call UnitRemoveAbility(u, 'Aasl')
-            call UnitRemoveAbility(u, 'BPSE')
-            set t=null
-            return true
-        endif
-        return false
-    endfunction
-    function UnitStun_Actions takes nothing returns nothing
-        local timer t= GetExpiredTimer()
-        local integer h= GetHandleId(t)
-        local unit u= LoadUnitHandle(HT, h, 0)
-        local integer uh= GetHandleId(u)
-        //call SaveInteger(UnitKeyBuff, uh, UNITBUFF_STUN,  LoadInteger(UnitKeyBuff, uh, UNITBUFF_STUN) - 1 )
-        call RemoveSavedHandle(UnitKeyBuff, uh, UNITBUFF_STUN)
-        call RemoveSavedHandle(HT, h, 0)
-        call PauseTimer(t)
-        call DestroyTimer(t)
-        call EXPauseUnit(u, false) //此函数内部自带计数
-call UnitRemoveAbility(u, 'Aasl')
-        call UnitRemoveAbility(u, 'BPSE')
-        set t=null
-        set u=null
-    endfunction
-    //单位、持续时间、是否无视魔免
-    function UnitSetStun takes unit u,real dur returns boolean
-        local timer t
-        local integer h= GetHandleId(u)
-        local real time= 0
-        if HaveSavedHandle(UnitKeyBuff, h, UNITBUFF_STUN) then
-            set t=LoadTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN)
-            set time=TimerGetRemaining(t)
-        else
-            set t=CreateTimer()
-            call EXPauseUnit(u, true)
-            //call SaveInteger(UnitKeyBuff, h, UNITBUFF_STUN, LoadInteger(UnitKeyBuff, h, UNITBUFF_STUN) + 1)
-            call UnitAddAbility(u, 'Aasl')
-            call UnitMakeAbilityPermanent(u, true, 'Aasl')
-            call SaveTimerHandle(UnitKeyBuff, h, UNITBUFF_STUN, t)
-            call SaveUnitHandle(HT, GetHandleId(t), 0, u)
-        endif
-        if time < dur then
-            set time=dur
-        endif
-        if time != 0 then
-            call TimerStart(t, time, false, function UnitStun_Actions)
-        endif
-        set t=null
-        return true
-    endfunction
-    //封装了一层本质上是使用UnitSetStun 参数b为是否无视魔法免疫
-    function M_UnitSetStun takes unit u,real dur,real herodur,boolean b returns boolean
-        if IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE) and not b then //检查是否魔免
-            return false
-        endif
-        if GetUnitAbilityLevel(u, 'AHer') == 1 then //如果单位为英雄 那么就会有此技能
-set dur=herodur
-        endif
-        return UnitSetStun(u , dur)
-    endfunction
-// scope Stun ends
+// scope BlzAPI begins
     
-// scope BuffSystem begins
-    function SetBuffType takes integer whichAbilityId,integer whichBuffId,integer whichPolarity,integer whichType returns nothing
-        call SaveBoolean(BuffSystem___Buff, whichType, whichAbilityId, true)
-        call SaveInteger(BuffSystem___Buff, whichAbilityId, BUFF_TYPE_BUFFID, whichBuffId)
-        if whichPolarity != 0 then
-            call SaveBoolean(BuffSystem___Buff, whichPolarity, whichAbilityId, true)
-        endif
-        call SaveBoolean(BuffSystem___Buff, BUFF_TYPE_IS_BUFF, whichAbilityId, true)
-        
-    endfunction
-    function BuffSystem___InitBuff takes nothing returns nothing
-        // 晕眩 负面 物理
-        call SetBuffType('Aasl' , 'BPSE' , BUFF_TYPE_NEGATIVE , BUFF_TYPE_PHYSICAL)
-    endfunction
-    // 
-    function BuffSystem___IsBuffType takes integer whichAbilityId,integer whichType returns boolean
-        return LoadBoolean(BuffSystem___Buff, whichType, whichAbilityId)
-    endfunction
-    function BuffSystem___GetAbilityBuff takes integer whichAbilityId returns integer
-        return LoadInteger(BuffSystem___Buff, whichAbilityId, BUFF_TYPE_BUFFID)
-    endfunction
-    // 单位死亡时移除的Buff
-    function EXUnitRemoveBuffs takes unit whichUnit,integer whichType returns nothing
-        local integer abilityId= 0
-        local integer loop__Index= 0
-        local trigger buffTrig
-        local integer iHandleId= GetHandleId(whichUnit)
-        loop
-            set abilityId=EXGetAbilityId(EXGetUnitAbilityByIndex(whichUnit, loop__Index))
-            exitwhen abilityId == 0
-            if BuffSystem___IsBuffType(abilityId , whichType) then
-                call UnitRemoveAbility(whichUnit, abilityId)
-                set abilityId=BuffSystem___GetAbilityBuff(abilityId)
-                if abilityId != 0 then
-                    set buffTrig=LoadTriggerHandle(UnitKeyBuff, iHandleId, abilityId)
-                    call UnitRemoveAbility(whichUnit, abilityId)
-                    if buffTrig != null then
-                        call TriggerEvaluate(buffTrig)
-                    endif
-                endif
-                 call Debug("log" , GetUnitName(whichUnit) + " 删除Buff " + GetObjectName(abilityId) + " Id:" + YDWEId2S(abilityId))
-            endif
-            set loop__Index=loop__Index + 1
-        endloop
-        set buffTrig=null
-    endfunction
-// scope BuffSystem ends
+    // 获取鼠标在游戏内的坐标X
 
-// #include "Vjass\Cinematic.j"
-// scope UnitRestore begins
+    // 获取鼠标在游戏内的坐标Y
+
+    // 获取鼠标在游戏内的坐标Z
+
+    // 鼠标是否在游戏内
+
+    // 获取鼠标屏幕坐标X
+
+    // 获取鼠标屏幕坐标Y
+
+    // 获取鼠标游戏窗口坐标X
+
+    // 获取鼠标游戏窗口坐标Y
+
+    // 设置鼠标位置
+
+    // 注册鼠标点击触发（sync为true时，调用TriggerExecute。为false时，直接运行action函数，可以异步不掉线，action里不要有同步操作）
+
+    // 注册鼠标点击触发（sync为true时，调用TriggerExecute。为false时，直接运行action函数，可以异步不掉线，action里不要有同步操作）
+
+    // 注册键盘点击触发
+
+    // 注册键盘点击触发
+
+    // 注册鼠标滚轮触发
+
+    // 注册鼠标滚轮触发
+
+    // 注册鼠标移动触发
+
+    // 注册鼠标移动触发
+
+    // 获取触发器的按键码
+
+    // 获取滚轮delta
+
+    // 判断按键是否按下
+
+    // 获取触发key的玩家
+
+    // 获取war3窗口宽度
+
+    // 获取war3窗口高度
+
+    // 获取war3窗口X坐标
+
+    // 获取war3窗口Y坐标
+
+    // 注册war3窗口大小变化事件
+
+    // 注册war3窗口大小变化事件
+
+    // 判断窗口是否激活
+
+    // 设置可摧毁物位置
+
+    // 设置单位位置-本地调用
+
+    // 异步执行函数
+
+    // 取鼠标指向的单位
+
+    // 设置单位的贴图
+
+    //  设置内存数值
+
+    //  替换单位类型 [BZAPI]
+
+    //  替换单位模型 [BZAPI]
+
+    //  原生 - 设置小地图背景贴图
+
+    // 注册数据同步触发器
+
+    // 同步游戏数据
+
+    // 获取同步的数据
+
+    // 获取同步数据的玩家
+
+    // 隐藏界面元素
+
+    // 修改游戏世界窗口位置
+
+    // 头像
+
+    // 小地图
+
+    // 技能按钮
+
+    // 英雄按钮
+
+    // 英雄血条
+
+    // 英雄蓝条
+
+    // 道具按钮
+
+    // 小地图按钮
+
+    // 左上菜单按钮
+
+    // 鼠标提示
+
+    // 聊天信息
+
+    // 单位信息
+
+    // 获取最上的信息
+
+    // 取rgba色值
+
+    // 设置界面更新回调（非同步）
+
+    // 界面更新回调
+
+    // 显示/隐藏窗体
+
+    // 创建窗体
+
+    // 创建简单的窗体
+
+    // 销毁窗体
+
+    // 加载内容目录 (Toc table of contents)
+
+    // 设置窗体相对位置 [0:左上|1:上|2:右上|3:左|4:中|5:右|6:左下|7:下|8:右下]
+
+    // 设置窗体绝对位置
+
+    // 清空窗体锚点
+
+    // 设置窗体禁用/启用
+
+    // 注册用户界面事件回调
+
+    //  注册UI事件回调(func handle)
+
+    // 获取触发用户界面事件的玩家
+
+    // 获取触发用户界面事件的窗体
+
+    // 通过名称查找窗体
+
+    // 通过名称查找普通窗体
+
+    // 查找字符串
+
+    // 查找BACKDROP frame
+
+    // 获取游戏用户界面
+
+    // 点击窗体
+
+    // 自定义屏幕比例
+
+    // 使用宽屏模式
+
+    // 设置文字（支持EditBox, TextFrame, TextArea, SimpleFontString、GlueEditBoxWar3、SlashChatBox、TimerTextFrame、TextButtonFrame、GlueTextButton）
+
+    // 获取文字（支持EditBox, TextFrame, TextArea, SimpleFontString）
+
+    // 设置字数限制（支持EditBox）
+
+    // 获取字数限制（支持EditBox）
+
+    // 设置文字颜色（支持TextFrame, EditBox）
+
+    // 获取鼠标所在位置的用户界面控件指针
+
+    // 设置所有锚点到目标窗体上
+
+    // 设置焦点
+
+    // 设置模型（支持Sprite、Model、StatusBar）
+
+    // 获取控件是否启用
+
+    // 设置透明度（0-255）
+
+    // 获取透明度（0-255）
+
+    // 设置动画
+
+    // 设置动画进度（autocast为false是可用）
+
+    // 设置texture（支持Backdrop、SimpleStatusBar）
+
+    // 设置缩放
+
+    // 设置提示
+
+    // 鼠标限制在用户界面内
+
+    // 获取当前值（支持Slider、SimpleStatusBar、StatusBar）
+
+    // 设置最大最小值（支持Slider、SimpleStatusBar、StatusBar）
+
+    // 设置Step值（支持Slider）
+
+    // 设置当前值（支持Slider、SimpleStatusBar、StatusBar）
+
+    // 设置窗体大小
+
+    // 根据tag创建窗体
+
+    // 设置颜色（支持SimpleStatusBar）
+
+    // 不明觉厉
+
+    //  设置优先级 [NEW]
+
+    //  设置父窗口 [NEW]
+
+    //  设置字体 [NEW]
+
+    //  获取 Frame 的 高度 [NEW]
+
+    //  设置对齐方式 [NEW]
+
+    //  获取 Frame 的 Parent [NEW]
+
+        
+// scope BlzAPI ends
     
-    function UnitCanRestoreLife takes unit whichUnit returns boolean
-        return HaveSavedInteger(UnitData, GetHandleId(whichUnit), UNIT_LIFERESTORE)
+// 伤害系统
+// scope Order begins
+    function IsCommonOrderId takes integer orderId returns boolean
+        return LoadBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, orderId)
     endfunction
-    function UnitCanRestoreMana takes unit whichUnit returns boolean
-        return HaveSavedInteger(UnitData, GetHandleId(whichUnit), UNIT_MANARESTORE)
+    function Order__SaveCommonOrderId takes integer orderId returns nothing
+        call SaveBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, orderId, true)
     endfunction
-    //生命恢复,所有生命恢复都以这条函数来进行	/*不包括生命移除*/
-    function UnitRestoreLife takes unit u,real r returns nothing
-        if r != 0 then
-            if IsUnitType(u, UNIT_TYPE_UNDEAD) then //不死族单位在荒芜地表享受两倍生命恢复效果
-if IsPointBlighted(GetUnitX(u), GetUnitY(u)) then
-                    set r=r * 2.00
-                endif
-            endif
-            call SetWidgetLife(u, GetWidgetLife(u) + r)
-        endif
+    function Order__Init takes nothing returns nothing
+        call SaveBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, (ORDER_ATTACK), true) // INLINED!!
+        call SaveBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, (ORDER_SMART), true) // INLINED!!
+        call SaveBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, (ORDER_MOVE), true) // INLINED!!
+        call SaveBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, (ORDER_PATROL), true) // INLINED!!
+        call SaveBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, (ORDER_STOP), true) // INLINED!!
     endfunction
-    //魔法恢复,所有魔法恢复都以这条函数来进行  /*不包括魔法移除*/
-    function UnitRestoreMana takes unit u,real r returns nothing
-        if r != 0 then
-            call SetUnitState(u, UNIT_STATE_MANA, GetUnitState(u, UNIT_STATE_MANA) + r)
-        endif
-    endfunction
-    //使单位加入恢复队列,允许其恢复 生命/魔法
-    function QueuedUnitLifeRestoreAdd takes unit whichUnit returns nothing
-        set UnitLifeRestoreNumber=UnitLifeRestoreNumber + 1
-        set UnitLifeRestoreQueue[UnitLifeRestoreNumber]=whichUnit
-        set LifeRestoreValue[UnitLifeRestoreNumber]=0. //可能不需要set 0
-call SaveInteger(UnitData, GetHandleId(whichUnit), UNIT_LIFERESTORE, UnitLifeRestoreNumber)
-    endfunction
-    //使单位加入恢复队列,允许其恢复 生命/魔法
-    function QueuedUnitManaRestoreAdd takes unit whichUnit returns nothing
-        set UnitManaRestoreNumber=UnitManaRestoreNumber + 1
-        set UnitManaRestoreQueue[UnitManaRestoreNumber]=whichUnit
-        set ManaRestoreValue[UnitManaRestoreNumber]=0.
-        call SaveInteger(UnitData, GetHandleId(whichUnit), UNIT_MANARESTORE, UnitManaRestoreNumber)
-    endfunction
-    //使单位加入恢复队列,允许其恢复 生命/魔法
-    function QueuedUnitRestoreAdd takes unit whichUnit returns nothing
-        call QueuedUnitLifeRestoreAdd(whichUnit)
-        call QueuedUnitManaRestoreAdd(whichUnit)
-    endfunction
-    //将单位移出恢复队列,禁用其恢复 生命
-    function QueuedUnitLifeRestoreRemove takes unit whichUnit returns nothing
-        local integer iHandleId= GetHandleId(whichUnit)
-        local integer index= LoadInteger(UnitData, iHandleId, UNIT_LIFERESTORE)
-        if index != UnitLifeRestoreNumber then
-            set UnitLifeRestoreQueue[index]=UnitLifeRestoreQueue[UnitLifeRestoreNumber]
-            set LifeRestoreValue[index]=LifeRestoreValue[UnitLifeRestoreNumber]
-            call SaveInteger(UnitData, iHandleId, UNIT_LIFERESTORE, 0)
-            set iHandleId=GetHandleId(UnitLifeRestoreQueue[UnitLifeRestoreNumber])
-            call SaveInteger(UnitData, iHandleId, UNIT_LIFERESTORE, index)
-        endif
-        set UnitLifeRestoreQueue[UnitLifeRestoreNumber]=null
-        set LifeRestoreValue[UnitLifeRestoreNumber]=0.
-        set UnitLifeRestoreNumber=UnitLifeRestoreNumber - 1
-    endfunction
-    //将单位移出恢复队列,禁用其恢复 魔法
-    function QueuedUnitManaRestoreRemove takes unit whichUnit returns nothing
-        local integer iHandleId= GetHandleId(whichUnit)
-        local integer index= LoadInteger(UnitData, iHandleId, UNIT_MANARESTORE)
-        if index != UnitManaRestoreNumber then
-            set UnitManaRestoreQueue[index]=UnitManaRestoreQueue[UnitManaRestoreNumber]
-            set ManaRestoreValue[index]=ManaRestoreValue[UnitManaRestoreNumber]
-            call SaveInteger(UnitData, iHandleId, UNIT_MANARESTORE, 0)
-	
-            set iHandleId=GetHandleId(UnitManaRestoreQueue[UnitManaRestoreNumber])
-            call SaveInteger(UnitData, iHandleId, UNIT_MANARESTORE, index)
-        endif
-        set UnitManaRestoreQueue[UnitManaRestoreNumber]=null
-        set ManaRestoreValue[UnitManaRestoreNumber]=0.
-        set UnitManaRestoreNumber=UnitManaRestoreNumber - 1
-    endfunction
-    //将单位移出恢复队列,禁用其恢复 生命/魔法
-    function QueuedUnitRestoreRemove takes unit whichUnit returns nothing
-        call QueuedUnitLifeRestoreRemove(whichUnit)
-        call QueuedUnitManaRestoreRemove(whichUnit)
-    endfunction
-    //RestoreFrame秒回调一次,恢复单位 生命/魔法
-    function RestoreAllUnitLife takes nothing returns boolean
-        local integer i= 1
-        loop
-            exitwhen i > UnitLifeRestoreNumber
-            if UnitAlive(UnitLifeRestoreQueue[i]) then
-                call UnitRestoreLife(UnitLifeRestoreQueue[i] , LifeRestoreValue[i])
-                //call UnitRestoreMana(UnitRestoreQueue[i], ManaRestoreValue[i])
-            endif
-            set i=i + 1
-        endloop
-        return false
-    endfunction
-    function RestoreAllUnitMana takes nothing returns boolean
-        local integer i= 1
-        loop
-            exitwhen i > UnitManaRestoreNumber
-            if UnitAlive(UnitManaRestoreQueue[i]) then
-                call UnitRestoreMana(UnitManaRestoreQueue[i] , ManaRestoreValue[i])
-            endif
-            set i=i + 1
-        endloop
-        return false
-    endfunction
-    function InitUnitRestore takes nothing returns nothing
-        local trigger trig= CreateTrigger()
-        call TriggerRegisterTimerEvent(trig, RestoreFrame, true)
-        call TriggerAddCondition(trig, Condition(function RestoreAllUnitLife))
-        set trig=CreateTrigger()
-        call TriggerRegisterTimerEvent(trig, RestoreFrame, true)
-        call TriggerAddCondition(trig, Condition(function RestoreAllUnitMana))
-    endfunction
-// scope UnitRestore ends
-// scope UnitBonusSystem begins
-    //设置单位生命恢复速度 这里GetHandleId用了三次 待优化
-    function UnitSetLifeRestore takes unit whichUnit,real newValue returns nothing
-        local integer h= GetHandleId(whichUnit)
-        local integer index= LoadInteger(UnitData, h, UNIT_LIFERESTORE)
-        if index == 0 then
-            call QueuedUnitLifeRestoreAdd(whichUnit)
-        endif
-        call SaveReal(UnitData, h, UNIT_LIFERESTORE, newValue)
-        call RefreshLifeUnitRestore(whichUnit)
-    endfunction
-    function UnitAddLifeRestore takes unit whichUnit,real value returns nothing
-        call UnitSetLifeRestore(whichUnit , LoadReal(UnitData, GetHandleId(whichUnit), UNIT_LIFERESTORE) + value)
-    endfunction
-    function UnitReduceLifeRestore takes unit whichUnit,real value returns nothing
-        call UnitSetLifeRestore(whichUnit , LoadReal(UnitData, GetHandleId(whichUnit), UNIT_LIFERESTORE) - value)
-    endfunction
-    //设置单位魔法恢复速度
-    function UnitSetManaRestore takes unit whichUnit,real newValue returns nothing
-        local integer h= GetHandleId(whichUnit)
-        local integer index= LoadInteger(UnitData, h, UNIT_MANARESTORE)
-        if index == 0 then
-            call QueuedUnitManaRestoreAdd(whichUnit)
-        endif
-        call SaveReal(UnitData, h, UNIT_MANARESTORE, newValue)
-        call RefreshManaUnitRestore(whichUnit)
-    endfunction
-    function UnitAddManaRestore takes unit whichUnit,real value returns nothing
-        call UnitSetManaRestore(whichUnit , LoadReal(UnitData, GetHandleId(whichUnit), UNIT_MANARESTORE) + value)
-    endfunction
-    function UnitReduceManaRestore takes unit whichUnit,real value returns nothing
-        call UnitSetManaRestore(whichUnit , LoadReal(UnitData, GetHandleId(whichUnit), UNIT_MANARESTORE) - value)
-    endfunction
-    //JAPI修改技能数据，并且刷新。
-    //*额外 攻击 防御 攻速*/
-    //升级并降低技能等级以此达到刷新属性的目的
-    function UnitAddAttackSpeedBonus takes unit whichUnit,real value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIsx')
-        endif
-        set value=LoadReal(UnitData, h, BONUS_ATTACK) + value
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, value)
-        call IncUnitAbilityLevel(whichUnit, 'AIsx')
-        call DecUnitAbilityLevel(whichUnit, 'AIsx')
-        call SaveReal(UnitData, h, BONUS_ATTACK, value)
-    endfunction
-    function UnitReduceAttackSpeedBonus takes unit whichUnit,real value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIsx')
-        endif
-        set value=LoadReal(UnitData, h, BONUS_ATTACK) - value
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, value)
-        call IncUnitAbilityLevel(whichUnit, 'AIsx')
-        call DecUnitAbilityLevel(whichUnit, 'AIsx')
-        call SaveReal(UnitData, h, BONUS_ATTACK, value)
-    endfunction
-    function UnitSetAttackSpeedBonus takes unit whichUnit,real newValue returns nothing
-        if GetUnitAbilityLevel(whichUnit, 'AIsx') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIsx')
-        endif
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIsx'), 1, ABILITY_DATA_DATA_A, newValue)
-        call IncUnitAbilityLevel(whichUnit, 'AIsx')
-        call DecUnitAbilityLevel(whichUnit, 'AIsx')
-        call SaveReal(UnitData, GetHandleId(whichUnit), BONUS_ATTACK, newValue)
-    endfunction
-    function UnitAddArmorBonus takes unit whichUnit,real value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AId1')
-        endif
-        set value=LoadReal(UnitData, h, BONUS_ARMOR) + value
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, value)
-        call IncUnitAbilityLevel(whichUnit, 'AId1')
-        call DecUnitAbilityLevel(whichUnit, 'AId1')
-        call SaveReal(UnitData, h, BONUS_ARMOR, value)
-    endfunction
-    function UnitReduceArmorBonus takes unit whichUnit,real value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AId1')
-        endif
-        set value=LoadReal(UnitData, h, BONUS_ARMOR) - value
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, value)
-        call IncUnitAbilityLevel(whichUnit, 'AId1')
-        call DecUnitAbilityLevel(whichUnit, 'AId1')
-        call SaveReal(UnitData, h, BONUS_ARMOR, value)
-    endfunction
-    function UnitSetArmorBonus takes unit whichUnit,real newValue returns nothing
-        if GetUnitAbilityLevel(whichUnit, 'AId1') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AId1')
-        endif
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AId1'), 1, ABILITY_DATA_DATA_A, newValue)
-        call IncUnitAbilityLevel(whichUnit, 'AId1')
-        call DecUnitAbilityLevel(whichUnit, 'AId1')
-        call SaveReal(UnitData, GetHandleId(whichUnit), BONUS_ARMOR, newValue)
-    endfunction
-    //增加单位移动速度
-    function UnitAddMoveSpeedBonus takes unit whichUnit,real value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIms')
-        endif
-        set value=LoadReal(UnitData, h, BONUS_MOVESPEED) + value
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, value)
-        call IncUnitAbilityLevel(whichUnit, 'AIms')
-        call DecUnitAbilityLevel(whichUnit, 'AIms')
-        call SaveReal(UnitData, h, BONUS_MOVESPEED, value)
-    endfunction
-    //减少单位移动速度
-    function UnitReduceMoveSpeedBonus takes unit whichUnit,real value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIms')
-        endif
-        set value=LoadReal(UnitData, h, BONUS_MOVESPEED) - value
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, value)
-        call IncUnitAbilityLevel(whichUnit, 'AIms')
-        call DecUnitAbilityLevel(whichUnit, 'AIms')
-        call SaveReal(UnitData, h, BONUS_MOVESPEED, value)
-    endfunction
-    //设置单位移动速度
-    function UnitSetMoveSpeedBonus takes unit whichUnit,real newValue returns nothing
-        if GetUnitAbilityLevel(whichUnit, 'AIms') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIms')
-        endif
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIms'), 1, ABILITY_DATA_DATA_A, newValue)
-        call IncUnitAbilityLevel(whichUnit, 'AIms')
-        call DecUnitAbilityLevel(whichUnit, 'AIms')
-        call SaveReal(UnitData, GetHandleId(whichUnit), BONUS_MOVESPEED, newValue)
-    endfunction
-    function UnitAddDamageBonus takes unit whichUnit,real value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIat')
-        endif
-        set value=LoadReal(UnitData, h, BONUS_DAMAGE) + value
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, value)
-        call IncUnitAbilityLevel(whichUnit, 'AIat')
-        call DecUnitAbilityLevel(whichUnit, 'AIat')
-        call SaveReal(UnitData, h, BONUS_DAMAGE, value)
-    endfunction
-    function UnitReduceDamageBonus takes unit whichUnit,real value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIat')
-        endif
-        set value=LoadReal(UnitData, h, BONUS_DAMAGE) - value
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, value)
-        call IncUnitAbilityLevel(whichUnit, 'AIat')
-        call DecUnitAbilityLevel(whichUnit, 'AIat')
-        call SaveReal(UnitData, h, BONUS_DAMAGE, value)
-    endfunction
-    function UnitSetDamageBonus takes unit whichUnit,real newValue returns nothing
-        if GetUnitAbilityLevel(whichUnit, 'AIat') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'AIat')
-        endif
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'AIat'), 1, ABILITY_DATA_DATA_A, newValue)
-        call IncUnitAbilityLevel(whichUnit, 'AIat')
-        call DecUnitAbilityLevel(whichUnit, 'AIat')
-        call SaveReal(UnitData, GetHandleId(whichUnit), BONUS_DAMAGE, newValue)
-    endfunction
-    function UnitAddStrBonus takes unit whichUnit,integer value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        local ability abAamk= EXGetUnitAbility(whichUnit, 'Aamk')
-        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'Aamk')
-        endif
-        set value=LoadInteger(UnitData, h, BONUS_STR) + value
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, value)
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(UnitData, h, BONUS_INT))
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, LoadInteger(UnitData, h, BONUS_AGI))
-        call IncUnitAbilityLevel(whichUnit, 'Aamk')
-        call DecUnitAbilityLevel(whichUnit, 'Aamk')
-        call SaveInteger(UnitData, h, BONUS_STR, value)
-        set abAamk=null
-    endfunction
-    function UnitReduceStrBonus takes unit whichUnit,integer value returns nothing
-        local integer h= GetHandleId(whichUnit)
-        local ability abAamk= EXGetUnitAbility(whichUnit, 'Aamk')
-        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'Aamk')
-        endif
-        set value=LoadInteger(UnitData, h, BONUS_STR) - value
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, value)
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(UnitData, h, BONUS_INT))
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, LoadInteger(UnitData, h, BONUS_AGI))
-        call IncUnitAbilityLevel(whichUnit, 'Aamk')
-        call DecUnitAbilityLevel(whichUnit, 'Aamk')
-        call SaveInteger(UnitData, h, BONUS_STR, value)
-        set abAamk=null
-    endfunction
-    function UnitSetStrBonus takes unit whichUnit,integer newValue returns nothing
-        local integer h= GetHandleId(whichUnit)
-        local ability abAamk= EXGetUnitAbility(whichUnit, 'Aamk')
-        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'Aamk')
-        endif
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_C, newValue)
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_B, LoadInteger(UnitData, h, BONUS_INT))
-        call EXSetAbilityDataReal(abAamk, 1, ABILITY_DATA_DATA_A, LoadInteger(UnitData, h, BONUS_AGI))
-        call IncUnitAbilityLevel(whichUnit, 'Aamk')
-        call DecUnitAbilityLevel(whichUnit, 'Aamk')
-        call SaveInteger(UnitData, h, BONUS_STR, newValue)
-        set abAamk=null
-    endfunction
-    //设置单位最大生命值 会按当前比例改变
-    function UnitAddMaxLife takes unit whichUnit,real value returns nothing
-        local real maxlife= GetUnitState(whichUnit, UNIT_STATE_MAX_LIFE)
-        set value=maxlife + value
-        call SetUnitState(whichUnit, UNIT_STATE_MAX_LIFE, value)
-        if UnitAlive(whichUnit) then
-            call SetWidgetLife(whichUnit, GetWidgetLife(whichUnit) * ( value / maxlife ))
-        endif
-    endfunction
-    function UnitReduceMaxLife takes unit whichUnit,real value returns nothing
-        local real maxlife= GetUnitState(whichUnit, UNIT_STATE_MAX_LIFE)
-        local real life= GetWidgetLife(whichUnit)
-        set value=maxlife - value
-        call SetUnitState(whichUnit, UNIT_STATE_MAX_LIFE, value)
-        if UnitAlive(whichUnit) and maxlife != life then
-            call SetWidgetLife(whichUnit, life * ( value / maxlife ))
-        endif
-    endfunction
-    function UnitSetMaxLife takes unit whichUnit,real newVal returns nothing
-        local real maxlife= GetUnitState(whichUnit, UNIT_STATE_MAX_LIFE)
-        call SetUnitState(whichUnit, UNIT_STATE_MAX_LIFE, newVal)
-        if UnitAlive(whichUnit) then
-            call SetWidgetLife(whichUnit, GetWidgetLife(whichUnit) * ( newVal / maxlife )) //按比例改变血量
-endif
-    endfunction
-    //设置单位最大魔法值 会按当前比例改变
-    function UnitAddMaxMana takes unit whichUnit,real value returns nothing
-        local real maxmana= GetUnitState(whichUnit, UNIT_STATE_MAX_MANA)
-        local real mana= GetUnitState(whichUnit, UNIT_STATE_MANA)
-        set value=maxmana + value
-        call SetUnitState(whichUnit, UNIT_STATE_MAX_MANA, value)
-        if UnitAlive(whichUnit) then
-            if maxmana == mana then
-                call SetUnitState(whichUnit, UNIT_STATE_MANA, value)
-            else
-                call SetUnitState(whichUnit, UNIT_STATE_MANA, GetUnitState(whichUnit, UNIT_STATE_MANA) * ( value / maxmana ))
-            endif
-        endif
-    endfunction
-    function UnitReduceMaxMana takes unit whichUnit,real value returns nothing
-        local real maxmana= GetUnitState(whichUnit, UNIT_STATE_MAX_MANA)
-        local real mana= GetUnitState(whichUnit, UNIT_STATE_MANA)
-        set value=maxmana - value
-        call SetUnitState(whichUnit, UNIT_STATE_MAX_MANA, value)
-        if UnitAlive(whichUnit) and maxmana != mana then
-            call SetUnitState(whichUnit, UNIT_STATE_MANA, mana * ( value / maxmana ))
-        endif
-    endfunction
-    function UnitSetMaxMana takes unit whichUnit,real newVal returns nothing
-        local real maxmana= GetUnitState(whichUnit, UNIT_STATE_MAX_MANA)
-        call SetUnitState(whichUnit, UNIT_STATE_MAX_MANA, newVal)
-        if UnitAlive(whichUnit) then
-            call SetUnitState(whichUnit, UNIT_STATE_MANA, GetUnitState(whichUnit, UNIT_STATE_MANA) * ( newVal / maxmana ))
-        endif
-    endfunction
-    //仅用作物品刷新属性
-    function UnitAddAttribute takes unit whichUnit,integer itemId returns nothing
-        local integer h= GetHandleId(whichUnit)
-        local integer str= LoadInteger(UnitData, h, BONUS_STR) + LoadInteger(ObjectData, itemId, BONUS_STR)
-        local integer agi= LoadInteger(UnitData, h, BONUS_AGI) + LoadInteger(ObjectData, itemId, BONUS_AGI)
-        local integer int= LoadInteger(UnitData, h, BONUS_INT) + LoadInteger(ObjectData, itemId, BONUS_INT)
-        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'Aamk')
-        endif
-        call SaveInteger(UnitData, h, BONUS_STR, str)
-        call SaveInteger(UnitData, h, BONUS_AGI, agi)
-        call SaveInteger(UnitData, h, BONUS_INT, int)
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_C, str)
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_B, int)
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_A, agi)
-        call IncUnitAbilityLevel(whichUnit, 'Aamk')
-        call DecUnitAbilityLevel(whichUnit, 'Aamk')
-    endfunction
-    function UnitReduceAttribute takes unit whichUnit,integer itemId returns nothing
-        local integer h= GetHandleId(whichUnit)
-        local integer str= LoadInteger(UnitData, h, BONUS_STR) - LoadInteger(ObjectData, itemId, BONUS_STR)
-        local integer agi= LoadInteger(UnitData, h, BONUS_AGI) - LoadInteger(ObjectData, itemId, BONUS_AGI)
-        local integer int= LoadInteger(UnitData, h, BONUS_INT) - LoadInteger(ObjectData, itemId, BONUS_INT)
-        if GetUnitAbilityLevel(whichUnit, 'Aamk') <= 0 then
-            call UnitAddPermanentAbility(whichUnit , 'Aamk')
-        endif
-        call SaveInteger(UnitData, h, BONUS_STR, str)
-        call SaveInteger(UnitData, h, BONUS_AGI, agi)
-        call SaveInteger(UnitData, h, BONUS_INT, int)
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_C, str)
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_B, int)
-        call EXSetAbilityDataReal(EXGetUnitAbility(whichUnit, 'Aamk'), 1, ABILITY_DATA_DATA_A, agi)
-        call IncUnitAbilityLevel(whichUnit, 'Aamk')
-        call DecUnitAbilityLevel(whichUnit, 'Aamk')
-    endfunction
-    function GetUnitStateBonus takes unit whichUnit,integer iBonusType returns real
-        return LoadReal(UnitData, GetHandleId(whichUnit), iBonusType)
-    endfunction
-    // 通过句柄来查单位的额外属性加成 会被内联
-    function GetUnitStateBonusByHandleId takes integer whichHandleId,integer iBonusType returns real
-        return LoadReal(UnitData, whichHandleId, iBonusType)
-    endfunction
-    // 同步镜像与本体的属性
-    function SyncIllusionUnitState takes unit hIllusionUnit,unit hMasterUnit returns nothing
-        local real value= 0.
-        local ability hAbilityAamk
-        local integer iMasterUnitHandleId= GetHandleId(hMasterUnit)
-        // 攻击力
-        set value=GetUnitStateBonusByHandleId(iMasterUnitHandleId , BONUS_DAMAGE)
-        call UnitSetDamageBonus(hIllusionUnit , value)
-        // 护甲
-        set value=GetUnitStateBonusByHandleId(iMasterUnitHandleId , BONUS_ARMOR)
-        call UnitSetArmorBonus(hIllusionUnit , value)
-        // 攻速
-        set value=GetUnitStateBonusByHandleId(iMasterUnitHandleId , BONUS_ATTACK)
-        call UnitAddAttackSpeedBonus(hIllusionUnit , value)
-        // 如果AHer ＞ 0 就是英雄单位镜像
-        if GetUnitAbilityLevel(hIllusionUnit, 'AHer') > 0 and GetUnitAbilityLevel(hMasterUnit, 'Aamk') > 0 then
-            set hAbilityAamk=EXGetUnitAbility(hIllusionUnit, 'Aamk')
-            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_C, GetUnitStateBonusByHandleId(iMasterUnitHandleId , BONUS_STR))
-            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_B, GetUnitStateBonusByHandleId(iMasterUnitHandleId , BONUS_INT))
-            call EXSetAbilityDataReal(hAbilityAamk, 1, ABILITY_DATA_DATA_A, GetUnitStateBonusByHandleId(iMasterUnitHandleId , BONUS_AGI))
-            set hAbilityAamk=null
-            call IncUnitAbilityLevel(hIllusionUnit, 'Aamk')
-            call DecUnitAbilityLevel(hIllusionUnit, 'Aamk')
-            // 生命值和魔法值默认同步 但如果修改了额外属性可能会导致不一致
-            // 最大生命值
-            set value=GetUnitState(hMasterUnit, UNIT_STATE_MAX_LIFE)
-            call SetUnitState(hIllusionUnit, UNIT_STATE_MAX_LIFE, value)
-            // 最大魔法值
-            set value=GetUnitState(hMasterUnit, UNIT_STATE_MAX_MANA)
-            call SetUnitState(hIllusionUnit, UNIT_STATE_MAX_MANA, value)
-        endif
-    endfunction
-    //初始化单位属性 暂时弃用 (因为每个单位要加出生直接多4个技能太浪费了)
-    
-// scope UnitBonusSystem ends
-// 一些通用技能模板
-//
-//===========================================================================
-//冲击波类
-function WaveDamageEnumUnit takes unit whichUnit,unit targetUnit,integer damageType,real damageAmount,string funcName,integer level returns nothing
-	call DamageUnit(whichUnit , targetUnit , damageType , damageAmount)
-	if funcName != null then
-		//set Wave_U = whichUnit
-		//set Wave_Sou = targetUnit
-		//set Wave_LV = level
-		call ExecuteFunc(funcName)
-	endif
-endfunction
-function WaveRunningActions takes nothing returns nothing
- local trigger trig= GetTriggeringTrigger()
- local integer iHandleId= GetHandleId(trig)
- local effect missileEffect= LoadEffectHandle(HT, iHandleId, 0)
- local real damage= LoadReal(HT, iHandleId, 0)
- local real angle= LoadReal(HT, iHandleId, 3) * bj_DEGTORAD
- local real speed= LoadReal(HT, iHandleId, 4)
- local real area= LoadReal(HT, iHandleId, 8)
- local unit spellUnit
- local unit firstUnit
- local group injuredUnitGroup
- local group targetUnitGroup
- local boolean b= LoadBoolean(HT, iHandleId, 10)
- local boolean funcEnd= false
- local integer damageType= LoadInteger(HT, iHandleId, 1)
- local string funcstr= LoadStr(HT, iHandleId, 0)
- local integer level= LoadInteger(HT, iHandleId, 5)
- local boolean isTimeEvent= GetTriggerEventId() == EVENT_GAME_TIMER_EXPIRED
- local real effectX
- local real effectY
- local real radius
- local real UnitAngleBetween
-	if isTimeEvent then
-		call EXSetEffectXY(missileEffect, CoordinateX(EXGetEffectX(missileEffect) + speed * Cos(angle)), CoordinateY(EXGetEffectY(missileEffect) + speed * Sin(angle)))
-		call SaveInteger(HT, iHandleId, 12, LoadInteger(HT, iHandleId, 12) + 1)
-		if LoadInteger(HT, iHandleId, 12) > LoadInteger(HT, iHandleId, 13) then
-			set funcEnd=true
-			call EXSetEffectXY(missileEffect, LoadReal(HT, iHandleId, 5), LoadReal(HT, iHandleId, 6))
-		endif
-		//else
-		//	set firstUnit = GetTriggerUnit()
-	endif
-	if b then
-		set injuredUnitGroup=LoadGroupHandle(HT, iHandleId, 2)
-		set targetUnitGroup=LoginGroup()
-		set effectX=EXGetEffectX(missileEffect)
-		set effectY=EXGetEffectY(missileEffect)
-		set radius=area + LoadReal(HT, iHandleId, 9) * ( GetTriggerEvalCount(trig) - 1 ) + 100
-		set spellUnit=LoadUnitHandle(HT, iHandleId, 5)
-		set P2=GetOwningPlayer(spellUnit)
-		call GroupEnumUnitsInRange(targetUnitGroup, effectX, effectY, radius, LoadBooleanExprHandle(HT, iHandleId, 15))
-		call GroupRemoveGroup(injuredUnitGroup, targetUnitGroup)
-		set radius=radius - 100
-		loop
-			set firstUnit=FirstOfGroup(targetUnitGroup)
-			exitwhen firstUnit == null
-			call GroupRemoveUnit(targetUnitGroup, firstUnit)
-			if IsUnitInRangeXY(firstUnit, effectX, effectY, radius) then
-				if GetTriggerEvalCount(trig) < 3 then
-					set angle=LoadReal(HT, iHandleId, 3)
-					set UnitAngleBetween=AngleBetweenXY(effectX , effectY , GetUnitX(firstUnit) , GetUnitY(firstUnit))
-					if ( angle - UnitAngleBetween < - 180.00 ) then
-						set angle=( angle - UnitAngleBetween + 360 )
-					else
-						if ( angle - UnitAngleBetween > 180.00 ) then
-							set angle=angle - UnitAngleBetween - 360
-						else
-							set angle=angle - UnitAngleBetween
-						endif
-					endif
-					set angle=RAbsBJ(angle)
-					if angle <= 120 then
-						call GroupAddUnit(injuredUnitGroup, firstUnit)
-						call WaveDamageEnumUnit(spellUnit , firstUnit , damageType , damage , funcstr , level)
-					endif
-				else
-					call GroupAddUnit(injuredUnitGroup, firstUnit)
-					call WaveDamageEnumUnit(spellUnit , firstUnit , damageType , damage , funcstr , level)
-				endif
-			endif
-		endloop
-		call LogoutGroup(targetUnitGroup)
-		if funcEnd then
-			call LogoutGroup(injuredUnitGroup)
-		endif
-	elseif not isTimeEvent then
-		call WaveDamageEnumUnit(LoadUnitHandle(HT, iHandleId, 5) , firstUnit , damageType , damage , funcstr , level)
-	endif
-	if funcEnd then
-		call DestroyBoolExpr(LoadBooleanExprHandle(HT, iHandleId, 15))
-		call FlushChildHashtable(HT, iHandleId)
-		call ClearTrigger(trig)
-		call DestroyEffect(missileEffect)
-	endif
-	set firstUnit=null
-	set missileEffect=null
-	set trig=null
-	set injuredUnitGroup=null
-	set targetUnitGroup=null
-	set spellUnit=null
-endfunction
-//如果参数area和range的值一样，为矩形冲击波，每次选取的范围一样.range＞area则像食腐蜂群。
-//单位释放冲击波 - 使用特效来作为投射物 (不建议过远)
-//func可以填null,则没有特殊效果,filter如果null则是无差别伤害.
-function UnitSpellWaveByEffect takes unit whichUnit,effect missileEffect,real damage,real maxDistance,real area,real range,real startX,real startY,real targetX,real targetY,real missileSpeed,integer damageType,string func,integer level,code filter returns nothing
- local trigger trig= CreateTrigger()
- local integer iHandleId= GetHandleId(trig)
- local real angle= AngleBetweenXY(startX , startY , targetX , targetY)
- local real interval= 0.02
- local real speed= missileSpeed * interval
- local integer maxEvalCount= R2I(maxDistance / speed) + 1
-	call EXEffectMatRotateZ(missileEffect, angle)
-	call SaveBooleanExprHandle(HT, iHandleId, 15, Condition(filter))
-	call SaveEffectHandle(HT, iHandleId, 0, missileEffect)
-	call SaveReal(HT, iHandleId, 0, damage)
-	call SaveUnitHandle(HT, iHandleId, 5, whichUnit)
-	call SaveReal(HT, iHandleId, 1, maxDistance)
-	call SaveReal(HT, iHandleId, 2, range)
-	call SaveReal(HT, iHandleId, 3, angle)
-	call SaveReal(HT, iHandleId, 4, speed)
-	call SaveInteger(HT, iHandleId, 13, maxEvalCount)
-	call TriggerRegisterTimerEvent(trig, interval, true)
-	call TriggerRegisterTimerEvent(trig, 0, false)
-	call TriggerAddCondition(trig, Condition(function WaveRunningActions))
-	call SaveReal(HT, iHandleId, 8, area)
-	call SaveReal(HT, iHandleId, 9, ( range - area ) / I2R(maxEvalCount))
-	call SaveGroupHandle(HT, iHandleId, 2, LoginGroup())
-	call SaveBoolean(HT, iHandleId, 10, true)
-	call EXSetEffectXY(missileEffect, CoordinateX(startX + area / 2. * Cos(angle * bj_DEGTORAD)), CoordinateY(startY + area / 2. * Sin(angle * bj_DEGTORAD)))
-	call SaveReal(HT, iHandleId, 5, CoordinateX(EXGetEffectX(missileEffect) + maxDistance * Cos(angle * bj_DEGTORAD)))
-	call SaveReal(HT, iHandleId, 6, CoordinateY(EXGetEffectY(missileEffect) + maxDistance * Sin(angle * bj_DEGTORAD)))
-	call SaveInteger(HT, iHandleId, 1, damageType)
-	//call SaveBoolean(HT, iHandleId, 0, b)
-	if func != null then
-		call SaveStr(HT, iHandleId, 0, func)
-		call SaveInteger(HT, iHandleId, 5, level)
-	endif
-	set trig=null
-endfunction
-//战争践踏
-//让单位释放一个践踏
-//目标允许强制为 地面,非机械,非建筑,存活
-function UnitSpellStmop takes unit whichUnit,real damage,integer damageType,real dur,real herodur,real area,boolean ignoreMagicImmunes,string effectPath returns nothing
- local group targetGroup= LoginGroup()
- local real unitX= GetUnitX(whichUnit)
- local real unitY= GetUnitY(whichUnit)
- local unit firstUnit
-	call GroupEnumUnitsInRange(targetGroup, unitX, unitY, area, null)
-	set P2=GetOwningPlayer(whichUnit)
-	loop
-		set firstUnit=FirstOfGroup(targetGroup)
-		exitwhen firstUnit == null
-		if IsGround_NotMechanical_Enemy_Alive_NoStructure(firstUnit) then
-			call M_UnitSetStun(firstUnit , dur , herodur , ignoreMagicImmunes)
-			call DamageUnit(whichUnit , firstUnit , damageType , damage)
-		endif
-		call GroupRemoveUnit(targetGroup, firstUnit)
-	endloop
-	call DestroyEffect(AddSpecialEffect(effectPath, unitX, unitY))
-	//地形就不变化了,因为这可能会很卡
-	set firstUnit=null
-	call LogoutGroup(targetGroup)
-	set targetGroup=null
-endfunction
-//光击阵
-function UnitSpellLightStrikeArray takes unit whichUnit,real damage,integer damageType,real targetX,real targetY,real radius,real dur,real herodur,boolean ignoreMagicImmunes returns nothing
- local group targetUnitGroup= LoginGroup()
- local unit firstUnit
-	call GroupEnumUnitsInRange(targetUnitGroup, targetX, targetY, radius, null)
-	set P2=GetOwningPlayer(whichUnit)
-	loop
-		set firstUnit=FirstOfGroup(targetUnitGroup)
-		exitwhen firstUnit == null
-		if IsGround_NotMechanical_Enemy_Alive_NoStructure(firstUnit) then
-			call M_UnitSetStun(firstUnit , dur , herodur , ignoreMagicImmunes)
-			call DamageUnit(whichUnit , firstUnit , damageType , damage)
-		endif
-		call GroupRemoveUnit(targetUnitGroup, firstUnit)
-	endloop
-	call LogoutGroup(targetUnitGroup)
-	set targetUnitGroup=null
-	set firstUnit=null
-endfunction
-// scope Image begins
-    // 设置单位高度来到达隐藏单位，并同时隐藏单位阴影(需要用逆变身来刷新)。
-    function M_ShowUnit takes unit whichUnit,boolean bIsShow returns nothing
-        if bIsShow then
-            call SetUnitShadow(whichUnit , GetUnitOriginShadow(whichUnit))
-            call SetUnitInvulnerable(whichUnit, false)
-            call EXPauseUnit(whichUnit, false)
-            call SetUnitFlyHeight(whichUnit, GetUnitDefaultFlyHeight(whichUnit), 0)
-        else
-            call SetUnitShadow(whichUnit , "_")
-            call SetUnitInvulnerable(whichUnit, true)
-            call EXPauseUnit(whichUnit, true)
-            call UnitAddAbility(whichUnit, 'Arav')
-            call UnitRemoveAbility(whichUnit, 'Arav')
-            call SetUnitFlyHeight(whichUnit, 9999, 0)
-        endif
-    endfunction
-    function Image___CreateIllusionUnit takes integer iHandleId,integer iMaxAmount returns nothing
-        local trigger trig= LoadTriggerHandle(HT, iHandleId, 0)
-        local integer iHandleId2= GetHandleId(trig)
-        local unit whichUnit= LoadUnitHandle(HT, iHandleId2, 0)
-        local unit dummyUnit= CreateUnit(GetOwningPlayer(whichUnit), 'ndum', GetUnitX(whichUnit), GetUnitY(whichUnit), 0)
-        local integer realUnitIndex= GetRandomInt(1, iMaxAmount)
-        local real dataB= LoadReal(HT, iHandleId2, 'B')
-        local real dataC= LoadReal(HT, iHandleId2, 'C')
-        local real rDur= LoadReal(HT, iHandleId2, 0)
-        local integer loop__i= 1
-        local effect eImageMissileEff
-        local ability hAbilityAIil
-        call SaveUnitHandle(HT, GetHandleId(dummyUnit), KEY_MASTERUNIT, whichUnit)
-        call UnitAddAbility(dummyUnit, Image___ImageAbility)
-        set hAbilityAIil=EXGetUnitAbility(dummyUnit, Image___ImageAbility)
-        call EXSetAbilityDataReal(hAbilityAIil, 1, ABILITY_DATA_DUR, rDur)
-        call EXSetAbilityDataReal(hAbilityAIil, 1, ABILITY_DATA_HERODUR, rDur)
-        set hAbilityAIil=null
-        // 给召唤者标识一下
-        call SaveBoolean(UnitBuff, GetHandleId(whichUnit), UnitIsSummoningIllusions, true)
-        set Tmp__ArrayReal['B']=dataB
-        set Tmp__ArrayReal['C']=dataC
-        call M_ShowUnit(whichUnit , true)
-        loop
-            set eImageMissileEff=LoadEffectHandle(HT, iHandleId, loop__i)
-            if loop__i != realUnitIndex then
-                set Tmp__ArrayReal['X']=EXGetEffectX(eImageMissileEff)
-                set Tmp__ArrayReal['Y']=EXGetEffectY(eImageMissileEff)
-                call IssueTargetOrderById(dummyUnit, 852274, whichUnit)
-            else
-                call SetUnitX(whichUnit, EXGetEffectX(eImageMissileEff))
-                call SetUnitY(whichUnit, EXGetEffectY(eImageMissileEff))
-            endif
-            call DestroyEffect(eImageMissileEff)
-            exitwhen loop__i == iMaxAmount
-            set loop__i=loop__i + 1
-        endloop
-        call RemoveSavedBoolean(UnitBuff, GetHandleId(whichUnit), UnitIsSummoningIllusions)
-        call DestroyFogModifier(LoadFogModifierHandle(HT, iHandleId2, 20))
-        call ClearTrigger(trig)
-        call FlushChildHashtable(HT, iHandleId2)
-        set trig=null
-        set eImageMissileEff=null
-        set whichUnit=null
-        set dummyUnit=null
-    endfunction
-    function Image___ImageMissileMovement takes nothing returns boolean
-        local integer iHandleId= GetHandleId(GetTriggeringTrigger())
-        local integer iMaxAmount= LoadInteger(HT, iHandleId, 'A')
-        local real rMissileSpeed= LoadReal(HT, iHandleId, 'S')
-        local effect eImageMissileEff
-        local integer loop__i= 1
-        local real angle
-        local real rTargetX
-        local real rTargetY
-        local integer iCount= LoadInteger(HT, iHandleId, 'C')
-        set iCount=iCount - 1
-        if iCount > 0 then
-            call SaveInteger(HT, iHandleId, 'C', iCount)
-            loop
-                set angle=( loop__i * 360 / iMaxAmount ) * bj_DEGTORAD
-                set eImageMissileEff=LoadEffectHandle(HT, iHandleId, loop__i)
-                set rTargetX=CoordinateX(EXGetEffectX(eImageMissileEff) + rMissileSpeed * Cos(angle))
-                set rTargetY=CoordinateY(EXGetEffectY(eImageMissileEff) + rMissileSpeed * Sin(angle))
-                call EXSetEffectXY(eImageMissileEff, rTargetX, rTargetY)
-                exitwhen loop__i == iMaxAmount
-                set loop__i=loop__i + 1
-            endloop
-        else
-            call Image___CreateIllusionUnit(iHandleId , iMaxAmount)
-            call ClearTrigger(GetTriggeringTrigger())
-            call FlushChildHashtable(HT, iHandleId)
-        endif
-        set eImageMissileEff=null
-        return false
-    endfunction
-    // 创建镜像的投射物
-    function Image___CreateImageMissile takes nothing returns boolean
-        // 镜像的机制 如果镜像数量＜2 则取随机±180角度
-        local integer iHandleId= GetHandleId(GetTriggeringTrigger())
-        local unit whichUnit= LoadUnitHandle(HT, iHandleId, 0)
-        local real rStartX= GetUnitX(whichUnit)
-        local real rStartY= GetUnitY(whichUnit)
-        // 投射物数量 = 幻象数量 + 1 因为本体也要有一个投射物
-        local integer iMaxAmount= LoadInteger(HT, iHandleId, 'A') + 1
-        local real rRng= LoadReal(HT, iHandleId, 'R')
-        local real rMissileSpeed= LoadReal(HT, iHandleId, 'S') * 0.03
-        local string sMissileArt= LoadStr(HT, iHandleId, 10)
-        local real rFace= GetUnitFacing(whichUnit)
-        local effect eImageMissileEff
-        local integer loop__i
-        // 对于上个触发器的参数读取应该在这条注释上面
-        call BJDebugMsg(I2S(iMaxAmount) + "iMaxAmount")
-        set iHandleId=CreateTimerEventTrigger(0.03 , true , function Image___ImageMissileMovement)
-        if HaveSavedHandle(HT, iHandleId, 100) then
-            call DestroyEffect(LoadEffectHandle(HT, iHandleId, 100))
-        endif
-        // 继续传参
-        call SaveInteger(HT, iHandleId, 'A', iMaxAmount)
-        call SaveReal(HT, iHandleId, 'R', rRng)
-        call SaveReal(HT, iHandleId, 'S', rMissileSpeed)
-        // 触发器的最大运行次数
-        call SaveInteger(HT, iHandleId, 'C', R2I(rRng / rMissileSpeed))
-        set loop__i=1
-        loop
-            set eImageMissileEff=AddSpecialEffect(sMissileArt, rStartX, rStartY)
-            call SaveEffectHandle(HT, iHandleId, loop__i, eImageMissileEff)
-            exitwhen loop__i == iMaxAmount
-            set loop__i=loop__i + 1
-        endloop
-        set eImageMissileEff=null
-        call SaveTriggerHandle(HT, iHandleId, 0, GetTriggeringTrigger())
-        //call TriggerRegisterTimerEvent(hTrig, 0.03, true)
-        set whichUnit=null
-        return false
-    endfunction
-    // 单位释放分身 (剑圣分身)
-    // DataA分身数量,DataB伤害比例,DataC受伤比例,DataD技能延迟,Rng施法距离(位移距离),Area作用范围(施法时提供的视野)
-    function UnitSpellImage takes unit whichUnit,real rDataA,real rDataB,real rDataC,real rDataD,real rDur,string sSpecialArt,string sMissileArt,real rMissileSpeed,real rRng,real rArea returns nothing
-        local integer iHandleId= CreateTimerEventTrigger(rDataD , false , function Image___CreateImageMissile)
-        local real rUnitX= GetUnitX(whichUnit)
-        local real rUnitY= GetUnitY(whichUnit)
-        local fogmodifier hImageFog= CreateFogModifierRadius(GetOwningPlayer(whichUnit), FOG_OF_WAR_VISIBLE, rUnitX, rUnitY, rArea, true, false)
-        if sSpecialArt != null then
-            call SaveEffectHandle(HT, iHandleId, 100, AddSpecialEffect(sSpecialArt, rUnitX, rUnitY))
-        endif
-        call M_ShowUnit(whichUnit , false)
-        // call SavePlayerHandle(HT, iHandleId, 'P', GetOwningPlayer(whichUnit))
-        call SaveUnitHandle(HT, iHandleId, 0, whichUnit)
-        call SaveInteger(HT, iHandleId, 'A', R2I(rDataA))
-        call SaveReal(HT, iHandleId, 'B', rDataB)
-        call SaveReal(HT, iHandleId, 'C', rDataC)
-        call SaveReal(HT, iHandleId, 'D', rDataD)
-        call SaveReal(HT, iHandleId, 'R', rRng)
-        call SaveReal(HT, iHandleId, 'S', rMissileSpeed)
-        call SaveReal(HT, iHandleId, 0, rDur)
-        call SaveStr(HT, iHandleId, 10, sMissileArt)
-        call SaveFogModifierHandle(HT, iHandleId, 20, hImageFog)
-        // 这里应该清除一下魔法效果
-        set hImageFog=null
-    endfunction
-// scope Image ends
+// scope Order ends
+// 漂浮文字
+// 物体数据 从Slk库获取
 // scope ItemSystem begins
     function GetPowerUpItemNumber takes item it returns integer
         local integer id
@@ -4408,9 +4729,9 @@ endfunction
         set x=GetWidgetX(it)
         set y=GetWidgetY(it)
         set newItem=EXCreateItem(ItemStack_Real[realId] , x , y)
-        call DisableTrigger(ItemAttrTrig)
-        call RemoveItem(it)
-        call EnableTrigger(ItemAttrTrig)
+        //call DisableTrigger(ItemAttrTrig)
+        //call RemoveItem(it)
+        //call EnableTrigger(ItemAttrTrig)
         if not UnitAddItem(u, newItem) then //如果给不了则创建PowerUp回去
 call RemoveItem(newItem) //0.秒计时后创建物品,否则会被挤开
 set h=CreateTimerEventTrigger(0. , false , function ItemSystem___create_powerupitem_actions)
@@ -4567,254 +4888,24 @@ call TriggerRegisterAnyUnitEventBJ(ItemAttrTrig, EVENT_PLAYER_UNIT_PAWN_ITEM) //
 call TriggerAddCondition(ItemAttrTrig, Condition(function ItemSystem___itemtrigger_actions))
 	
         call InitRegisterItem() //注册物品
-call InitItemHeroAttribute() //初始化物品英雄三围属性
+call SetItemHeroAttribute('cnob' , 5 , 5 , 5) //初始化物品英雄三围属性 // INLINED!!
 call InitItemAttribute() //初始化物品属性
 endfunction
 // scope ItemSystem ends
-// 物品相关事件包含在ItemSystem.j
-// scope UnitAttackEvent begins
-    //获取暴击光环等级 因为获取不了Buff等级 只能通过不同的魔法效果来判断等级
-    function GetCriticalStrikeAuraLevel takes unit u returns integer
-        if GetUnitAbilityLevel(u, 'Blc6') == 1 then
-            return 4
-        elseif GetUnitAbilityLevel(u, 'Blc5') == 1 then
-            return 3
-        elseif GetUnitAbilityLevel(u, 'Blc4') == 1 then
-            return 2
-        elseif GetUnitAbilityLevel(u, 'Blc3') == 1 then
-            return 1
-        endif
-        return 0
-    endfunction
-    //得到单位的暴击伤害值(倍率) 无则为0.
-    function GetCriticalStrikeDamage takes unit attacker returns real
-        local real damage= 0.
-        local integer lv
-        if EffectIsEnabled[1] then
-            set lv=GetCriticalStrikeAuraLevel(attacker)
-            if lv > 0 then
-                if PrdRandom(attacker , 'Alc3' , 15) then //概率
-set damage=damage + ( lv * 0.1 + 0.1 ) //括号里的值为此暴击的倍率
-endif
-            endif
-        endif
-        if damage != 0. then
-            call SetUnitAnimation(attacker, "Attack slam") //播放暴击动画
-call QueueUnitAnimation(attacker, "Stand Ready") //不把Stand Ready加入队列的话 动作会很僵硬
-endif
-        return damage
-    endfunction
-    //模拟
-    function UnitAttackEvent__UnitAttack takes unit whichUnit,unit target,boolean isAttack returns nothing
-        local real amount= GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_BASE) + GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_DICE) * GetRandomInt(1, R2I(GetUnitState(whichUnit, UNIT_STATE_ATTACK1_DAMAGE_SIDE)))
-        local integer weapon_type= R2I(GetUnitState(whichUnit, UNIT_STATE_ATTACK1_ATTACK_TYPE))
-call UnitDamageTarget(whichUnit, target, amount, isAttack, false, ConvertAttackType(weapon_type), DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
-    endfunction
-    function GeminateAttackMissileForward takes nothing returns boolean
-        local trigger t= GetTriggeringTrigger()
-        local integer h= GetHandleId(t)
-        local effect missile= LoadEffectHandle(HT, h, 13)
-        local unit whichUnit= LoadUnitHandle(HT, h, 11)
-        local unit target= LoadUnitHandle(HT, h, 12)
-        local real speed= LoadReal(HT, h, 24)
-        local real x1= EXGetEffectX(missile)
-        local real y1= EXGetEffectY(missile)
-        local real x2= GetUnitX(target)
-        local real y2= GetUnitY(target)
-        local real angle
-local real distance
-        local real z= EXGetEffectZ(missile)
-        local integer count= GetTriggerEvalCount(t)
-        local boolean b= LoadBoolean(HT, h, 20)
-        local real centre
-        if b then
-            set angle=AngleBetweenXY(x1 , y1 , x2 , y2)
-        else
-            if x2 != LoadReal(HT, h, 20) or y2 != LoadReal(HT, h, 21) then
-                call SaveBoolean(HT, h, 20, true)
-                call EXSetEffectZ(missile, LoadReal(HT, h, 22))
-            endif
-            set angle=LoadReal(HT, h, 50)
-            set centre=LoadReal(HT, h, 53)
-            set z=LoadReal(HT, h, 54) - ( count - centre ) * ( count - centre )
-            call EXSetEffectZ(missile, z)
-            call EXEffectMatReset(missile)
-            call EXEffectMatRotateY(missile, Atan2(z, angle))
-        endif
-        set x1=x1 + speed * Cos(angle * bj_DEGTORAD)
-        set y1=y1 + speed * Sin(angle * bj_DEGTORAD)
-        set distance=GetDistanceBetween(x1 , y1 , x2 , y2)
-        call EXSetEffectXY(missile, x1, y1)
-        if distance <= speed then
-            call DestroyEffect(missile)
-            call UnitAttackEvent__UnitAttack(whichUnit , target , LoadBoolean(HT, h, 10))
-            call FlushChildHashtable(HT, h)
-            call ClearTrigger(t)
-        endif
-        set t=null
-        set missile=null
-        set whichUnit=null
-        set target=null
-        return false
-    endfunction
-    function GeminateAttackLaunch takes nothing returns boolean
-        local trigger t= GetTriggeringTrigger()
-        local integer h= GetHandleId(t)
-        local unit whichUnit= LoadUnitHandle(HT, h, 11)
-local unit target= LoadUnitHandle(HT, h, 12)
-local real x1= GetUnitX(whichUnit)
-        local real y1= GetUnitY(whichUnit)
-        local real x2= GetUnitX(target)
-        local real y2= GetUnitY(target)
-        local integer unitId= GetUnitTypeId(whichUnit)
-        local boolean isAttack= LoadBoolean(HT, h, 10)
-local string missileArt= GetUnitSlkData(unitId , "Missileart")
-local effect missile= AddSpecialEffect(missileArt, x1, y1)
-local real z= EXGetEffectZ(missile) + 70
-local real missilespeed= S2R(GetUnitSlkData(unitId , "Missilespeed"))
-        local real scale= S2R(GetUnitSlkData(unitId , "modelScale"))
-local real arc= GetUnitState(whichUnit, UNIT_STATE_ATTACK1_BACK_SWING) + 1
-local real angle= AngleBetweenXY(x1 , y1 , x2 , y2)
-local real distance= GetDistanceBetween(x1 , y1 , x2 , y2)
-local real maxheight= z * arc //* ( distance * 0.5 )  
-local real maxcount= R2I(( distance / ( missilespeed * 0.04 ) ))
-local real upheight= maxheight / maxcount
-call FlushChildHashtable(HT, h)
-        call ClearTrigger(t)
-        set t=CreateTrigger()
-        set h=GetHandleId(t)
-        call TriggerRegisterTimerEvent(t, 0.04, true)
-        call TriggerAddCondition(t, Condition(function GeminateAttackMissileForward))
-        call EXSetEffectZ(missile, z)
-        call EXSetEffectSize(missile, scale)
-        call SaveBoolean(HT, h, 10, isAttack)
-        call SaveUnitHandle(HT, h, 11, whichUnit)
-        call SaveUnitHandle(HT, h, 12, target)
-        call SaveEffectHandle(HT, h, 13, missile)
-        call SaveReal(HT, h, 20, x2)
-        call SaveReal(HT, h, 21, y2)
-        call SaveReal(HT, h, 22, z)
-        call SaveReal(HT, h, 23, arc)
-        call SaveReal(HT, h, 24, missilespeed * 0.04) //每次前进的距离
-call SaveReal(HT, h, 30, 0)
-        call SaveReal(HT, h, 50, angle)
-        call SaveReal(HT, h, 51, maxcount)
-        call SaveReal(HT, h, 52, upheight)
-        call SaveReal(HT, h, 53, maxcount * 0.5)
-        call SaveReal(HT, h, 54, maxheight)
-        call TriggerEvaluate(t)
-	
-        set t=null
-        set whichUnit=null
-        set target=null
-        set missile=null
-        return false
-    endfunction
-    // 模拟连击
-    function GeminateAttack takes unit whichUnit,unit target,real time,boolean isAttack returns nothing
-        local trigger t
-        local integer h
-        if time > 0 then
-            set t=CreateTrigger()
-            set h=GetHandleId(t)
-            call TriggerAddCondition(t, Condition(function GeminateAttackLaunch))
-            call TriggerRegisterTimerEvent(t, time, false)
-            call SaveUnitHandle(HT, h, 11, whichUnit)
-            call SaveUnitHandle(HT, h, 12, target)
-            call SaveBoolean(HT, h, 10, isAttack)
-            set t=null
-        else
-            call UnitAttackEvent__UnitAttack(whichUnit , target , isAttack)
-        endif
-    endfunction
-    function AttackReadyToGoInitActions takes nothing returns boolean
-        local trigger trig= GetTriggeringTrigger()
-        local integer th= GetHandleId(trig)
-        local timer t= LoadTimerHandle(HT, th, 10)
-        local unit whichUnit= LoadUnitHandle(HT, th, 17)
-        local unit target= LoadUnitHandle(HT, th, 18)
-        if GetTriggerEventId() == EVENT_GAME_TIMER_EXPIRED then
-            //call GeminateAttack(whichUnit, target, 1, true)
-        endif
-        //call FlushChildHashtable(HT, th)
-        //call RemoveSavedHandle(UnitKeyBuff, GetHandleId(u), AttackReadyTrg)
-        //--call ClearTrigger(trig)
-        call PauseTimer(t)
-        set trig=null
-        set whichUnit=null
-        set target=null
-        set t=null
-        return false
-    endfunction
-    function UnitAttackEvent__AttackReadyToGoInit takes unit u,unit target,integer h returns nothing
-        local trigger trig
-        local timer t
-        local integer th
-        if HaveSavedHandle(UnitKeyBuff, h, AttackReadyTrg) then
-            set trig=LoadTriggerHandle(UnitKeyBuff, h, AttackReadyTrg)
-            set th=GetHandleId(trig)
-            set t=LoadTimerHandle(HT, th, 10)
-        else
-            set trig=CreateTrigger()
-            set th=GetHandleId(trig)
-            set t=CreateTimer()
-            call FlushChildHashtable(HT, th)
-            call SaveUnitHandle(HT, th, 17, u)
-            call SaveTimerHandle(HT, th, 10, t)
-            call TriggerRegisterDeathEvent(trig, u)
-            call TriggerRegisterUnitEvent(trig, u, EVENT_UNIT_ISSUED_ORDER)
-            call TriggerRegisterUnitEvent(trig, u, EVENT_UNIT_ISSUED_TARGET_ORDER)
-            call TriggerRegisterUnitEvent(trig, u, EVENT_UNIT_ISSUED_POINT_ORDER)
-            call TriggerRegisterTimerExpireEvent(trig, t)
-            call TriggerAddCondition(trig, Condition(function AttackReadyToGoInitActions))
-            call SaveTriggerHandle(UnitKeyBuff, h, AttackReadyTrg, trig)
-        endif
-        call SaveUnitHandle(HT, th, 18, target)
-        call TimerStart(t, S2R(GetUnitSlkData(GetUnitTypeId(u) , "dmgpt1")) / RMinBJ(GetUnitState(u, UNIT_STATE_RATE_OF_FIRE), 5.), false, null)
-        set trig=null
-        set t=null
-    endfunction
-    //任意单位被攻击
-    function UnitAttackEvent__UnitAttackedActions takes nothing returns boolean
-        local unit targetUnit= GetTriggerUnit()
-local unit attackerUnit= GetAttacker()
-local integer h= GetHandleId(attackerUnit)
-        call SaveUnitHandle(UnitKeyBuff, h, AttackTarget, targetUnit)
-        if EffectIsEnabled[0] then //暴击运算
-if CommonAttackEffectFilter(attackerUnit , targetUnit) then
-                call SaveReal(UnitKeyBuff, h, CriticalStrikeDamage, GetCriticalStrikeDamage(attackerUnit))
-            endif
-        endif
-        //捕捉弹道出手
-        if IsUnitIdType(GetUnitTypeId(attackerUnit), UNIT_TYPE_RANGED_ATTACKER) then
-            call UnitAttackEvent__AttackReadyToGoInit(attackerUnit , targetUnit , h)
-        endif
-        set attackerUnit=null
-        set targetUnit=null
-        return false
-    endfunction
-    function UnitAttackEvent__Init takes nothing returns nothing
-        local trigger trig= CreateTrigger()
-        call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_ATTACKED)
-        call TriggerAddCondition(trig, Condition(function UnitAttackEvent__UnitAttackedActions))
-        set trig=null
-    endfunction
-// scope UnitAttackEvent ends
 // scope UnitDeathEvent begins
     //清空以单位handleId为父key的大部分数据
-    function FlushUnitData takes unit whichUnit returns nothing
+    function UnitDeathEvent___FlushUnitData takes unit whichUnit returns nothing
         local integer iHandleId= GetHandleId(whichUnit)
         local integer loop_index= 0
         //如果单位会恢复生命值或魔法值,那么将其移除恢复队列
-        if HaveSavedInteger(UnitData, iHandleId, UNIT_LIFERESTORE) then
+        if HaveSavedInteger(DynamicData, iHandleId, UNIT_LIFERESTORE) then
             call QueuedUnitLifeRestoreRemove(whichUnit)
         endif
-        if HaveSavedInteger(UnitData, iHandleId, UNIT_MANARESTORE) then
+        if HaveSavedInteger(DynamicData, iHandleId, UNIT_MANARESTORE) then
             call QueuedUnitManaRestoreRemove(whichUnit)
         endif
         call FlushChildHashtable(HT, iHandleId)
-        call FlushChildHashtable(UnitData, iHandleId)
-        call FlushChildHashtable(UnitKeyBuff, iHandleId)
+        call FlushChildHashtable(DynamicData, iHandleId)
         call Debug("log" , GetUnitName(whichUnit) + " 数据已清空")
     endfunction
     //任意单位死亡
@@ -4825,8 +4916,8 @@ if CommonAttackEffectFilter(attackerUnit , targetUnit) then
         call EXUnitRemoveBuffs(dyingUnit , BUFF_TYPE_IS_BUFF)
         if IsUnitType(dyingUnit, UNIT_TYPE_HERO) then
         else
-            //非英雄单位死亡直接清空哈希表子目录
-            call FlushUnitData(dyingUnit)
+            // 非英雄单位死亡直接清空哈希表子目录
+            call UnitDeathEvent___FlushUnitData(dyingUnit)
             //set deathType = S2I(GetUnitSlkData(unitType, "deathType"))
             //if deathType == 0 or deathType == 1 then
             //	call Debug("log", GetUnitName(dyingUnit)+ " 死亡，不会腐烂")
@@ -4835,7 +4926,7 @@ if CommonAttackEffectFilter(attackerUnit , targetUnit) then
         set dyingUnit=null
         return false
     endfunction
-    function UnitDeathEvent__Init takes nothing returns nothing
+    function UnitDeathEvent___Init takes nothing returns nothing
         local trigger trig= CreateTrigger()
         call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_DEATH)
         call TriggerAddCondition(trig, Condition(function UnitDeathEvnetActions))
@@ -4843,42 +4934,46 @@ if CommonAttackEffectFilter(attackerUnit , targetUnit) then
     endfunction
 // scope UnitDeathEvent ends
 // scope UnitAbilityEvent begins
-    function UnitAbilityEvent__InitAbilityFunctions takes nothing returns nothing
+    function UnitAbilityEvent___SetSkillEvent takes integer eventType,integer skillId,string evnetfunc returns nothing
+        call SaveStr(ObjectData, eventType, skillId, evnetfunc)
+    endfunction
+    function UnitAbilityEvent___InitAbilityFunctions takes nothing returns nothing
+ 
         //中尉 Lieutenant
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Alc1', "Crosskill")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Alc2', "EnchantEquipment")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Alc2', "EnchantEquipment_Learn1")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Alc3', "CriticalStrikeAura_Learn1")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Alc4', "Stomp")
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Alc1' ), ( "Crosskill")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Alc2' ), ( "EnchantEquipment")) // INLINED!!
+        call SaveStr(ObjectData, (LEARN_FIRST_LEVEL_SKILL ), ( 'Alc2' ), ( "EnchantEquipment_Learn1")) // INLINED!!
+        call SaveStr(ObjectData, (LEARN_FIRST_LEVEL_SKILL ), ( 'Alc3' ), ( "CriticalStrikeAura_Learn1")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Alc4' ), ( "Stomp")) // INLINED!!
         //火魔法师 FireMage
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ahy0', "AbstinenceIsGoodMedicine")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ahy1', "DragonSlave")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ahy2', "LightStrikeArray")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Ahy3', "FierySoul")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ahy4', "LagunaBlade")
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ahy0' ), ( "AbstinenceIsGoodMedicine")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ahy1' ), ( "DragonSlave")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ahy2' ), ( "LightStrikeArray")) // INLINED!!
+        call SaveStr(ObjectData, (LEARN_FIRST_LEVEL_SKILL ), ( 'Ahy3' ), ( "Register_FierySoul")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ahy4' ), ( "LagunaBlade")) // INLINED!!
         //铁心灭绝者 DeterminedExterminator
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Acs1', "Assassination")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Acs2', "BlightPower")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Acs3', "BlackEpidermis")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Acs4', "LearnGhostShip")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Acs4', "GhostShip")
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Acs1' ), ( "Assassination")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Acs2' ), ( "BlightPower")) // INLINED!!
+        call SaveStr(ObjectData, (LEARN_FIRST_LEVEL_SKILL ), ( 'Acs3' ), ( "BlackEpidermis")) // INLINED!!
+        call SaveStr(ObjectData, (LEARN_FIRST_LEVEL_SKILL ), ( 'Acs4' ), ( "LearnGhostShip")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Acs4' ), ( "GhostShip")) // INLINED!!
         //模范公民 ModelCitizen / TaxStealer
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ats0', "Shinyboy")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ats1', "Transmute")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ats2', "WeMedia")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ats4', "GrandNarrative")
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ats0' ), ( "Shinyboy")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ats1' ), ( "Transmute")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ats2' ), ( "WeMedia")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ats4' ), ( "GrandNarrative")) // INLINED!!
         //风暴之灵 StormSpirit
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ast1', "StaticRremnant")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ast2', "ElectricVortex")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Ast0', "BallLightning")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Ast3', "OverloadLearn1")
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ast1' ), ( "StaticRremnant")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ast2' ), ( "ElectricVortex")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Ast0' ), ( "BallLightning")) // INLINED!!
+        call SaveStr(ObjectData, (LEARN_FIRST_LEVEL_SKILL ), ( 'Ast3' ), ( "OverloadLearn1")) // INLINED!!
         //枪兵 PikeMan
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Apm1', "BattleImago")
-        call SaveStr(ObjectData, LEARN_FIRST_LEVEL_SKILL, 'Apm2', "BattleSpiralLearn1")
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Apm1' ), ( "BattleImago")) // INLINED!!
+        call SaveStr(ObjectData, (LEARN_FIRST_LEVEL_SKILL ), ( 'Apm2' ), ( "BattleSpiralLearn1")) // INLINED!!
         //屠夫 Pudge
-        call SaveStr(ObjectData, SPELL_EFFECT, 'Apg1', "Pudge_MeatHook")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'A005', "Pudge_Rot")
-        call SaveStr(ObjectData, SPELL_EFFECT, 'A006', "Pudge_Dismember")
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'Apg1' ), ( "Pudge_MeatHook")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'A005' ), ( "Pudge_Rot")) // INLINED!!
+        call SaveStr(ObjectData, (SPELL_EFFECT ), ( 'A006' ), ( "Pudge_Dismember")) // INLINED!!
     endfunction
     //发动技能效果 
     //单独触发器 运行的效率快一些 因为发动技能效果比较常见 后续可能合并
@@ -4932,50 +5027,48 @@ if HaveSavedString(ObjectData, SPELL_EFFECT, abId) then
     //endfunction
     //英文名部分为机翻 因为英语实在渣
     //初始化技能事件
-    function UnitAbilityEvent__Init takes nothing returns nothing
+    function UnitAbilityEvent___Init takes nothing returns nothing
         set AbilityEventTrigger=CreateTrigger()
         set UnitSpellEffectTrigger=CreateTrigger()
         call TriggerAddCondition(UnitSpellEffectTrigger, Condition(function UnitSpellEffectActions))
         call TriggerAddCondition(AbilityEventTrigger, Condition(function AbilityEventActions))
 	
-        call UnitAbilityEvent__InitAbilityFunctions()
+        call UnitAbilityEvent___InitAbilityFunctions()
     endfunction
 // scope UnitAbilityEvent ends
 // scope UnitEnterMapEvent begins
     function UnitEnterMapAction takes nothing returns boolean
-        local unit u= GetFilterUnit()
-        local integer typeId= GetUnitTypeId(u)
-        if GetUnitAbilityLevel(GetFilterUnit(), 'Aloc') <= 0 then //受伤事件
-call TriggerRegisterUnitEvent(DamageEventTrigger, u, EVENT_UNIT_DAMAGED)
+        local unit whichUnit= GetFilterUnit()
+        local integer typeId= GetUnitTypeId(whichUnit)
+        if GetUnitAbilityLevel(whichUnit, 'Aloc') <= 0 then //受伤事件
+call TriggerRegisterUnitEvent(DamageEventTrigger, whichUnit, EVENT_UNIT_DAMAGED)
             // call InitUnitBonus(u)
+        else
+            set whichUnit=null
+            return false
         endif
-        if IsUnitType(u, UNIT_TYPE_HERO) then
-            call QueuedUnitRestoreAdd(u)
-            call RefreshUnitState(u)
-            call TriggerRegisterUnitEvent(UnitSpellEffectTrigger, u, EVENT_UNIT_SPELL_EFFECT) //给单位注册发动技能事件
-            call TriggerRegisterUnitEvent(AbilityEventTrigger, u, EVENT_UNIT_SPELL_CHANNEL)
-            call TriggerRegisterUnitEvent(AbilityEventTrigger, u, EVENT_UNIT_HERO_SKILL) //学习技能事件
-            call TriggerRegisterUnitEvent(HeroLevelUpTrigger, u, EVENT_UNIT_HERO_LEVEL) //英雄升级事件
+        if IsUnitType(whichUnit, UNIT_TYPE_HERO) then
+            call QueuedUnitRestoreAdd(whichUnit)
+            call RefreshUnitState(whichUnit)
+            call TriggerRegisterUnitEvent(UnitSpellEffectTrigger, whichUnit, EVENT_UNIT_SPELL_EFFECT) //给单位注册发动技能事件
+            call TriggerRegisterUnitEvent(AbilityEventTrigger, whichUnit, EVENT_UNIT_SPELL_CHANNEL)
+            call TriggerRegisterUnitEvent(AbilityEventTrigger, whichUnit, EVENT_UNIT_HERO_SKILL) //学习技能事件
+            call TriggerRegisterUnitEvent(HeroLevelUpTrigger, whichUnit, EVENT_UNIT_HERO_LEVEL) //英雄升级事件
         endif
         if typeId == 'ndum' then
-            call ShowUnit(u, false)
-            call SetUnitPathing(u, false)
-            call SetUnitInvulnerable(u, true)
-            call UnitApplyTimedLife(u, 'BTLF', 20.)
+            call ShowUnit(whichUnit, false)
+            call SetUnitPathing(whichUnit, false)
+            call SetUnitInvulnerable(whichUnit, true)
+            call UnitApplyTimedLife(whichUnit, 'BTLF', 20.)
         elseif typeId == 'HI02' then
-            call RefreshAbilityCost(u)
+            call RefreshAbilityCost(whichUnit)
         elseif typeId == 'nfoh' then
             //call PercentRestoreAura(u, 0.02, 650, 'Ab18', 'B018', function RestoreAura_Filter)
         endif
-        set u=null
+        set whichUnit=null
         return false
     endfunction
-    function UnitEnterMapEvent__Init takes nothing returns nothing
-        local rect world= GetWorldBounds()
-        set WorldRegion=CreateRegion()
-        call RegionAddRect(WorldRegion, world)
-        call RemoveRect(world)
-        set world=null
+    function UnitEnterMapEvent___Init takes nothing returns nothing
         call TriggerRegisterEnterRegion(EnterMapTrigger, WorldRegion, Condition(function UnitEnterMapAction))
     endfunction
 // scope UnitEnterMapEvent ends
@@ -4988,7 +5081,7 @@ set u=null
         return false
     endfunction
     
-    function HeroLevelUp__Init takes nothing returns nothing
+    function HeroLevelUp___Init takes nothing returns nothing
         call TriggerAddCondition(HeroLevelUpTrigger, Condition(function HeroLevelUpActions))
     endfunction
 // scope HeroLevelUp ends
@@ -4997,10 +5090,10 @@ set u=null
     function SummonIllusionUnit takes unit hIllusionUnit,unit hMasterUnit returns nothing
         local integer iHandleId
         // 判断单位是否在施法镜像 如果是 则设置镜像的属性和位置
-        if LoadBoolean(UnitBuff, GetHandleId(hMasterUnit), UnitIsSummoningIllusions) then
+        if LoadBoolean(DynamicData, GetHandleId(hMasterUnit), IMAGO_UNIT_IS_SUMMONING_ILLUSIONS) then
             set iHandleId=GetHandleId(hIllusionUnit)
-            call SaveReal(UnitData, iHandleId, IllusionUnitDataB, Tmp__ArrayReal['B'])
-            call SaveReal(UnitData, iHandleId, IllusionUnitDataC, Tmp__ArrayReal['C'])
+            call SaveReal(DynamicData, iHandleId, IllusionUnitDataB, Tmp__ArrayReal['B'])
+            call SaveReal(DynamicData, iHandleId, IllusionUnitDataC, Tmp__ArrayReal['C'])
             call SetUnitX(hIllusionUnit, Tmp__ArrayReal['X'])
             call SetUnitY(hIllusionUnit, Tmp__ArrayReal['Y'])
         endif
@@ -5020,175 +5113,752 @@ set u=null
         set hSnmmoingUnit=null
         return false
     endfunction
-    function UnitSummonEvent__Init takes nothing returns nothing
+    // 任意单位被召唤事件
+    function UnitSummonEvent___Init takes nothing returns nothing
         local trigger trig= CreateTrigger()
         call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_SUMMON)
         call TriggerAddCondition(trig, Condition(function UnitSummonEventActions))
         set trig=null
     endfunction
 // scope UnitSummonEvent ends
-// 英雄尽量在后面加载
-function Lcqy_ZeroCast takes unit u,boolean b returns nothing
- local integer uh= GetHandleId(u)
-	if b then
-		call CommonTextTag("|c0009d396 0x 施法！！|r" , 5 , u , .03 , 255 , 255 , 255 , 255 , 64)
-		call YDWESetUnitAbilityDataString(u , 'Alc0' , 1 , 204 , "ReplaceableTextures\\CommandButtons\\BTNMagicalSentry.blp")
-	else
-		call YDWESetUnitAbilityDataString(u , 'Alc0' , 1 , 204 , "ReplaceableTextures\\PassiveButtons\\PASBTNMagicalSentry.blp")
-	endif
-	call SaveBoolean(UnitKeyBuff, GetHandleId(M_GetSpellAbilityUnit()), ZeroCast, b)
-endfunction
-function crosskill_actions takes integer unitId,integer buffId returns nothing
- local real x1
- local real y1
- local real x2
- local real y2
- local real a= 0
- local integer i= 0
- local unit ft= null
- local player p= GetOwningPlayer(M_GetSpellAbilityUnit())
- local unit target= M_GetSpellTargetUnit()
- local boolean isAlly= IsUnitAlly(target, p)
-	if target == null then
-		set x1=M_GetSpellTargetX()
-		set y1=M_GetSpellTargetY()
-	else
-		set x1=GetUnitX(target)
-		set y1=GetUnitY(target)
-	endif
-	loop //
-set a=90.00 * i * bj_DEGTORAD
-		set x2=CoordinateX(x1 + 90 * Cos(a))
-		set y2=CoordinateY(y1 + 90 * Sin(a))
-		set ft=CreateUnit(p, unitId, x2, y2, AngleBetweenXY(x2 , y2 , x1 , y1))
-		call UnitApplyTimedLife(ft, buffId, 30.)
-		if not isAlly then
-			call IssueTargetOrderById(ft, Order_Attack, target)
-		endif
-		call SetUnitX(ft, x2)
-		call SetUnitY(ft, y2)
-		call DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\MassTeleport\\MassTeleportCaster.mdl", x2, y2))
-		exitwhen i == 3
-		set i=i + 1
-	endloop
-	set target=null
-	set ft=null
-endfunction
-//十字围杀
-function Crosskill takes nothing returns nothing
- local boolean b= LoadBoolean(UnitKeyBuff, GetHandleId(M_GetSpellAbilityUnit()), ZeroCast)
-	if b then //成立则代表当前拥有零重施法状态
-call crosskill_actions('hlc2' , 'Bft2')
-		call Lcqy_ZeroCast(M_GetSpellAbilityUnit() , false) //移除零重施法状态
+// scope UnitDecayEvnet begins
+    
+    // 任意单位腐烂
+    function UnitDecayEvnetActions takes nothing returns boolean
+        local unit decayUnit= GetDecayingUnit()
+        set decayUnit=null
+        return false
+    endfunction
+    
+    function UnitDecayEvnet___Init takes nothing returns nothing
+        local trigger trig= CreateTrigger()
+        call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_DECAY)
+        call TriggerAddCondition(trig, Condition(function UnitDecayEvnetActions))
+        set trig=null
+    endfunction
+// scope UnitDecayEvnet ends
+// scope Stun begins
+    // 模拟行为限制
+    // 模拟晕眩
+    // EXPauseUnit内部自带计数 为true时+1 false时-1 计数 <=0 时单位不再晕眩
+    // 移除晕眩
+    function UnitRemoveStun takes unit u returns boolean
+        local integer h
+        local integer uh= GetHandleId(u)
+        local timer t= null
+        if HaveSavedHandle(UnitBuffData, uh, UNITBUFF_STUN) then
+            set t=LoadTimerHandle(UnitBuffData, uh, UNITBUFF_STUN)
+            set h=GetHandleId(t)
+            call RemoveSavedHandle(UnitBuffData, uh, UNITBUFF_STUN)
+            call RemoveSavedHandle(HT, h, 0)
+            call DestroyTimer(t)
+            call EXPauseUnit(u, false) //此函数内部自带计数
+call UnitRemoveAbility(u, 'Aasl')
+            call UnitRemoveAbility(u, 'BPSE')
+            set t=null
+            return true
+        endif
+        return false
+    endfunction
+    function UnitStun_Actions takes nothing returns nothing
+        local timer t= GetExpiredTimer()
+        local integer h= GetHandleId(t)
+        local unit u= LoadUnitHandle(HT, h, 0)
+        local integer uh= GetHandleId(u)
+        //call SaveInteger(UnitBuffData, uh, UNITBUFF_STUN,  LoadInteger(UnitBuffData, uh, UNITBUFF_STUN) - 1 )
+        call RemoveSavedHandle(UnitBuffData, uh, UNITBUFF_STUN)
+        call RemoveSavedHandle(HT, h, 0)
+        call PauseTimer(t)
+        call DestroyTimer(t)
+        call EXPauseUnit(u, false) //此函数内部自带计数
+call UnitRemoveAbility(u, 'Aasl')
+        call UnitRemoveAbility(u, 'BPSE')
+        set t=null
+        set u=null
+    endfunction
+    // 单位、持续时间、是否无视魔免
+    function UnitSetStun takes unit u,real dur returns boolean
+        local timer t
+        local integer h= GetHandleId(u)
+        local real time= 0
+        if HaveSavedHandle(UnitBuffData, h, UNITBUFF_STUN) then
+            set t=LoadTimerHandle(UnitBuffData, h, UNITBUFF_STUN)
+            set time=TimerGetRemaining(t)
+        else
+            set t=CreateTimer()
+            call EXPauseUnit(u, true)
+            //call SaveInteger(UnitBuffData, h, UNITBUFF_STUN, LoadInteger(UnitBuffData, h, UNITBUFF_STUN) + 1)
+            call UnitAddAbility(u, 'Aasl')
+            call UnitMakeAbilityPermanent(u, true, 'Aasl')
+            call SaveTimerHandle(UnitBuffData, h, UNITBUFF_STUN, t)
+            call SaveUnitHandle(HT, GetHandleId(t), 0, u)
+        endif
+        if time < dur then
+            set time=dur
+        endif
+        if time != 0 then
+            call TimerStart(t, time, false, function UnitStun_Actions)
+        endif
+        set t=null
+        return true
+    endfunction
+    // 封装了一层本质上是使用UnitSetStun 参数b为是否无视魔法免疫
+    function M_UnitSetStun takes unit u,real dur,real herodur,boolean b returns boolean
+        if IsUnitType(u, UNIT_TYPE_MAGIC_IMMUNE) and not b then //检查是否魔免
+            return false
+        endif
+        if GetUnitAbilityLevel(u, 'AHer') == 1 then //如果单位为英雄 那么就会有此技能
+set dur=herodur
+        endif
+        return UnitSetStun(u , dur)
+    endfunction
+// scope Stun ends
+    
+// 枷锁
+// scope Leash begins
+    
+    // 移除单位枷锁
+    function UnitRemoveLeash takes unit u,integer abid,integer buffId returns nothing
+	
+    endfunction
+    //GetTriggerEventId() == EVENT_UNIT_SPELL_ENDCAST and GetSpellAbilityId() == LoadInteger(HT, h, 50)//
+    //似乎不需要记录技能Id
+    function Leash___CallBack takes nothing returns boolean
+        local trigger t= GetTriggeringTrigger()
+        local integer h= GetHandleId(t)
+        local unit u= LoadUnitHandle(HT, h, 1)
+        local unit target= LoadUnitHandle(HT, h, 0)
+        local integer c= GetTriggerEvalCount(t)
+        local real damage
+        local eventid trigEventId= GetTriggerEventId()
+        //时间到期 或 Buff等级为0 或 单位死亡
+        if c == LoadInteger(HT, h, 30) or GetUnitAbilityLevel(target, LoadInteger(HT, h, 2)) == 0 or trigEventId == EVENT_WIDGET_DEATH or ( trigEventId == EVENT_UNIT_SPELL_ENDCAST and GetSpellAbilityId() == LoadInteger(HT, h, 55) ) then
+            call DestroyLightning(LoadLightningHandle(HT, h, 10))
+            call EXPauseUnit(target, false)
+            call RemoveSavedHandle(UnitBuffData, GetHandleId(u), UNITBUFF_STUN)
+            //call SaveInteger(DynamicData, h, UNITBUFF_STUN, LoadInteger(DynamicData, h, UNITBUFF_STUN ) - 1)
+            call UnitRemoveAbility(target, LoadInteger(HT, h, 1))
+            call UnitRemoveAbility(target, LoadInteger(HT, h, 2))
+            call FlushChildHashtable(HT, h)
+            call ClearTrigger(t)
+        else
+            if HaveSavedHandle(HT, h, 10) then
+                call MoveLightning(LoadLightningHandle(HT, h, 10), true, GetUnitX(u), GetUnitY(u), GetUnitX(target), GetUnitY(target))
+                if ModuloInteger(c, 20) == 1 then //伤害单位
+set damage=LoadReal(HT, h, 30)
+                    if damage != 0 then
+                        call DamageUnit(u , target , 1 , damage) //枷锁只会造成法术攻击 魔法伤害
+endif
+                endif
+            else
+                set damage=LoadReal(HT, h, 30)
+                if damage != 0 then
+                    call DamageUnit(u , target , 1 , damage) //如果没存闪电效果则每次回调造成一次伤害
+endif
+            endif
+        endif
+        set trigEventId=null
+        set t=null
+        set target=null
+        set u=null
+        return false
+    endfunction
+    //关于单位枷锁，Buff的叠加类型为 同idBuff重复释放刷新持续时间。
+    //codeName填 "_" 则不会有闪电效果 如果需要单位持续施法，使用UnitSetLeashByAbility。
+    function UnitSetLeash takes unit spellUnit,unit targetUnit,string codeName,integer spellAbility,integer abilityId,integer buffId,real dur,real herodur,real damage,boolean ignoreMagicImmunes returns boolean
+        local integer h
+        local trigger t
+        local real time= 0.
+        if IsUnitType(targetUnit, UNIT_TYPE_MAGIC_IMMUNE) and not ignoreMagicImmunes then
+            return false
+        endif
+        set h=GetHandleId(targetUnit)
+        if GetUnitAbilityLevel(targetUnit, 'AHer') == 1 then
+            set dur=herodur
+        endif
+        if GetUnitAbilityLevel(targetUnit, buffId) == 1 then
+            set t=LoadTriggerHandle(UnitBuffData, h, buffId) //防止buff的key冲突所以加一下
+        else
+            call EXPauseUnit(targetUnit, true)
+            //call SaveInteger(DynamicData, h, UNITBUFF_STUN, LoadInteger(DynamicData, h, UNITBUFF_STUN ) + 1)
+            set t=CreateTrigger()
+            call TriggerAddCondition(t, Condition(function Leash___CallBack))
+            call SaveTriggerHandle(UnitBuffData, h, buffId, t)
+            set h=GetHandleId(t)
+            if spellAbility != 0 then
+                call SaveInteger(HT, h, 55, spellAbility)
+                call TriggerRegisterUnitEvent(t, spellUnit, EVENT_UNIT_SPELL_ENDCAST)
+            endif
+            call UnitAddAbility(targetUnit, abilityId)
+            call UnitMakeAbilityPermanent(targetUnit, true, abilityId)
+            call SaveUnitHandle(HT, h, 0, targetUnit)
+            call SaveUnitHandle(HT, h, 1, spellUnit)
+            if codeName != "_" then
+                call SaveLightningHandle(HT, h, 10, AddLightning(codeName, true, GetUnitX(spellUnit), GetUnitY(spellUnit), GetUnitX(targetUnit), GetUnitY(targetUnit)))
+                call TriggerRegisterTimerEvent(t, LeashFrame, true) //
 else
-		if PrdRandom(M_GetSpellAbilityUnit() , 'Alc0' , 20) then
-			call Lcqy_ZeroCast(M_GetSpellAbilityUnit() , true) //添加零重施法状态
-return
-		endif
-		call crosskill_actions('hlc1' , 'Bft1')
+                call TriggerRegisterTimerEvent(t, 1, true) //如果没有闪电特效，则一秒回调一次。
+endif
+            if damage != 0 then //直接存入伤害值
+call SaveReal(HT, h, 30, damage)
+            endif
+            call SaveInteger(HT, h, 1, abilityId)
+            call SaveInteger(HT, h, 2, buffId)
+            call SaveInteger(HT, h, 30, R2I(dur / LeashFrame)) //此项为最大赋值次数(持续时间)  dur / (LeashFrame)
+endif
+        if time < dur then
+            set time=dur
+        endif
+        if time != 0 then
+            call TriggerRegisterDeathEvent(t, spellUnit)
+            call TriggerRegisterDeathEvent(t, targetUnit)
+        endif
+        set t=null
+        return true
+    endfunction
+// scope Leash ends
+// scope MagicImmunity begins
+    function MagicImmunity___Remove takes nothing returns boolean
+        local trigger trig= GetTriggeringTrigger()
+        local integer iHandleId= GetHandleId(trig)
+        local unit whichUnit= LoadUnitHandle(HT, iHandleId, 0)
+        call UnitRemoveAbility(whichUnit, 'Amai')
+        set trig=null
+        return false
+    endfunction
+    function UnitSetMagicImmunity takes unit whichUnit,real time returns nothing
+        local integer iHandleId= GetHandleId(whichUnit)
+        local trigger trig= LoadTriggerHandle(UnitBuffData, iHandleId, MagicImmunity___MAGICIMMUNITY)
+        local real elapsed
+        if trig == null then
+            set trig=CreateTrigger()
+            set iHandleId=GetHandleId(trig)
+            call UnitAddPermanentAbility(whichUnit , 'Amai')
+            call UnitMakeAbilityPermanent(whichUnit, true, 'Amim')
+            call TriggerRegisterTimerEvent(trig, time, false)
+            call TriggerAddCondition(trig, Condition(function MagicImmunity___Remove))
+            call SaveUnitHandle(HT, iHandleId, 0, whichUnit)
+            call SaveReal(HT, iHandleId, 0, time + (TimerGetElapsed(base___GameTimer))) // INLINED!!
+        else
+            set iHandleId=GetHandleId(trig)
+            set elapsed=(TimerGetElapsed(base___GameTimer)) - LoadReal(HT, iHandleId, 0) // INLINED!!
+            if elapsed < time then
+                call FlushChildHashtable(HT, iHandleId)
+                call ClearTrigger(trig)
+                call RemoveSavedHandle(UnitBuffData, GetHandleId(whichUnit), MagicImmunity___MAGICIMMUNITY)
+                call UnitSetMagicImmunity(whichUnit , time)
+            endif
+        endif
+        set trig=null
+    endfunction
+// scope MagicImmunity ends
+//
+//===========================================================================
+//冲击波类
+function WaveDamageEnumUnit takes unit whichUnit,unit targetUnit,integer damageType,real damageAmount,string funcName,integer level returns nothing
+	call DamageUnit(whichUnit , targetUnit , damageType , damageAmount)
+	if funcName != null then
+		//set Wave_U = whichUnit
+		//set Wave_Sou = targetUnit
+		//set Wave_LV = level
+		call ExecuteFunc(funcName)
 	endif
 endfunction
-function enchant_equipment_actions takes nothing returns nothing
- local unit spellUnit= M_GetSpellAbilityUnit()
- local integer level= M_GetSpellAbilityLevel()
- local group buffGroup= LoginGroup()
- local unit firstUnit
- local real dur= 20 + level * 10
-	call GroupEnumUnitsInRange(buffGroup, GetUnitX(spellUnit), GetUnitY(spellUnit), 625, null)
-	set P2=GetOwningPlayer(spellUnit)
-	loop
-		set firstUnit=FirstOfGroup(buffGroup)
-		exitwhen firstUnit == null
-		if IsMechanical_Ally_Alive_NoStructure(firstUnit) then
-			call UnitAddAbilityTimed(firstUnit , 'Alc5' , level , dur , 'Blc2' , 1)
-		endif
-		call GroupRemoveUnit(buffGroup, firstUnit)
-	endloop
-	call LogoutGroup(buffGroup)
-	set buffGroup=null
-	set spellUnit=null
-	set firstUnit=null
-endfunction
-function EnchantEquipment takes nothing returns nothing
- local boolean b= LoadBoolean(UnitKeyBuff, GetHandleId(M_GetSpellAbilityUnit()), ZeroCast)
-	if b then
-		call enchant_equipment_actions()
-		call Lcqy_ZeroCast(M_GetSpellAbilityUnit() , false) //移除零重施法状态
-else
-		if PrdRandom(M_GetSpellAbilityUnit() , 'Alc0' , 20) then
-			call Lcqy_ZeroCast(M_GetSpellAbilityUnit() , true) //添加零重施法状态
-return
-		endif
-		call enchant_equipment_actions()
-	endif
-endfunction
-function LcqyStompSpell takes boolean haveZeroCast returns nothing
- local unit spellUnit= M_GetSpellAbilityUnit()
- local integer abilityLevel= M_GetSpellAbilityLevel()
- local real damage= 75
- local real dur= 3
- local real herodur= 2
- local real area= 325
- local group soldiersGroup
- local unit firstUnit
- local integer typeId
-	call UnitSpellStmop(spellUnit , damage , 1 , dur , herodur , area , true , "Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl")
-	if haveZeroCast then
-		set soldiersGroup=LoginGroup()
-		call GroupEnumUnitsInRange(soldiersGroup, GetUnitX(spellUnit), GetUnitY(spellUnit), 1000, null)
-		set P2=GetOwningPlayer(spellUnit)
-		loop
-			set firstUnit=FirstOfGroup(soldiersGroup)
-			exitwhen firstUnit == null
-			set typeId=GetUnitTypeId(firstUnit)
-			if typeId == 'hlc1' or typeId == 'hlc2' then
-				if Ally_Alive(firstUnit) then
-					call UnitSpellStmop(firstUnit , damage , 1 , dur , herodur , area , true , "Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl")
-				endif
-			endif
-			call GroupRemoveUnit(soldiersGroup, firstUnit)
-		endloop
-		set firstUnit=null
-		call LogoutGroup(soldiersGroup)
-		set soldiersGroup=null
-	endif
-	set spellUnit=null
-endfunction
-function Stomp takes nothing returns nothing
- local boolean isZeroCast= LoadBoolean(UnitKeyBuff, GetHandleId(M_GetSpellAbilityUnit()), ZeroCast)
-	if isZeroCast then
-		call Lcqy_ZeroCast(M_GetSpellAbilityUnit() , false) //移除零重施法状态
-call LcqyStompSpell(true)
-	else
-		if PrdRandom(M_GetSpellAbilityUnit() , 'Alc0' , 20) then
-			call Lcqy_ZeroCast(M_GetSpellAbilityUnit() , true) //添加零重施法状态
-return
-		endif
-		call LcqyStompSpell(false)
-	endif
-endfunction
-function AbstinenceIsGoodMedicineEffect takes nothing returns boolean
+function WaveRunningActions takes nothing returns nothing
  local trigger trig= GetTriggeringTrigger()
  local integer iHandleId= GetHandleId(trig)
- local unit whichUnit= LoadUnitHandle(HT, iHandleId, 0)
- local real data= 0.04
- local real addValue
-	if GetTriggerEventId() == EVENT_GAME_TIMER_EXPIRED then
-		set addValue=GetUnitState(whichUnit, UNIT_STATE_MAX_LIFE) * data
-		call UnitRestoreLife(whichUnit , addValue)
-		set addValue=GetUnitState(whichUnit, UNIT_STATE_MAX_MANA) * data
-		call UnitRestoreMana(whichUnit , addValue)
-	elseif GetSpellAbilityId() == LoadInteger(HT, iHandleId, 0) then
-		call UnitRemoveAbility(whichUnit, 'Ab09')
-		call UnitRemoveAbility(whichUnit, 'B009')
-		call UnitAddPermanentAbility(whichUnit , 'Ab08')
+ local effect missileEffect= LoadEffectHandle(HT, iHandleId, 0)
+ local real damage= LoadReal(HT, iHandleId, 0)
+ local real angle= LoadReal(HT, iHandleId, 3) * bj_DEGTORAD
+ local real speed= LoadReal(HT, iHandleId, 4)
+ local real area= LoadReal(HT, iHandleId, 8)
+ local unit spellUnit
+ local unit firstUnit
+ local group injuredUnitGroup
+ local group targetUnitGroup
+ local boolean b= LoadBoolean(HT, iHandleId, 10)
+ local boolean funcEnd= false
+ local integer damageType= LoadInteger(HT, iHandleId, 1)
+ local string funcstr= LoadStr(HT, iHandleId, 0)
+ local integer level= LoadInteger(HT, iHandleId, 5)
+ local boolean isTimeEvent= GetTriggerEventId() == EVENT_GAME_TIMER_EXPIRED
+ local real effectX
+ local real effectY
+ local real radius
+ local real UnitAngleBetween
+	if isTimeEvent then
+		call EXSetEffectXY(missileEffect, CoordinateX(EXGetEffectX(missileEffect) + speed * Cos(angle)), CoordinateY(EXGetEffectY(missileEffect) + speed * Sin(angle)))
+		call SaveInteger(HT, iHandleId, 12, LoadInteger(HT, iHandleId, 12) + 1)
+		if LoadInteger(HT, iHandleId, 12) > LoadInteger(HT, iHandleId, 13) then
+			set funcEnd=true
+			call EXSetEffectXY(missileEffect, LoadReal(HT, iHandleId, 5), LoadReal(HT, iHandleId, 6))
+		endif
+		//else
+		//	set firstUnit = GetTriggerUnit()
+	endif
+	if b then
+		set injuredUnitGroup=LoadGroupHandle(HT, iHandleId, 2)
+		set targetUnitGroup=LoginGroup()
+		set effectX=EXGetEffectX(missileEffect)
+		set effectY=EXGetEffectY(missileEffect)
+		set radius=area + LoadReal(HT, iHandleId, 9) * ( GetTriggerEvalCount(trig) - 1 ) + 100
+		set spellUnit=LoadUnitHandle(HT, iHandleId, 5)
+		set P2=GetOwningPlayer(spellUnit)
+		call GroupEnumUnitsInRange(targetUnitGroup, effectX, effectY, radius, LoadBooleanExprHandle(HT, iHandleId, 15))
+		call GroupRemoveGroup(injuredUnitGroup, targetUnitGroup)
+		set radius=radius - 100
+		loop
+			set firstUnit=FirstOfGroup(targetUnitGroup)
+			exitwhen firstUnit == null
+			call GroupRemoveUnit(targetUnitGroup, firstUnit)
+			if IsUnitInRangeXY(firstUnit, effectX, effectY, radius) then
+				if GetTriggerEvalCount(trig) < 3 then
+					set angle=LoadReal(HT, iHandleId, 3)
+					set UnitAngleBetween=AngleBetweenXY(effectX , effectY , GetUnitX(firstUnit) , GetUnitY(firstUnit))
+					if ( angle - UnitAngleBetween < - 180.00 ) then
+						set angle=( angle - UnitAngleBetween + 360 )
+					else
+						if ( angle - UnitAngleBetween > 180.00 ) then
+							set angle=angle - UnitAngleBetween - 360
+						else
+							set angle=angle - UnitAngleBetween
+						endif
+					endif
+					set angle=RAbsBJ(angle)
+					if angle <= 120 then
+						call GroupAddUnit(injuredUnitGroup, firstUnit)
+						call WaveDamageEnumUnit(spellUnit , firstUnit , damageType , damage , funcstr , level)
+					endif
+				else
+					call GroupAddUnit(injuredUnitGroup, firstUnit)
+					call WaveDamageEnumUnit(spellUnit , firstUnit , damageType , damage , funcstr , level)
+				endif
+			endif
+		endloop
+		call LogoutGroup(targetUnitGroup)
+		if funcEnd then
+			call LogoutGroup(injuredUnitGroup)
+		endif
+	elseif not isTimeEvent then
+		call WaveDamageEnumUnit(LoadUnitHandle(HT, iHandleId, 5) , firstUnit , damageType , damage , funcstr , level)
+	endif
+	if funcEnd then
+		call DestroyBoolExpr(LoadBooleanExprHandle(HT, iHandleId, 15))
 		call FlushChildHashtable(HT, iHandleId)
 		call ClearTrigger(trig)
+		call DestroyEffect(missileEffect)
 	endif
-	set whichUnit=null
+	set firstUnit=null
+	set missileEffect=null
 	set trig=null
-	return false
+	set injuredUnitGroup=null
+	set targetUnitGroup=null
+	set spellUnit=null
 endfunction
+//如果参数area和range的值一样，为矩形冲击波，每次选取的范围一样.range＞area则像食腐蜂群。
+//单位释放冲击波 - 使用特效来作为投射物 (不建议过远)
+//func可以填null,则没有特殊效果,filter如果null则是无差别伤害.
+function UnitSpellWaveByEffect takes unit whichUnit,effect missileEffect,real damage,real maxDistance,real area,real range,real startX,real startY,real targetX,real targetY,real missileSpeed,integer damageType,string func,integer level,code filter returns nothing
+ local trigger trig= CreateTrigger()
+ local integer iHandleId= GetHandleId(trig)
+ local real angle= AngleBetweenXY(startX , startY , targetX , targetY)
+ local real interval= 0.02
+ local real speed= missileSpeed * interval
+ local integer maxEvalCount= R2I(maxDistance / speed) + 1
+	call EXEffectMatRotateZ(missileEffect, angle)
+	call SaveBooleanExprHandle(HT, iHandleId, 15, Condition(filter))
+	call SaveEffectHandle(HT, iHandleId, 0, missileEffect)
+	call SaveReal(HT, iHandleId, 0, damage)
+	call SaveUnitHandle(HT, iHandleId, 5, whichUnit)
+	call SaveReal(HT, iHandleId, 1, maxDistance)
+	call SaveReal(HT, iHandleId, 2, range)
+	call SaveReal(HT, iHandleId, 3, angle)
+	call SaveReal(HT, iHandleId, 4, speed)
+	call SaveInteger(HT, iHandleId, 13, maxEvalCount)
+	call TriggerRegisterTimerEvent(trig, interval, true)
+	call TriggerRegisterTimerEvent(trig, 0, false)
+	call TriggerAddCondition(trig, Condition(function WaveRunningActions))
+	call SaveReal(HT, iHandleId, 8, area)
+	call SaveReal(HT, iHandleId, 9, ( range - area ) / I2R(maxEvalCount))
+	call SaveGroupHandle(HT, iHandleId, 2, LoginGroup())
+	call SaveBoolean(HT, iHandleId, 10, true)
+	call EXSetEffectXY(missileEffect, CoordinateX(startX + area / 2. * Cos(angle * bj_DEGTORAD)), CoordinateY(startY + area / 2. * Sin(angle * bj_DEGTORAD)))
+	call SaveReal(HT, iHandleId, 5, CoordinateX(EXGetEffectX(missileEffect) + maxDistance * Cos(angle * bj_DEGTORAD)))
+	call SaveReal(HT, iHandleId, 6, CoordinateY(EXGetEffectY(missileEffect) + maxDistance * Sin(angle * bj_DEGTORAD)))
+	call SaveInteger(HT, iHandleId, 1, damageType)
+	//call SaveBoolean(HT, iHandleId, 0, b)
+	if func != null then
+		call SaveStr(HT, iHandleId, 0, func)
+		call SaveInteger(HT, iHandleId, 5, level)
+	endif
+	set trig=null
+endfunction
+//战争践踏
+//让单位释放一个践踏
+//目标允许强制为 地面,非机械,非建筑,存活
+function UnitSpellStmop takes unit whichUnit,real damage,integer damageType,real dur,real herodur,real area,boolean ignoreMagicImmunes,string effectPath returns nothing
+ local group targetGroup= LoginGroup()
+ local real unitX= GetUnitX(whichUnit)
+ local real unitY= GetUnitY(whichUnit)
+ local unit firstUnit
+	call GroupEnumUnitsInRange(targetGroup, unitX, unitY, area, null)
+	set P2=GetOwningPlayer(whichUnit)
+	loop
+		set firstUnit=FirstOfGroup(targetGroup)
+		exitwhen firstUnit == null
+		if IsGroundNotMechanicalEnemyAliveNoStructure(firstUnit) then
+			call M_UnitSetStun(firstUnit , dur , herodur , ignoreMagicImmunes)
+			call DamageUnit(whichUnit , firstUnit , damageType , damage)
+		endif
+		call GroupRemoveUnit(targetGroup, firstUnit)
+	endloop
+	call DestroyEffect(AddSpecialEffect(effectPath, unitX, unitY))
+	//地形就不变化了,因为这可能会很卡
+	set firstUnit=null
+	call LogoutGroup(targetGroup)
+	set targetGroup=null
+endfunction
+//光击阵
+function UnitSpellLightStrikeArray takes unit whichUnit,real damage,integer damageType,real targetX,real targetY,real radius,real dur,real herodur,boolean ignoreMagicImmunes returns nothing
+ local group targetUnitGroup= LoginGroup()
+ local unit firstUnit
+	call GroupEnumUnitsInRange(targetUnitGroup, targetX, targetY, radius, null)
+	set P2=GetOwningPlayer(whichUnit)
+	loop
+		set firstUnit=FirstOfGroup(targetUnitGroup)
+		exitwhen firstUnit == null
+		if IsGroundNotMechanicalEnemyAliveNoStructure(firstUnit) then
+			call M_UnitSetStun(firstUnit , dur , herodur , ignoreMagicImmunes)
+			call DamageUnit(whichUnit , firstUnit , damageType , damage)
+		endif
+		call GroupRemoveUnit(targetUnitGroup, firstUnit)
+	endloop
+	call LogoutGroup(targetUnitGroup)
+	set targetUnitGroup=null
+	set firstUnit=null
+endfunction
+// scope Image begins
+    // 设置单位高度来到达隐藏单位，并同时隐藏单位阴影(需要用逆变身来刷新)。
+    function M_ShowUnit takes unit whichUnit,boolean bIsShow returns nothing
+        if bIsShow then
+            call SetUnitShadow(whichUnit , OBJ_GetUnitOriginShadow(whichUnit))
+            call SetUnitInvulnerable(whichUnit, false)
+            call EXPauseUnit(whichUnit, false)
+            call SetUnitFlyHeight(whichUnit, GetUnitDefaultFlyHeight(whichUnit), 0)
+        else
+            call SetUnitShadow(whichUnit , "_")
+            call SetUnitInvulnerable(whichUnit, true)
+            call EXPauseUnit(whichUnit, true)
+            call UnitAddAbility(whichUnit, 'Arav')
+            call UnitRemoveAbility(whichUnit, 'Arav')
+            call SetUnitFlyHeight(whichUnit, 9999, 0)
+        endif
+    endfunction
+    function Image___CreateIllusionUnit takes integer iHandleId,integer iMaxAmount returns nothing
+        local trigger trig= LoadTriggerHandle(HT, iHandleId, 0)
+        local integer iHandleId2= GetHandleId(trig)
+        local unit whichUnit= LoadUnitHandle(HT, iHandleId2, 0)
+        local unit dummyUnit= CreateUnit(GetOwningPlayer(whichUnit), 'ndum', GetUnitX(whichUnit), GetUnitY(whichUnit), 0)
+        local integer realUnitIndex= GetRandomInt(1, iMaxAmount)
+        local real dataB= LoadReal(HT, iHandleId2, 'B')
+        local real dataC= LoadReal(HT, iHandleId2, 'C')
+        local real rDur= LoadReal(HT, iHandleId2, 0)
+        local integer loop__i= 1
+        local effect eImageMissileEff
+        local ability hAbilityAIil
+        call SaveUnitHandle(HT, GetHandleId(dummyUnit), KEY_MASTERUNIT, whichUnit)
+        call UnitAddAbility(dummyUnit, Image___ImageAbility)
+        set hAbilityAIil=EXGetUnitAbility(dummyUnit, Image___ImageAbility)
+        call EXSetAbilityDataReal(hAbilityAIil, 1, ABILITY_DATA_DUR, rDur)
+        call EXSetAbilityDataReal(hAbilityAIil, 1, ABILITY_DATA_HERODUR, rDur)
+        set hAbilityAIil=null
+        // 给召唤者标识一下
+        call SaveBoolean(DynamicData, GetHandleId(whichUnit), IMAGO_UNIT_IS_SUMMONING_ILLUSIONS, true)
+        set Tmp__ArrayReal['B']=dataB
+        set Tmp__ArrayReal['C']=dataC
+        call M_ShowUnit(whichUnit , true)
+        loop
+            set eImageMissileEff=LoadEffectHandle(HT, iHandleId, loop__i)
+            if loop__i != realUnitIndex then
+                set Tmp__ArrayReal['X']=EXGetEffectX(eImageMissileEff)
+                set Tmp__ArrayReal['Y']=EXGetEffectY(eImageMissileEff)
+                call IssueTargetOrderById(dummyUnit, 852274, whichUnit)
+            else
+                call SetUnitX(whichUnit, EXGetEffectX(eImageMissileEff))
+                call SetUnitY(whichUnit, EXGetEffectY(eImageMissileEff))
+            endif
+            call DestroyEffect(eImageMissileEff)
+            exitwhen loop__i == iMaxAmount
+            set loop__i=loop__i + 1
+        endloop
+        call RemoveSavedBoolean(DynamicData, GetHandleId(whichUnit), IMAGO_UNIT_IS_SUMMONING_ILLUSIONS)
+        call DestroyFogModifier(LoadFogModifierHandle(HT, iHandleId2, 20))
+        call ClearTrigger(trig)
+        call FlushChildHashtable(HT, iHandleId2)
+        set trig=null
+        set eImageMissileEff=null
+        set whichUnit=null
+        set dummyUnit=null
+    endfunction
+    function Image___ImageMissileMovement takes nothing returns boolean
+        local integer iHandleId= GetHandleId(GetTriggeringTrigger())
+        local integer iMaxAmount= LoadInteger(HT, iHandleId, 'A')
+        local real rMissileSpeed= LoadReal(HT, iHandleId, 'S')
+        local effect eImageMissileEff
+        local integer loop__i= 1
+        local real angle
+        local real rTargetX
+        local real rTargetY
+        local integer iCount= LoadInteger(HT, iHandleId, 'C')
+        set iCount=iCount - 1
+        if iCount > 0 then
+            call SaveInteger(HT, iHandleId, 'C', iCount)
+            loop
+                set angle=( loop__i * 360 / iMaxAmount ) * bj_DEGTORAD
+                set eImageMissileEff=LoadEffectHandle(HT, iHandleId, loop__i)
+                set rTargetX=CoordinateX(EXGetEffectX(eImageMissileEff) + rMissileSpeed * Cos(angle))
+                set rTargetY=CoordinateY(EXGetEffectY(eImageMissileEff) + rMissileSpeed * Sin(angle))
+                call EXSetEffectXY(eImageMissileEff, rTargetX, rTargetY)
+                exitwhen loop__i == iMaxAmount
+                set loop__i=loop__i + 1
+            endloop
+        else
+            call Image___CreateIllusionUnit(iHandleId , iMaxAmount)
+            call ClearTrigger(GetTriggeringTrigger())
+            call FlushChildHashtable(HT, iHandleId)
+        endif
+        set eImageMissileEff=null
+        return false
+    endfunction
+    // 创建镜像的投射物
+    function Image___CreateImageMissile takes nothing returns boolean
+        // 镜像的机制 如果镜像数量＜2 则取随机±180角度
+        local integer iHandleId= GetHandleId(GetTriggeringTrigger())
+        local unit whichUnit= LoadUnitHandle(HT, iHandleId, 0)
+        local real rStartX= GetUnitX(whichUnit)
+        local real rStartY= GetUnitY(whichUnit)
+        // 投射物数量 = 幻象数量 + 1 因为本体也要有一个投射物
+        local integer iMaxAmount= LoadInteger(HT, iHandleId, 'A') + 1
+        local real rRng= LoadReal(HT, iHandleId, 'R')
+        local real rMissileSpeed= LoadReal(HT, iHandleId, 'S') * 0.03
+        local string sMissileArt= LoadStr(HT, iHandleId, 10)
+        local real rFace= GetUnitFacing(whichUnit)
+        local effect eImageMissileEff
+        local integer loop__i
+        // 对于上个触发器的参数读取应该在这条注释上面
+        call BJDebugMsg(I2S(iMaxAmount) + "iMaxAmount")
+        set iHandleId=CreateTimerEventTrigger(0.03 , true , function Image___ImageMissileMovement)
+        if HaveSavedHandle(HT, iHandleId, 100) then
+            call DestroyEffect(LoadEffectHandle(HT, iHandleId, 100))
+        endif
+        // 继续传参
+        call SaveInteger(HT, iHandleId, 'A', iMaxAmount)
+        call SaveReal(HT, iHandleId, 'R', rRng)
+        call SaveReal(HT, iHandleId, 'S', rMissileSpeed)
+        // 触发器的最大运行次数
+        call SaveInteger(HT, iHandleId, 'C', R2I(rRng / rMissileSpeed))
+        set loop__i=1
+        loop
+            set eImageMissileEff=AddSpecialEffect(sMissileArt, rStartX, rStartY)
+            call SaveEffectHandle(HT, iHandleId, loop__i, eImageMissileEff)
+            exitwhen loop__i == iMaxAmount
+            set loop__i=loop__i + 1
+        endloop
+        set eImageMissileEff=null
+        call SaveTriggerHandle(HT, iHandleId, 0, GetTriggeringTrigger())
+        //call TriggerRegisterTimerEvent(hTrig, 0.03, true)
+        set whichUnit=null
+        return false
+    endfunction
+    // 单位释放分身 (剑圣分身)
+    // DataA分身数量,DataB伤害比例,DataC受伤比例,DataD技能延迟,Rng施法距离(位移距离),Area作用范围(施法时提供的视野)
+    function UnitSpellImage takes unit whichUnit,real rDataA,real rDataB,real rDataC,real rDataD,real rDur,string sSpecialArt,string sMissileArt,real rMissileSpeed,real rRng,real rArea returns nothing
+        local integer iHandleId= CreateTimerEventTrigger(rDataD , false , function Image___CreateImageMissile)
+        local real rUnitX= GetUnitX(whichUnit)
+        local real rUnitY= GetUnitY(whichUnit)
+        local fogmodifier hImageFog= CreateFogModifierRadius(GetOwningPlayer(whichUnit), FOG_OF_WAR_VISIBLE, rUnitX, rUnitY, rArea, true, false)
+        if sSpecialArt != null then
+            call SaveEffectHandle(HT, iHandleId, 100, AddSpecialEffect(sSpecialArt, rUnitX, rUnitY))
+        endif
+        call M_ShowUnit(whichUnit , false)
+        // call SavePlayerHandle(HT, iHandleId, 'P', GetOwningPlayer(whichUnit))
+        call SaveUnitHandle(HT, iHandleId, 0, whichUnit)
+        call SaveInteger(HT, iHandleId, 'A', R2I(rDataA))
+        call SaveReal(HT, iHandleId, 'B', rDataB)
+        call SaveReal(HT, iHandleId, 'C', rDataC)
+        call SaveReal(HT, iHandleId, 'D', rDataD)
+        call SaveReal(HT, iHandleId, 'R', rRng)
+        call SaveReal(HT, iHandleId, 'S', rMissileSpeed)
+        call SaveReal(HT, iHandleId, 0, rDur)
+        call SaveStr(HT, iHandleId, 10, sMissileArt)
+        call SaveFogModifierHandle(HT, iHandleId, 20, hImageFog)
+        // 这里应该清除一下魔法效果
+        set hImageFog=null
+    endfunction
+// scope Image ends
+// scope Lieutenant begins
+ function Lcqy_ZeroCast takes unit u,boolean b returns nothing
+  local integer uh= GetHandleId(u)
+		if b then
+			call CommonTextTag("|c0009d396 0x 施法！！|r" , 5 , u , .03 , 255 , 255 , 255 , 255 , 64)
+			call YDWESetUnitAbilityDataString(u , 'Alc0' , 1 , 204 , "ReplaceableTextures\\CommandButtons\\BTNMagicalSentry.blp")
+		else
+			call YDWESetUnitAbilityDataString(u , 'Alc0' , 1 , 204 , "ReplaceableTextures\\PassiveButtons\\PASBTNMagicalSentry.blp")
+		endif
+		call SaveBoolean(DynamicData, GetHandleId((Tmp_SpellAbilityUnit)), ZeroCast, b) // INLINED!!
+	endfunction
+ function crosskill_actions takes integer unitId,integer buffId returns nothing
+  local real x1
+  local real y1
+  local real x2
+  local real y2
+  local real a= 0
+  local integer i= 0
+  local unit ft= null
+  local player p= GetOwningPlayer((Tmp_SpellAbilityUnit)) // INLINED!!
+  local unit target= (Tmp_SpellTargetUnit) // INLINED!!
+  local boolean isAlly= IsUnitAlly(target, p)
+		if target == null then
+			set x1=(Tmp_SpellTargetX) // INLINED!!
+			set y1=(Tmp_SpellTargetY) // INLINED!!
+		else
+			set x1=GetUnitX(target)
+			set y1=GetUnitY(target)
+		endif
+		loop //
+set a=90.00 * i * bj_DEGTORAD
+			set x2=CoordinateX(x1 + 90 * Cos(a))
+			set y2=CoordinateY(y1 + 90 * Sin(a))
+			set ft=CreateUnit(p, unitId, x2, y2, AngleBetweenXY(x2 , y2 , x1 , y1))
+			call UnitApplyTimedLife(ft, buffId, 30.)
+			if not isAlly then
+				call IssueTargetOrderById(ft, ORDER_ATTACK, target)
+			endif
+			call SetUnitX(ft, x2)
+			call SetUnitY(ft, y2)
+			call DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\MassTeleport\\MassTeleportCaster.mdl", x2, y2))
+			exitwhen i == 3
+			set i=i + 1
+		endloop
+		set target=null
+		set ft=null
+	endfunction
+	//十字围杀
+ function Crosskill takes nothing returns nothing
+  local boolean b= LoadBoolean(DynamicData, GetHandleId((Tmp_SpellAbilityUnit)), ZeroCast) // INLINED!!
+		if b then //成立则代表当前拥有零重施法状态
+call crosskill_actions('hlc2' , 'Bft2')
+			call Lcqy_ZeroCast((Tmp_SpellAbilityUnit) , false) //移除零重施法状态 // INLINED!!
+else
+			if GetPrdRandom((Tmp_SpellAbilityUnit) , 'Alc0' , 20) then // INLINED!!
+				call Lcqy_ZeroCast((Tmp_SpellAbilityUnit) , true) //添加零重施法状态 // INLINED!!
+return
+			endif
+			call crosskill_actions('hlc1' , 'Bft1')
+		endif
+	endfunction
+ function enchant_equipment_actions takes nothing returns nothing
+  local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+  local integer level= (Tmp_SpellAbilityLevel) // INLINED!!
+  local group buffGroup= LoginGroup()
+  local unit firstUnit
+  local real dur= 20 + level * 10
+		call GroupEnumUnitsInRange(buffGroup, GetUnitX(spellUnit), GetUnitY(spellUnit), 625, null)
+		set P2=GetOwningPlayer(spellUnit)
+		loop
+			set firstUnit=FirstOfGroup(buffGroup)
+			exitwhen firstUnit == null
+			if IsMechanicalAllyAliveNoStructure(firstUnit) then
+				call UnitAddAbilityTimed(firstUnit , 'Alc5' , level , dur , 'Blc2')
+			endif
+			call GroupRemoveUnit(buffGroup, firstUnit)
+		endloop
+		call LogoutGroup(buffGroup)
+		set buffGroup=null
+		set spellUnit=null
+		set firstUnit=null
+	endfunction
+ function EnchantEquipment takes nothing returns nothing
+  local boolean b= LoadBoolean(DynamicData, GetHandleId((Tmp_SpellAbilityUnit)), ZeroCast) // INLINED!!
+		if b then
+			call enchant_equipment_actions()
+			call Lcqy_ZeroCast((Tmp_SpellAbilityUnit) , false) //移除零重施法状态 // INLINED!!
+else
+			if GetPrdRandom((Tmp_SpellAbilityUnit) , 'Alc0' , 20) then // INLINED!!
+				call Lcqy_ZeroCast((Tmp_SpellAbilityUnit) , true) //添加零重施法状态 // INLINED!!
+return
+			endif
+			call enchant_equipment_actions()
+		endif
+	endfunction
+ function LcqyStompSpell takes boolean haveZeroCast returns nothing
+  local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+  local integer abilityLevel= (Tmp_SpellAbilityLevel) // INLINED!!
+  local real damage= 75
+  local real dur= 3
+  local real herodur= 2
+  local real area= 325
+  local group soldiersGroup
+  local unit firstUnit
+  local integer typeId
+		call UnitSpellStmop(spellUnit , damage , 1 , dur , herodur , area , true , "Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl")
+		if haveZeroCast then
+			set soldiersGroup=LoginGroup()
+			call GroupEnumUnitsInRange(soldiersGroup, GetUnitX(spellUnit), GetUnitY(spellUnit), 1000, null)
+			set P2=GetOwningPlayer(spellUnit)
+			loop
+				set firstUnit=FirstOfGroup(soldiersGroup)
+				exitwhen firstUnit == null
+				set typeId=GetUnitTypeId(firstUnit)
+				if typeId == 'hlc1' or typeId == 'hlc2' then
+					if IsAllyAlive(firstUnit) then
+						call UnitSpellStmop(firstUnit , damage , 1 , dur , herodur , area , true , "Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl")
+					endif
+				endif
+				call GroupRemoveUnit(soldiersGroup, firstUnit)
+			endloop
+			set firstUnit=null
+			call LogoutGroup(soldiersGroup)
+			set soldiersGroup=null
+		endif
+		set spellUnit=null
+	endfunction
+ function Stomp takes nothing returns nothing
+  local boolean isZeroCast= LoadBoolean(DynamicData, GetHandleId((Tmp_SpellAbilityUnit)), ZeroCast) // INLINED!!
+		if isZeroCast then
+			call Lcqy_ZeroCast((Tmp_SpellAbilityUnit) , false) //移除零重施法状态 // INLINED!!
+call LcqyStompSpell(true)
+		else
+			if GetPrdRandom((Tmp_SpellAbilityUnit) , 'Alc0' , 20) then // INLINED!!
+				call Lcqy_ZeroCast((Tmp_SpellAbilityUnit) , true) //添加零重施法状态 // INLINED!!
+return
+			endif
+			call LcqyStompSpell(false)
+		endif
+	endfunction
+ function AbstinenceIsGoodMedicineEffect takes nothing returns boolean
+  local trigger trig= GetTriggeringTrigger()
+  local integer iHandleId= GetHandleId(trig)
+  local unit whichUnit= LoadUnitHandle(HT, iHandleId, 0)
+  local real data= 0.04
+  local real addValue
+		if GetTriggerEventId() == EVENT_GAME_TIMER_EXPIRED then
+			set addValue=GetUnitState(whichUnit, UNIT_STATE_MAX_LIFE) * data
+			call UnitRestoreLife(whichUnit , addValue)
+			set addValue=GetUnitState(whichUnit, UNIT_STATE_MAX_MANA) * data
+			call UnitRestoreMana(whichUnit , addValue)
+		elseif GetSpellAbilityId() == LoadInteger(HT, iHandleId, 0) then
+			call UnitRemoveAbility(whichUnit, 'Ab09')
+			call UnitRemoveAbility(whichUnit, 'B009')
+			call UnitAddPermanentAbility(whichUnit , 'Ab08')
+			call FlushChildHashtable(HT, iHandleId)
+			call ClearTrigger(trig)
+		endif
+		set whichUnit=null
+		set trig=null
+		return false
+	endfunction
+// scope Lieutenant ends
 // scope CopperAlchemist begins
 	//黑羽
 	//戒色
@@ -5196,7 +5866,7 @@ endfunction
  function AbstinenceIsGoodMedicine takes nothing returns nothing
   local trigger trig= CreateTrigger()
   local integer iHandleId= GetHandleId(trig)
-  local unit hSpellUnit= M_GetSpellAbilityUnit()
+  local unit hSpellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
 		call TriggerRegisterTimerEvent(trig, 1.0, true)
 		call TriggerRegisterUnitEvent(trig, hSpellUnit, EVENT_UNIT_SPELL_ENDCAST)
 		call TriggerAddCondition(trig, Condition(function AbstinenceIsGoodMedicineEffect))
@@ -5235,23 +5905,23 @@ endfunction
 		set trig=null
 	endfunction
  function DragonSlave_Filter takes nothing returns boolean
-		return Enemy_Alive_NoStructure_NoImmune(GetFilterUnit())
+		return IsEnemyAliveNoStructureNoImmune(GetFilterUnit())
 	endfunction
 	// 龙破斩
  function DragonSlave takes nothing returns nothing
-  local unit hSpellUnit= M_GetSpellAbilityUnit()
-  local unit hTargetUnitt= M_GetSpellTargetUnit()
+  local unit hSpellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+  local unit hTargetUnitt= (Tmp_SpellTargetUnit) // INLINED!!
   local real startX= GetUnitX(hSpellUnit)
   local real startY= GetUnitY(hSpellUnit)
   local real targetX
   local real targetY
   local string effectPath= "Abilities\\Spells\\Human\\DragonSlave\\DragonSlave.mdx"
-  local real damage= 80 + M_GetSpellAbilityLevel() * 70
-  local integer level= M_GetSpellAbilityLevel()
+  local real damage= 80 + (Tmp_SpellAbilityLevel) * 70 // INLINED!!
+  local integer level= (Tmp_SpellAbilityLevel) // INLINED!!
   local effect missileEffect
 		if hTargetUnitt == null then
-			set targetX=M_GetSpellTargetX()
-			set targetY=M_GetSpellTargetY()
+			set targetX=(Tmp_SpellTargetX) // INLINED!!
+			set targetY=(Tmp_SpellTargetY) // INLINED!!
 		else
 			set targetX=GetUnitX(hTargetUnitt)
 			set targetY=GetUnitY(hTargetUnitt)
@@ -5280,12 +5950,12 @@ endfunction
 	endfunction
 	// 光击阵
  function LightStrikeArray takes nothing returns nothing
-  local unit hSpellUnit= M_GetSpellAbilityUnit()
-  local real targetX= M_GetSpellTargetX()
-  local real targetY= M_GetSpellTargetY()
+  local unit hSpellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+  local real targetX= (Tmp_SpellTargetX) // INLINED!!
+  local real targetY= (Tmp_SpellTargetY) // INLINED!!
   local trigger trig= CreateTrigger()
   local integer iHandleId= GetHandleId(trig)
-  local integer level= M_GetSpellAbilityLevel()
+  local integer level= (Tmp_SpellAbilityLevel) // INLINED!!
   local real damage= 40 + level * 40
 		call TriggerRegisterTimerEvent(trig, 0.5, false)
 		call TriggerAddCondition(trig, Condition(function LightStrikeArrayWait05))
@@ -5302,7 +5972,7 @@ endfunction
   local integer iHandleId= GetHandleId(trig)
   local unit whichUnit
   local integer fierySoulCount
-		if TimerGetElapsed(GameTimer) > LoadReal(HT, iHandleId, 0) then
+		if (TimerGetElapsed(base___GameTimer)) > LoadReal(HT, iHandleId, 0) then // INLINED!!
 			call RemoveSavedHandle(HT, GetHandleId(LoadTriggerHandle(HT, iHandleId, 1)), 0)
 			set whichUnit=LoadUnitHandle(HT, iHandleId, 0)
 			call UnitReduceAttackSpeedBonus(whichUnit , LoadReal(HT, iHandleId, 1))
@@ -5349,7 +6019,7 @@ endfunction
 		else
 			set iHandleId=GetHandleId(newTrig)
 		endif
-		call SaveReal(HT, iHandleId, 0, TimerGetElapsed(GameTimer) + 9)
+		call SaveReal(HT, iHandleId, 0, (TimerGetElapsed(base___GameTimer)) + 9) // INLINED!!
 		set fierySoulCount=LoadInteger(HT, iHandleId, 0)
 		if fierySoulCount < 3 then
 			call SaveInteger(HT, iHandleId, 0, fierySoulCount + 1)
@@ -5362,24 +6032,25 @@ endfunction
 		endif
 		set trig=null
 	endfunction
- function FierySoulFilter takes nothing returns boolean
+ function CopperAlchemist___FierySoulFilter takes nothing returns boolean
   local integer abilityId= GetSpellAbilityId()
 		call FierySoulEffect(GetSpellAbilityUnit())
 		return false
 	endfunction
- function FierySoul takes nothing returns nothing
+ function Register_FierySoul takes nothing returns nothing
   local unit learnUnit= GetLearningUnit()
-  local trigger trig= CreateTrigger()
+  local trigger trig= CreateUnitAbilityTrigger(learnUnit , GetLearnedSkill())
+		
 		call TriggerRegisterUnitEvent(trig, learnUnit, EVENT_UNIT_SPELL_EFFECT)
-		call TriggerAddCondition(trig, Condition(function FierySoulFilter))
+		call TriggerAddCondition(trig, Condition(function CopperAlchemist___FierySoulFilter))
 		set trig=null
 		set learnUnit=null
 	endfunction
 	
 	// 偷懒直接在筛选里面加特效
- function CopperAlchemist__DragonSlave_Filter takes nothing returns boolean
+ function CopperAlchemist___DragonSlave_Filter takes nothing returns boolean
   local unit hFilterUnit= GetFilterUnit()
-		if Enemy_Alive_NoStructure(hFilterUnit) then
+		if IsEnemyAliveNoStructure(hFilterUnit) then
 			call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Human\\LagunaBlade\\LagunaBlade_hit.mdx", hFilterUnit, "origin"))
 			return true
 		endif
@@ -5387,10 +6058,10 @@ endfunction
 		return false
 	endfunction
 	//神灭斩
- function CopperAlchemist__LagunaBlade takes nothing returns nothing
-  local unit hSpellUnit= M_GetSpellAbilityUnit()
-  local unit hTargetUnitt= M_GetSpellTargetUnit()
-  local integer level= M_GetSpellAbilityLevel()
+ function CopperAlchemist___LagunaBlade takes nothing returns nothing
+  local unit hSpellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+  local unit hTargetUnitt= (Tmp_SpellTargetUnit) // INLINED!!
+  local integer level= (Tmp_SpellAbilityLevel) // INLINED!!
   local real startX= GetUnitX(hSpellUnit)
   local real startY= GetUnitY(hSpellUnit)
   local real targetX
@@ -5399,14 +6070,14 @@ endfunction
   local string effectPath= "Abilities\\Spells\\Human\\LagunaBlade\\LagunaBlade.mdx"
   local effect missileEffect
 		if hTargetUnitt == null then
-			set targetX=M_GetSpellTargetX()
-			set targetY=M_GetSpellTargetY()
+			set targetX=(Tmp_SpellTargetX) // INLINED!!
+			set targetY=(Tmp_SpellTargetY) // INLINED!!
 		else
 			set targetX=GetUnitX(hTargetUnitt)
 			set targetY=GetUnitY(hTargetUnitt)
 		endif
 		set missileEffect=AddSpecialEffect(effectPath, targetX, targetY)
-		call UnitSpellWaveByEffect(hSpellUnit , missileEffect , damage , 800 , 275 , 200 , startX , startY , targetX , targetY , 1200 , 1 , null , level , function CopperAlchemist__DragonSlave_Filter)
+		call UnitSpellWaveByEffect(hSpellUnit , missileEffect , damage , 800 , 275 , 200 , startX , startY , targetX , targetY , 1200 , 1 , null , level , function CopperAlchemist___DragonSlave_Filter)
 		set missileEffect=null
 		set hSpellUnit=null
 		set hTargetUnitt=null
@@ -5458,11 +6129,11 @@ function DeterminedExterminator takes unit whichUnit returns nothing
 endfunction
 //暗杀
 function Assassination takes nothing returns nothing
- local unit spellUnit= M_GetSpellAbilityUnit()
- local unit targetUnit= M_GetSpellTargetUnit()
+ local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+ local unit targetUnit= (Tmp_SpellTargetUnit) // INLINED!!
  local unit firstUnit
  local group targetGroup= LoginGroup()
- local integer abilityLevel= M_GetSpellAbilityLevel()
+ local integer abilityLevel= (Tmp_SpellAbilityLevel) // INLINED!!
  local real damage= 60 + abilityLevel * 20
  local integer heroStr= GetHeroStr(spellUnit, true)
 	set damage=damage + ( damage * heroStr * 0.01 )
@@ -5471,7 +6142,7 @@ function Assassination takes nothing returns nothing
 	loop
 		set firstUnit=FirstOfGroup(targetGroup)
 		exitwhen firstUnit == null
-		if IsGround_NotMechanical_Enemy_Alive_NoStructure(firstUnit) then
+		if IsGroundNotMechanicalEnemyAliveNoStructure(firstUnit) then
 			call DamageUnit(spellUnit , firstUnit , 2 , damage)
 			call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Other\\Stampede\\StampedeMissileDeath.mdl", firstUnit, "origin"))
 		endif
@@ -5484,11 +6155,11 @@ function Assassination takes nothing returns nothing
 	set spellUnit=null
 endfunction
 function BlightPower takes nothing returns nothing
- local unit spellUnit= M_GetSpellAbilityUnit()
- local integer abilityLevel= M_GetSpellAbilityLevel()
+ local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+ local integer abilityLevel= (Tmp_SpellAbilityLevel) // INLINED!!
  local real dur= 3 + abilityLevel * 1
 	call UnitSetMagicImmunity(spellUnit , dur)
-	call UnitAddAbilityTimed(spellUnit , 'Ab10' , 1 , dur , 'B010' , 1)
+	call UnitAddAbilityTimed(spellUnit , 'Ab10' , 1 , dur , 'B010')
 	call SetBlight(GetOwningPlayer(spellUnit), GetUnitX(spellUnit), GetUnitY(spellUnit), 225, true)
 	
 	set spellUnit=null
@@ -5613,7 +6284,7 @@ function ShipSail takes nothing returns boolean
 			set firstUnit=FirstOfGroup(targetGroup)
 			exitwhen firstUnit == null
 			//非空军 非机械 存活 非建筑 敌军 可见
-			if UnitVisibleToPlayer(firstUnit , P2) and IsGround_NotMechanical_Enemy_Alive_NoStructure(firstUnit) and not IsUnitInGroup(firstUnit, injuredGroup) then
+			if UnitVisibleToPlayer(firstUnit , P2) and IsGroundNotMechanicalEnemyAliveNoStructure(firstUnit) and not IsUnitInGroup(firstUnit, injuredGroup) then
 				call JumpShip(firstUnit , dummyShip , spellUnit)
 				call GroupAddUnit(injuredGroup, firstUnit)
 			endif
@@ -5639,7 +6310,7 @@ function ShipSail takes nothing returns boolean
 		loop
 			set firstUnit=FirstOfGroup(targetGroup)
 			exitwhen firstUnit == null
-			if Enemy_Alive_NoStructure(firstUnit) then
+			if IsEnemyAliveNoStructure(firstUnit) then
 				call M_UnitSetStun(firstUnit , 2 , 1.4 , false)
 				call DamageUnit(spellUnit , firstUnit , 1 , amount)
 			endif
@@ -5675,10 +6346,10 @@ function LearnGhostShip takes nothing returns nothing
 	set trig=null
 endfunction
 function GhostShip takes nothing returns nothing
- local unit spellUnit= M_GetSpellAbilityUnit()
+ local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
  local unit dummyShip
- local real spellX= M_GetSpellTargetX()
- local real spellY= M_GetSpellTargetY()
+ local real spellX= (Tmp_SpellTargetX) // INLINED!!
+ local real spellY= (Tmp_SpellTargetY) // INLINED!!
  local real unitX= GetUnitX(spellUnit)
  local real unitY= GetUnitY(spellUnit)
  local real startX
@@ -5686,7 +6357,7 @@ function GhostShip takes nothing returns nothing
  local real targetX
  local real targetY
  local real angle
- local integer level= M_GetSpellAbilityLevel()
+ local integer level= (Tmp_SpellAbilityLevel) // INLINED!!
  local real damage= 100 + level * 50
  local integer maxCount= 150
  local integer iHandleId= CreateTimerEventTrigger(.02 , true , function ShipSail)
@@ -5741,17 +6412,17 @@ function TaxStealerAddGold takes unit taxStealer,integer addGold returns nothing
 endfunction
 function Shinyboy takes nothing returns nothing
  local integer gold= IMinBJ(TaxStealerGoldAmount, 300)
- local unit spellUnit= M_GetSpellAbilityUnit()
+ local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
 	
 	call TaxStealerAddGold(spellUnit , - gold)
-	call DamageUnit(spellUnit , M_GetSpellAbilityUnit() , 1 , gold)
+	call DamageUnit(spellUnit , (Tmp_SpellAbilityUnit) , 1 , gold) // INLINED!!
 	set spellUnit=null
 endfunction
 // 
 function Transmute takes nothing returns nothing
- local unit spellUnit= M_GetSpellAbilityUnit()
- local unit targetUnit= M_GetSpellTargetUnit()
- local integer level= M_GetSpellAbilityLevel()
+ local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+ local unit targetUnit= (Tmp_SpellTargetUnit) // INLINED!!
+ local integer level= (Tmp_SpellAbilityLevel) // INLINED!!
  local integer addGold= 40 + level * 20
 	if TaxStealerGoldAmount >= 0 then
 		if GetUnitAbilityLevel(targetUnit, 'AHer') == 0 then
@@ -5784,7 +6455,7 @@ function WeMediaDeath takes nothing returns nothing
 	loop
 		set firstUnit=FirstOfGroup(targetGroup)
 		exitwhen firstUnit == null
-		if Enemy_Alive_NotFly(firstUnit) then
+		if IsEnemyAliveNotFly(firstUnit) then
 			call DamageUnit(boomUnit , firstUnit , 3 , damage)
 		endif
 		call GroupRemoveUnit(targetGroup, firstUnit)
@@ -5799,8 +6470,8 @@ function WeMediaDeath takes nothing returns nothing
 	set trig=null
 endfunction
 function WeMedia takes nothing returns nothing
- local unit spellUnit= M_GetSpellAbilityUnit()
- local integer level= M_GetSpellAbilityLevel()
+ local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+ local integer level= (Tmp_SpellAbilityLevel) // INLINED!!
  local real face= GetUnitFacing(spellUnit)
  local real unitX= GetUnitX(spellUnit) + 150 * Cos(face * bj_DEGTORAD)
  local real unitY= GetUnitY(spellUnit) + 150 * Sin(face * bj_DEGTORAD)
@@ -5809,7 +6480,7 @@ function WeMedia takes nothing returns nothing
  local integer iHandleId= GetHandleId(trig)
 	call TaxStealerAddGold(spellUnit , - 100)
 	call SetUnitExploded(media, true)
-	call IssueImmediateOrderById(media, Order_Taunt)
+	call IssueImmediateOrderById(media, ORDER_TAUNT)
 	call UnitApplyTimedLife(media, 'BTLF', 5)
 	call TriggerRegisterDeathEvent(trig, media)
 	call TriggerAddCondition(trig, Condition(function WeMediaDeath))
@@ -5821,8 +6492,8 @@ function WeMedia takes nothing returns nothing
 endfunction
 //宏大叙事
 function GrandNarrative takes nothing returns nothing
- local unit spellUnit= M_GetSpellAbilityUnit()
- local integer addGold= 100 + M_GetSpellAbilityLevel() * 100
+ local unit spellUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+ local integer addGold= 100 + (Tmp_SpellAbilityLevel) * 100 // INLINED!!
 	call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Other\\Transmute\\PileofGold.mdl", spellUnit, "origin"))
 	call TaxStealerAddGold(spellUnit , addGold)
 	call GoldTextTag(GetOwningPlayer(spellUnit) , spellUnit , addGold)
@@ -5852,345 +6523,7 @@ function CreateTaxStealerGoldBarUI takes unit taxStealerUnit returns nothing
 	call TaxStealerAddGold(taxStealerUnit , 500)
 endfunction
 // scope StormSpirit begins
-    function StormSpirit__BallLightningMove takes nothing returns nothing
-        local trigger t= GetTriggeringTrigger()
-        local integer h= GetHandleId(t)
-        local real distance= LoadReal(HT, h, 0)
-local unit u= LoadUnitHandle(HT, h, 10)
-local unit d1= LoadUnitHandle(HT, h, 11)
-local unit d2= LoadUnitHandle(HT, h, 12)
-        local lightning light= LoadLightningHandle(HT, h, 21)
-local real x1= GetUnitX(u)
-        local real y1= GetUnitY(u)
-        //前进方向 需要动态计算 因为可能会因为多次释放导致过头
-        local real a= Atan2(LoadReal(HT, h, 9) - y1, LoadReal(HT, h, 8) - x1)
-        local real x2= x1 + ( distance ) * Cos(a)
-        local real y2= y1 + ( distance ) * Sin(a)
-        local real mana= GetUnitState(u, UNIT_STATE_MANA)
-        local real cost= ( distance ) * ( 12 + .007 * GetUnitState(u, UNIT_STATE_MAX_MANA) ) * 0.01
-        local integer count= LoadInteger(HT, h, 30)
-        set count=count - 1
-        if count == 0 or GetUnitState(u, UNIT_STATE_MANA) < 1 or not UnitAlive(u) then
-            call SetUnitFlyHeight(u, 0, 0)
-            call SetUnitPathing(u, true)
-            //call SetUnitPosition(u, x2, y2)
-            call DestroyLightning(light)
-            call DestroyEffect(LoadEffectHandle(HT, h, 32))
-            call RemoveUnit(d1)
-            call RemoveUnit(d2)
-            call FlushChildHashtable(HT, h)
-            call ClearTrigger(t)
-            //逆变身 暂时不用 会导致单位特效丢失
-            //set h = GetHandleId(u)
-            //set count = LoadInteger(UnitKeyBuff, BallLightningCount, h) - 1
-            //call SaveInteger(UnitKeyBuff, BallLightningCount, h, count)
-            //if count == 0 then //计数为0则逆变身回正常状态
-            //	call YDWEUnitTransform(u, 'HI02')
-            //endif
-        else //开始移动	
-call SetUnitX(u, x2)
-            call SetUnitY(u, y2)
-            call SetUnitX(d1, x2)
-            call SetUnitY(d1, y2)
-            call SetUnitX(d2, x2)
-            call SetUnitY(d2, y2)
-            if GetTriggerEvalCount(t) > 25 then //移动闪电
-set x1=LoadReal(HT, h, 6) + distance * Cos(a)
-                set y1=LoadReal(HT, h, 7) + distance * Sin(a)
-                call SaveReal(HT, h, 6, x1 * 1.)
-                call SaveReal(HT, h, 7, y1 * 1.)
-            else
-                set x1=LoadReal(HT, h, 6)
-                set y1=LoadReal(HT, h, 7)
-            endif
-            call MoveLightning(light, true, x1, y1, x2, y2)
-            call SetUnitState(u, UNIT_STATE_MANA, RMaxBJ(mana - cost, 0))
-            call SaveInteger(HT, h, 30, count)
-        endif
-        call KillDestructablesInCircle(x2 , y2 , 75) //会破坏75码范围内的可破坏物
-set light=null
-        set u=null
-        set d1=null
-        set d2=null
-        set t=null
-    endfunction
-    function BallLightning takes nothing returns nothing
-        local real x1= GetUnitX(M_GetSpellAbilityUnit())
-        local real y1= GetUnitY(M_GetSpellAbilityUnit())
-        local real x2
-        local real y2
-        local lightning light
-        local real distance
-        local unit d1
-        local unit d2
-        local trigger t
-        local integer h
-        local integer lv= M_GetSpellAbilityLevel()
-        local player p= GetOwningPlayer(M_GetSpellAbilityUnit())
-        //local real mana = GetUnitState(u, UNIT_STATE_MANA)
-        //local real cost = 30 + .06 * GetUnitState(u, UNIT_STATE_MAX_MANA)
-        //call SetUnitState(u, UNIT_STATE_MANA, RMaxBJ(mana -cost, 0))
-        set t=CreateTrigger()
-        //set h = GetHandleId(M_GetSpellAbilityUnit()) //计数 + 1
-        //call SaveInteger(UnitKeyBuff, BallLightningCount, h, LoadInteger(UnitKeyBuff, BallLightningCount, h) + 1 )
-        //call YDWEUnitTransform(M_GetSpellAbilityUnit(), 'HIM2')
-        set h=GetHandleId(t)
-        set d1=CreateUnit(p, 'nsbl', x1, y1, 0) //滚动风暴之灵
-set d2=CreateUnit(p, 'npn5', x1, y1, 0) //似乎是用来发出声音的
-
-        call SetUnitVertexColor(d2, 255, 255, 255, 0)
-        set p=null
-        //set MNR = CreateUnit(GetOwningPlayer(u),'npn5', ux, uy, 0)
-        set light=AddLightning("FORK", true, x1, y1, x1, y1)
-        if M_GetSpellAbilityUnit() == null then
-            set x2=M_GetSpellTargetX()
-            set y2=M_GetSpellTargetY()
-        else
-            set x2=GetUnitX(M_GetSpellAbilityUnit())
-            set y2=GetUnitY(M_GetSpellAbilityUnit())
-        endif
-        //
-        call UnitAddAbility(M_GetSpellAbilityUnit(), 'Amrf')
-        call UnitRemoveAbility(M_GetSpellAbilityUnit(), 'Amrf')
-        call SetUnitFlyHeight(M_GetSpellAbilityUnit(), 9999, 0)
-        //
-        call SetUnitPathing(M_GetSpellAbilityUnit(), false)
-        call SetUnitPathing(d1, false)
-        set distance=GetDistanceBetween(x2 , y2 , x1 , y1)
-        if distance < ( 25 + 25 * lv ) then
-            call SaveReal(HT, h, 0, distance)
-        else
-            call SaveReal(HT, h, 0, 25 + 25 * lv)
-        endif
-        //call SaveReal(HT, h, 5, Atan2(y2 -y1, x2 -x1))
-        call SaveReal(HT, h, 6, x1 * 1.)
-        call SaveReal(HT, h, 7, y1 * 1.)
-        call SaveReal(HT, h, 8, x2 * 1.) //似乎没有必要储存技能释放点 但需要动态计算朝向
-call SaveReal(HT, h, 9, y2 * 1.) //已经预存了前进次数和前进方向
-call SaveUnitHandle(HT, h, 10, M_GetSpellAbilityUnit())
-        call SaveUnitHandle(HT, h, 11, d1)
-        call SaveUnitHandle(HT, h, 12, d2)
-        call SaveLightningHandle(HT, h, 21, light)
-        //call SaveInteger(HT, h, 40, lv) //不需要存技能等级
-        call SaveInteger(HT, h, 30, ( IMaxBJ(R2I(SquareRoot(( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 )) / ( 25 + 25 * lv )), 1) ))
-        call SaveEffectHandle(HT, h, 32, ( AddSpecialEffectTarget("effects\\Lightning_Ball_Tail_FX.mdx", d2, "origin") ))
-        call TriggerRegisterTimerEvent(t, .04, true)
-        call TriggerAddCondition(t, Condition(function StormSpirit__BallLightningMove))
-        set light=null
-        set t=null
-        set d1=null
-        set d2=null
-    endfunction
-    function StormSpirit__ElectricVortexTow takes nothing returns boolean
-        local trigger t= GetTriggeringTrigger()
-        local integer h= GetHandleId(t)
-        local unit target= LoadUnitHandle(HT, h, 17)
-        local real a= LoadReal(HT, h, 11)
-        local real tx= GetUnitX(target) - 5 * Cos(a)
-        local real ty= GetUnitY(target) - 5 * Sin(a)
-        local real x= LoadReal(HT, h, 6)
-        local real y= LoadReal(HT, h, 7)
-        if ( x - tx ) * ( x - tx ) + ( y - ty ) * ( y - ty ) < 100 then
-            set tx=x
-            set ty=y
-        endif
-        call SetUnitX(target, tx)
-        call SetUnitY(target, ty)
-        if GetTriggerEvalCount(t) == ( LoadInteger(HT, h, 5) ) or GetTriggerEventId() == EVENT_WIDGET_DEATH then
-            call FlushChildHashtable(HT, h)
-            call ClearTrigger(t)
-        endif
-        set t=null
-        set target=null
-        return false
-    endfunction
-    function StormSpirit__ElectricVortex_Fx takes unit u,unit target,integer lv returns nothing
-        local trigger t= CreateTrigger()
-        local integer h= GetHandleId(t)
-        local real x= GetUnitX(u)
-        local real y= GetUnitY(u)
-        local real tx= GetUnitX(target)
-        local real ty= GetUnitY(target)
-        local unit du= CreateUnit(GetOwningPlayer(u), 'nstd', x, y, GetUnitFacing(u))
-        call TriggerRegisterTimerEvent(t, .05, true)
-        call TriggerRegisterDeathEvent(t, target)
-        call TriggerAddCondition(t, Condition(function StormSpirit__ElectricVortexTow))
-        call SaveUnitHandle(HT, h, 17, target)
-        call SaveInteger(HT, h, 5, 10 + 10 * lv)
-        call SaveReal(HT, h, 6, x)
-        call SaveReal(HT, h, 7, y)
-        call SaveReal(HT, h, 11, Atan2(ty - y, tx - x))
-        call UnitSetLeash(du , target , "CLPB" , 0 , 'Ab03' , 'Bmlt' , 3 , 2 , 0 , false)
-        //call DamageUnit(u, target, 1 , 20)
-        call UnitApplyTimedLife(du, 'BTLF', 1 + .5 * lv)
-        set du=null
-        set t=null
-    endfunction
-    //电子涡流
-    function ElectricVortex takes nothing returns nothing
-        if not HaveSpellShield(M_GetSpellAbilityUnit()) then
-            call StormSpirit__ElectricVortex_Fx(M_GetSpellAbilityUnit() , M_GetSpellTargetUnit() , M_GetSpellAbilityLevel())
-        endif
-    endfunction
-    //残影动作 造成伤害或持续时间到期
-    function StormSpirit__StaticRremnantActions takes nothing returns boolean
-        local trigger t= GetTriggeringTrigger()
-        local integer h= GetHandleId(t)
-        local trigger effT= LoadTriggerHandle(HT, h, 9)
-local integer effH= GetHandleId(effT)
-        local unit shadow= LoadUnitHandle(HT, h, 30)
-        local group g= null
-        local unit u= null
-        local real x
-        local real y
-        local integer damage
-        if GetTriggerEventId() == EVENT_UNIT_DEATH then
-            call ShowUnit(shadow, false)
-            call KillUnit(shadow)
-            call FlushChildHashtable(HT, h)
-            call ClearTrigger(t)
-            call FlushChildHashtable(HT, effH)
-            call ClearTrigger(effT)
-        else
-            set P2=GetOwningPlayer(shadow)
-            if Enemy_Alive_NoStructure_NoImmune(GetTriggerUnit()) then
-                set x=GetUnitX(shadow)
-                set y=GetUnitY(shadow)
-                set u=LoadUnitHandle(HT, effH, 10)
-                set damage=100 + 40 * LoadInteger(HT, effH, 50) // 残影爆炸伤害
-//在单位死亡前从哈希表从获取数据 单位死亡哈希表就清空了
-call ShowUnit(shadow, false)
-                call KillUnit(shadow)
-                call DestroyEffect(AddSpecialEffect("Abilities\\Weapons\\Bolt\\BoltImpact.mdl", x, y))
-                call DestroyEffect(AddSpecialEffect("Abilities\\Weapons\\Bolt\\BoltImpact.mdl", x, y))
-                set shadow=u
-                set g=LoginGroup()
-                call GroupEnumUnitsInRange(g, x, y, 285, null)
-                loop
-                    set u=FirstOfGroup(g)
-                    exitwhen u == null
-                    if Enemy_Alive_NoStructure_NoImmune(u) then
-                        call DamageUnit(shadow , u , 1 , damage)
-                        call DestroyEffect(AddSpecialEffect("Abilities\\Weapons\\ChimaeraLightningMissile\\ChimaeraLightningMissile.mdl", GetUnitX(u), GetUnitY(u)))
-                    endif
-                    call GroupRemoveUnit(g, u)
-                endloop
-                call LogoutGroup(g)
-                call FlushChildHashtable(HT, h)
-                call ClearTrigger(t)
-                call FlushChildHashtable(HT, effH)
-                call ClearTrigger(effT)
-                set g=null
-                set u=null
-            endif
-        endif
-        set t=null
-        set effT=null
-        set shadow=null
-        return false
-    endfunction
-    //创建残影 有0.5s的延迟出现 1.0s延迟生效
-    function StormSpirit__CreateStaticRremnant takes nothing returns boolean
-        local trigger t= GetTriggeringTrigger()
-        local integer h= GetHandleId(t)
-        local trigger newT
-        local integer newH
-        local integer c= GetTriggerEvalCount(t)
-        local unit shadow
-        if c == 1 then
-            call DestroyEffect(LoadEffectHandle(HT, h, 20))
-        elseif c == 2 then
-            call DestroyEffect(LoadEffectHandle(HT, h, 21))
-            set newT=CreateTrigger()
-            set newH=GetHandleId(newT)
-            //创建残影
-            set shadow=CreateUnit(GetOwningPlayer(LoadUnitHandle(HT, h, 10)), 'npn2', LoadReal(HT, h, 1), LoadReal(HT, h, 2), LoadReal(HT, h, 3))
-            call SetUnitVertexColor(shadow, 255, 255, 255, 100)
-            call UnitApplyTimedLife(shadow, 'BHwe', 12)
-            call SaveUnitHandle(HT, h, 30, shadow)
-            call SaveUnitHandle(HT, newH, 30, shadow)
-            call SaveTriggerHandle(HT, newH, 9, t)
-            call TriggerRegisterUnitInRange(newT, shadow, 235, null) //残影触发范围
-call TriggerRegisterUnitEvent(newT, shadow, EVENT_UNIT_DEATH)
-            call TriggerAddCondition(newT, Condition(function StormSpirit__StaticRremnantActions))
-            //else c > 2 then
-        else
-            call DestroyEffect(AddSpecialEffectTarget("effects\\ManaFlareBoltImpact_NoSound.mdx", LoadUnitHandle(HT, h, 30), "origin"))
-        endif
-        set t=null
-        set newT=null
-        set shadow=null
-        return false
-    endfunction
-    //风暴之灵 - 残影
-    function StaticRremnant takes nothing returns nothing
-        local integer h= CreateTimerEventTrigger(0.5 , true , function StormSpirit__CreateStaticRremnant)
-        local real x= GetUnitX(M_GetSpellAbilityUnit())
-        local real y= GetUnitY(M_GetSpellAbilityUnit())
-        call SaveInteger(HT, h, 50, M_GetSpellAbilityLevel())
-        call SaveReal(HT, h, 1, ( x ) * 1.)
-        call SaveReal(HT, h, 2, ( y ) * 1.)
-        call SaveReal(HT, h, 3, GetUnitFacing(M_GetSpellAbilityUnit()) * 1.)
-        call SaveUnitHandle(HT, h, 10, M_GetSpellAbilityUnit())
-        call SaveEffectHandle(HT, h, 20, ( AddSpecialEffect("Abilities\\Spells\\Orc\\LightningShield\\LightningShieldTarget.mdl", x, y) ))
-        call SaveEffectHandle(HT, h, 21, ( AddSpecialEffect("effects\\Static_Remnant_FX.mdx", x, y) ))
-    endfunction
     
-    //超负荷
-    function OverLoadActions takes nothing returns nothing
-        local integer h= GetHandleId(Tmp_DamageSource)
-        local group g= LoginGroup()
-        local unit u= Tmp_DamageInjured
-        local real damage= GetUnitAbilityLevel(Tmp_DamageSource, 'Ast3') * 20 + 10
-        call SaveInteger(UnitKeyBuff, h, StormSpirit__HaveOverload, 0)
-        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectLeft))
-        call DestroyEffect(LoadEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectRight))
-        call DestroyEffect(AddSpecialEffect("Abilities\\Spells\\Human\\Thunderclap\\ThunderClapCaster.mdl", GetUnitX(u), GetUnitY(u)))
-	
-        set P2=GetOwningPlayer(Tmp_DamageSource)
-        call GroupEnumUnitsInRange(g, GetUnitX(u), GetUnitY(u), 300, null)
-        loop
-            set u=FirstOfGroup(g)
-            exitwhen u == null //造成法术攻击 魔法伤害
-if Enemy_Alive_NoStructure(u) then
-                call DamageUnit(Tmp_DamageSource , u , 1 , damage)
-                call UnitAddAbilityTimed(u , 'ANol' , 1 , 0.6 , 'BSts' , 2)
-                call GroupRemoveUnit(g, u)
-            endif
-        endloop
-        call LogoutGroup(g)
-        set g=null
-        set u=null
-    endfunction
-    function OverLoad_Filter takes nothing returns boolean
-        if LoadInteger(UnitKeyBuff, GetHandleId(Tmp_DamageSource), StormSpirit__HaveOverload) == 1 then
-            call OverLoadActions()
-        endif
-        return false
-    endfunction
-    function AddOverLoad takes nothing returns boolean
-        local unit u= GetTriggerUnit()
-        local integer h= GetHandleId(u)
-        if LoadInteger(UnitKeyBuff, h, StormSpirit__HaveOverload) == 0 then
-            call SaveInteger(UnitKeyBuff, h, StormSpirit__HaveOverload, 1)
-            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectRight, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "right hand") ))
-            call SaveEffectHandle(UnitKeyBuff, h, StormSpirit__OverloadEffectLeft, ( AddSpecialEffectTarget("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", u, "left hand") ))
-        endif
-        set u=null
-        return false
-    endfunction
-    //注册超负荷攻击以及施法事件
-    function OverloadLearn1 takes nothing returns nothing
-        local trigger t= CreateTrigger()
-        local unit u= GetTriggerUnit()
-        call TriggerRegisterUnitEvent(t, u, EVENT_UNIT_SPELL_EFFECT)
-        call TriggerAddCondition(t, Condition(function AddOverLoad))
-        set t=CreateTrigger()
-        call TriggerAddCondition(t, Condition(function OverLoad_Filter))
-        call TriggerRegisterAnyUnitDamagedEvent(t , 1)
-        set u=null
-        set t=null
-    endfunction
 // scope StormSpirit ends
 // scope PickMan begins
     // 战斗螺旋  反击螺旋缝合战斗饥渴
@@ -6206,7 +6539,7 @@ if Enemy_Alive_NoStructure(u) then
         local real radius
         local integer iDamageType
         if IsUnitEnemy(whichUnit, GetOwningPlayer(hAttacker)) then
-            if PrdRandom(whichUnit , 'Apm2' , 15) then
+            if GetPrdRandom(whichUnit , 'Apm2' , 15) then
                 // 物理伤害 对敌对单位 非建筑 无视魔免
                 set iAbilityLevle=GetUnitAbilityLevel(whichUnit, 'Apm2')
                 set radius=325
@@ -6224,7 +6557,7 @@ if Enemy_Alive_NoStructure(u) then
                 loop
                     set firstUnit=FirstOfGroup(enumDamageTarget)
                     exitwhen firstUnit == null
-                    if Enemy_Alive_NoStructure(firstUnit) then
+                    if IsEnemyAliveNoStructure(firstUnit) then
                         call DestroyEffect(AddSpecialEffectTarget(targetEffectPath, firstUnit, "origin"))
                         call DamageUnit(whichUnit , firstUnit , iDamageType , rDamageAmount)
                     endif
@@ -6252,7 +6585,7 @@ if Enemy_Alive_NoStructure(u) then
     endfunction
     // 口嗨
     function CallSbNames takes nothing returns nothing
-        local unit whichUnit= M_GetSpellAbilityUnit()
+        local unit whichUnit= (Tmp_SpellAbilityUnit) // INLINED!!
         local group enumUnits= LoginGroup()
         local unit firstUnit
         local real radius= 525
@@ -6265,7 +6598,7 @@ if Enemy_Alive_NoStructure(u) then
         exitwhen firstUnit == null
             call GroupRemoveUnit(enumUnits, firstUnit)
             // 友军 存活 非建筑 英雄
-            if Ally_Alive_NoStructure_IsHero(firstUnit) then
+            if IsAllyAliveNoStructureIsHero(firstUnit) then
                 // 把友军的护甲给吃瓜
                 call UnitReduceArmorBonus(firstUnit , armoarValue)
                 call UnitAddArmorBonus(whichUnit , armoarValue)
@@ -6278,7 +6611,7 @@ if Enemy_Alive_NoStructure(u) then
     endfunction
     // 战斗咆哮 狂战士的怒吼+淘汰之刃
     function BattleRoar takes nothing returns nothing
-        local unit whichUnit= M_GetSpellAbilityUnit()
+        local unit whichUnit= (Tmp_SpellAbilityUnit) // INLINED!!
         local group enumUnits= LoginGroup()
         local unit firstUnit
         local real radius= 525
@@ -6292,7 +6625,7 @@ if Enemy_Alive_NoStructure(u) then
         exitwhen firstUnit == null
             call GroupRemoveUnit(enumUnits, firstUnit)
             // 敌对 存活 非建筑
-            if Enemy_Alive_NoStructure(firstUnit) then
+            if IsEnemyAliveNoStructure(firstUnit) then
                 // 超过生命临界点就斩杀
                 if GetWidgetLife(firstUnit) < criticalValue then
                     if UnitKillTarget(whichUnit , firstUnit) then
@@ -6312,11 +6645,11 @@ if Enemy_Alive_NoStructure(u) then
     
 // scope PickMan ends
 // scope Pudge begins
-    function Pudge__MeatHook_Filter takes nothing returns boolean
+    function Pudge___MeatHook_Filter takes nothing returns boolean
         return Alive_NoStructure(GetFilterUnit())
     endfunction
     
-    function Pudge__MeatHook_Return takes nothing returns boolean
+    function Pudge___MeatHook_Return takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit target= LoadUnitHandle(HT, h, 5)
@@ -6347,7 +6680,7 @@ if Enemy_Alive_NoStructure(u) then
         return false
     endfunction
     
-    function Pudge__Pudge_MeatHook_Move takes nothing returns boolean
+    function Pudge___Pudge_MeatHook_Move takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit u= LoadUnitHandle(HT, h, 10)
@@ -6378,7 +6711,7 @@ if Enemy_Alive_NoStructure(u) then
             call SaveEffectHandle(HT, rh, 2100 + count, hook)
             set hook=null
             set g=LoginGroup()
-            call GroupEnumUnitsInRange(g, x, y, range, Condition(function Pudge__MeatHook_Filter))
+            call GroupEnumUnitsInRange(g, x, y, range, Condition(function Pudge___MeatHook_Filter))
             call GroupRemoveUnit(g, u)
             set target=FirstOfGroup(g)
             if target == null then
@@ -6391,7 +6724,7 @@ if Enemy_Alive_NoStructure(u) then
                 call ClearTrigger(t)
                 call TriggerRegisterTimerEvent(rt, .025, true)
                 call TriggerRegisterDeathEvent(rt, target)
-                call TriggerAddCondition(rt, Condition(function Pudge__MeatHook_Return))
+                call TriggerAddCondition(rt, Condition(function Pudge___MeatHook_Return))
                 call SetUnitPathing(target, false)
                 call SaveInteger(HT, rh, 21, count)
                 call SaveBoolean(HT, rh, 10, true)
@@ -6406,7 +6739,7 @@ if Enemy_Alive_NoStructure(u) then
             call FlushChildHashtable(HT, h)
             call ClearTrigger(t)
             call TriggerRegisterTimerEvent(rt, .025, true)
-            call TriggerAddCondition(rt, Condition(function Pudge__MeatHook_Return))
+            call TriggerAddCondition(rt, Condition(function Pudge___MeatHook_Return))
             call SaveInteger(HT, rh, 21, count)
         endif
     
@@ -6418,19 +6751,19 @@ if Enemy_Alive_NoStructure(u) then
     
     //技能函数不能为私有函数(因为函数名记录在哈希表内)
     function Pudge_MeatHook takes nothing returns nothing
-        local integer h= CreateTimerEventTrigger(.025 , true , function Pudge__Pudge_MeatHook_Move)
+        local integer h= CreateTimerEventTrigger(.025 , true , function Pudge___Pudge_MeatHook_Move)
         //前进方向
-        local real a= AngleBetweenXY(GetUnitX(M_GetSpellAbilityUnit()) , GetUnitY(M_GetSpellAbilityUnit()) , M_GetSpellTargetX() , M_GetSpellTargetY())
+        local real a= AngleBetweenXY(GetUnitX((Tmp_SpellAbilityUnit)) , GetUnitY((Tmp_SpellAbilityUnit)) , (Tmp_SpellTargetX) , (Tmp_SpellTargetY)) // INLINED!!
         
-        call SaveUnitHandle(HT, h, 10, M_GetSpellAbilityUnit())
+        call SaveUnitHandle(HT, h, 10, (Tmp_SpellAbilityUnit)) // INLINED!!
         call SaveReal(HT, h, 11, a)
-        call SaveInteger(HT, h, 20, M_GetSpellAbilityLevel())
+        call SaveInteger(HT, h, 20, (Tmp_SpellAbilityLevel)) // INLINED!!
         call SaveInteger(HT, h, 21, 0)
         call SaveTriggerHandle(HT, h, 30, CreateTrigger())
     
     endfunction
     
-    function Pudge__Pudge_Rot_Action takes nothing returns boolean
+    function Pudge___Pudge_Rot_Action takes nothing returns boolean
         local trigger t= GetTriggeringTrigger()
         local integer h= GetHandleId(t)
         local unit u= LoadUnitHandle(HT, h, 10)
@@ -6446,7 +6779,7 @@ set P2=GetOwningPlayer(u)
             loop
                 set target=FirstOfGroup(g)
                 exitwhen target == null
-                if Enemy_Alive_NoStructure_NoImmune(target) then
+                if IsEnemyAliveNoStructureNoImmune(target) then
                     call DamageUnit(u , target , 2 , damage)
                 endif
                 call GroupRemoveUnit(g, target)
@@ -6461,7 +6794,7 @@ set P2=GetOwningPlayer(u)
             set target=null
         else
             call DestroyEffect(effSlow)
-            call RemoveSavedHandle(UnitKeyBuff, GetHandleId(u), 'Bpg2')
+            call RemoveSavedHandle(UnitBuffData, GetHandleId(u), 'Bpg2')
             call FlushChildHashtable(HT, h)
             call ClearTrigger(t)
         endif
@@ -6472,11 +6805,11 @@ set P2=GetOwningPlayer(u)
     endfunction
     
     function Pudge_Rot takes nothing returns nothing
-        local unit whichUnit= M_GetSpellAbilityUnit()
+        local unit whichUnit= (Tmp_SpellAbilityUnit) // INLINED!!
         local integer h= GetHandleId(whichUnit)
         local trigger trig
-        if HaveSavedHandle(UnitKeyBuff, h, 'Bpg2') then
-            set trig=LoadTriggerHandle(UnitKeyBuff, h, 'Bpg2')
+        if HaveSavedHandle(UnitBuffData, h, 'Bpg2') then
+            set trig=LoadTriggerHandle(UnitBuffData, h, 'Bpg2')
             call UnitRemoveAbility(whichUnit, 'Ab05')
             call UnitRemoveAbility(whichUnit, 'Bpg2') //删除技能并立即运行一次触发 即可结束此触发
 call TriggerEvaluate(trig)
@@ -6484,8 +6817,8 @@ call TriggerEvaluate(trig)
             set trig=CreateTrigger()
             set h=GetHandleId(trig)
             call TriggerRegisterTimerEvent(trig, 0.1, true)
-            call TriggerAddCondition(trig, Condition(function Pudge__Pudge_Rot_Action))
-            call SaveTriggerHandle(UnitKeyBuff, GetHandleId(whichUnit), 'Bpg2', trig)
+            call TriggerAddCondition(trig, Condition(function Pudge___Pudge_Rot_Action))
+            call SaveTriggerHandle(UnitBuffData, GetHandleId(whichUnit), 'Bpg2', trig)
             call SaveUnitHandle(HT, h, 10, whichUnit)
             call UnitAddPermanentAbility(whichUnit , 'Ab05')
             call SaveEffectHandle(HT, h, 0, AddSpecialEffectTarget("Abilities\\Spells\\Human\\slow\\slowtarget.mdl", whichUnit, "head"))
@@ -6497,10 +6830,10 @@ call TriggerEvaluate(trig)
     
     // 肢解
     function Pudge_Dismember takes nothing returns nothing
-        local unit whichUnit= M_GetSpellAbilityUnit()
-        local unit targetUnit= M_GetSpellAbilityUnit()
+        local unit whichUnit= (Tmp_SpellAbilityUnit) // INLINED!!
+        local unit targetUnit= (Tmp_SpellAbilityUnit) // INLINED!!
         //指向性技能判断一下法术护盾
-        if not HaveSpellShield(M_GetSpellAbilityUnit()) then
+        if not HaveSpellShield((Tmp_SpellAbilityUnit)) then // INLINED!!
             call UnitSetLeash(whichUnit , targetUnit , null , 'A006' , 'Ab06' , 'B006' , 3 , 3 , 50 , true)
         endif
         set whichUnit=null
@@ -6538,7 +6871,7 @@ call TriggerEvaluate(trig)
             call GroupRemoveUnit(g, dummyUnit)
         endloop
         set dummyUnit=null
-        set isDismember=GetUnitCurrentOrder(pudge) == Order_MagicLeash and YDWEGetUnitAbilityState(pudge , 'A006' , 1) != 0.
+        set isDismember=GetUnitCurrentOrder(pudge) == ORDER_MAGICLEASH and YDWEGetUnitAbilityState(pudge , 'A006' , 1) != 0.
         if ( ( iMeetCondition > 1 or isDismember ) and not isRot ) or ( iMeetCondition < 2 and isRot and not isDismember ) then
             call IssueImmediateAbilityById(pudge , 'A005')
         endif
@@ -6573,13 +6906,13 @@ call TriggerEvaluate(trig)
         local real rMeatHookTime
         local location targetPosition= null
         local boolean targetNoSmartUnit
-        if targetOrder == 0 or ( targetOrder != Order_Move ) then
+        if targetOrder == 0 or ( targetOrder != ORDER_MOVE ) then
             call Debug("log" , "targetName=  " + GetUnitName(target))
-            call IssuePointOrderById(pudge, Order_Flare, targetX, targetY)
+            call IssuePointOrderById(pudge, ORDER_MEATHOOK, targetX, targetY)
         else
             set targetSpeed=GetUnitMoveSpeed(target)
             set targetNoSmartUnit=LoadBoolean(HT, GetHandleId(GetTriggeringTrigger()), GetHandleId(target))
-            if targetOrder == Order_Move or ( targetOrder == Order_Smart and targetNoSmartUnit ) then
+            if targetOrder == ORDER_MOVE or ( targetOrder == ORDER_SMART and targetNoSmartUnit ) then
                 set maxRangeMeatHook=( 30 + 5 * GetUnitAbilityLevel(pudge, 'Apg1') ) * 40
                 set rMeatHookTime=maxRangeMeatHook / 1600
                 set targetPosition=GetUnitPositionAfterMovement(target , rMeatHookTime + 0.3)
@@ -6594,7 +6927,7 @@ call TriggerEvaluate(trig)
                         return false
                     endif
                 endif
-                call IssuePointOrderById(pudge, Order_Flare, targetX, targetY)
+                call IssuePointOrderById(pudge, ORDER_MEATHOOK, targetX, targetY)
             endif
         endif
         return true
@@ -6613,7 +6946,7 @@ call TriggerEvaluate(trig)
 return
         endif
         //如果屠夫在放技能直接返回
-        if pudgeOrder == Order_MagicLeash or pudgeOrder == Order_Flare then
+        if pudgeOrder == ORDER_MAGICLEASH or pudgeOrder == ORDER_MEATHOOK then
             call Debug("log" , "return - Order = MagicLeash")
             return
         endif
@@ -6664,7 +6997,7 @@ return
         if YDWEGetUnitAbilityState(pudge , 'A006' , 1) != 0. then
             return
         endif
-        if pudgeOrder == Order_MagicLeash or pudgeOrder == Order_Flare then //如果屠夫在钩就返回
+        if pudgeOrder == ORDER_MAGICLEASH or pudgeOrder == ORDER_MEATHOOK then //如果屠夫在钩就返回
             call Debug("log" , " return - Order = Spell")
             return
         endif
@@ -6678,7 +7011,7 @@ return
         loop
             set dummyUnit=FirstOfGroup(enumGroup)
             exitwhen dummyUnit == null //检查可见度 防止对隐身单位
-            if Enemy_Alive_NoStructure(dummyUnit) and UnitVisibleToPlayer(dummyUnit , P2) then
+            if IsEnemyAliveNoStructure(dummyUnit) and UnitVisibleToPlayer(dummyUnit , P2) then
                 call GroupAddUnit(targetGroup, dummyUnit)
             endif
             call GroupRemoveUnit(enumGroup, dummyUnit)
@@ -6686,7 +7019,7 @@ return
         call LogoutGroup(enumGroup)
         set enumGroup=null
         set targetUnit=GetNearestUnitByGroup(targetGroup , pudgeX , pudgeY)
-        call IssueTargetOrderByIdWait0S(pudge , Order_MagicLeash , targetUnit)
+        call IssueTargetOrderByIdWait0S(pudge , ORDER_MAGICLEASH , targetUnit)
         call Debug("log" , "Dismember TargetName = " + GetUnitName(targetUnit))
         call LogoutGroup(targetGroup)
         set targetUnit=null
@@ -6704,7 +7037,7 @@ return
         local integer pudgeOrder= GetUnitCurrentOrder(pudge)
         local unit targetUnit
         local real rDistance= 0
-        if pudgeOrder == Order_MagicLeash or pudgeOrder == Order_Flare then //如果屠夫在放技能就返回
+        if pudgeOrder == ORDER_MAGICLEASH or pudgeOrder == ORDER_MEATHOOK then //如果屠夫在放技能就返回
             call Debug("log" , " return - Order = Spell")
             return
         endif
@@ -6718,7 +7051,7 @@ return
         loop
             set firstUnit=FirstOfGroup(enumGroup)
             exitwhen firstUnit == null //检查可见度 防止对隐身单位
-            if Enemy_Alive(firstUnit) and UnitVisibleToPlayer(firstUnit , P2) then
+            if IsEnemyAlive(firstUnit) and UnitVisibleToPlayer(firstUnit , P2) then
                 call GroupAddUnit(targetGroup, firstUnit)
             endif
             call GroupRemoveUnit(enumGroup, firstUnit)
@@ -6734,21 +7067,21 @@ return
             return
         endif
         call Debug("log" , "MinLife TargetName = " + GetUnitName(targetUnit))
-        if pudgeOrder != Order_Move then
-            if pudgeOrder == Order_Attack then
+        if pudgeOrder != ORDER_MOVE then
+            if pudgeOrder == ORDER_ATTACK then
                 set targetUnitX=GetUnitX(targetUnit)
                 set targetUnitY=GetUnitY(targetUnit)
                 set rDistance=GetDistanceBetween(pudgeX , pudgeY , targetUnitX , targetUnitY)
             endif
             if rDistance < 700 then
                 if YDWEGetUnitAbilityState(pudge , 'Apg1' , 1) == 0. then
-                    call IssuePointOrderById(pudge, Order_Flare, targetUnitX, targetUnitY)
+                    call IssuePointOrderById(pudge, ORDER_MEATHOOK, targetUnitX, targetUnitY)
                     call Debug("log" , "Hook TargetName = " + GetUnitName(targetUnit))
                 elseif YDWEGetUnitAbilityState(pudge , 'A006' , 1) == 0. then
-                    call IssueTargetOrderById(pudge, Order_MagicLeash, targetUnit)
+                    call IssueTargetOrderById(pudge, ORDER_MAGICLEASH, targetUnit)
                     call Debug("log" , "Dismember TargetName = " + GetUnitName(targetUnit))
                 else
-                    call IssueTargetOrderById(pudge, Order_Attack, targetUnit)
+                    call IssueTargetOrderById(pudge, ORDER_ATTACK, targetUnit)
                     call Debug("log" , "Attack TargetName = " + GetUnitName(targetUnit))
                 endif
             endif
@@ -6778,7 +7111,7 @@ return
             call PudgeAIDismember(pudge)
         elseif orderUnit != null then
             set orderId=GetIssuedOrderId()
-            if orderId == Order_Smart then
+            if orderId == ORDER_SMART then
                 call SaveBoolean(HT, iHandleId, GetHandleId(orderUnit), GetOrderTargetUnit() == null)
             endif
         elseif trigEventId == EVENT_WIDGET_DEATH then
@@ -6813,24 +7146,177 @@ return
     endfunction
     
     
-    function StartBossAI takes unit whichUnit returns nothing
+// scope Pudge ends
+// scope Imago begins
+    // Boss的命令队列
+    function SetBossCommandQueue takes unit whichUnit,unit targetUnit,integer whichOrderId,real x,real y returns nothing
+        call SaveUnitHandle(HT, Tmp__ArrayInt[1], 100, targetUnit)
+        call SaveInteger(HT, Tmp__ArrayInt[1], 100, whichOrderId)
+        call SaveReal(HT, Tmp__ArrayInt[1], 100, x)
+        call SaveReal(HT, Tmp__ArrayInt[1], 101, y)
+    endfunction
+    function GetBossCommandQueueOrderId takes nothing returns integer
+        return LoadInteger(HT, Tmp__ArrayInt[1], 100)
+    endfunction
+    function GetBossCommandQueueOrderTargetUnit takes nothing returns unit
+        return LoadUnitHandle(HT, Tmp__ArrayInt[1], 100)
+    endfunction
+    function GetBossCommandQueueOrderTargetX takes nothing returns real
+        return LoadReal(HT, Tmp__ArrayInt[1], 101)
+    endfunction
+    function GetBossCommandQueueOrderTargetY takes nothing returns real
+        return LoadReal(HT, Tmp__ArrayInt[1], 102)
+    endfunction
+    function Imago___ImagoAI__AddCommandQueue takes unit imago returns nothing
+        local group targetGroup= LoginGroup()
+        local group enumGroup= LoginGroup()
+        local unit firstUnit
+        local unit targetUnit
+        set Tmp__ArrayReal[0]=GetUnitX(imago)
+        set Tmp__ArrayReal[1]=GetUnitY(imago)
+        call GroupEnumUnitsInRange(enumGroup, Tmp__ArrayReal[0], Tmp__ArrayReal[1], 1600, null)
+        // 筛选
+        set P2=GetOwningPlayer(imago)
+        loop
+            set firstUnit=FirstOfGroup(enumGroup)
+            exitwhen firstUnit == null //检查可见度 防止对隐身单位
+            if IsEnemyAlive(firstUnit) and UnitVisibleToPlayer(firstUnit , P2) then
+                call GroupAddUnit(targetGroup, firstUnit)
+            endif
+            call GroupRemoveUnit(enumGroup, firstUnit)
+        endloop
+        set firstUnit=null
+        call LogoutGroup(enumGroup)
+        set enumGroup=null
+        // 寻敌
+        set targetUnit=GetMinPercentLifeUnitByGroup(targetGroup)
+        call LogoutGroup(targetGroup)
+        if IsUnitInRange(targetUnit, imago, 500) then // 如果百分比血量最低的单位在500范围内 那就干他
+call SetBossCommandQueue(imago , targetUnit , ORDER_ATTACK , 0 , 0)
+        endif
+        set targetUnit=null
+    endfunction
+    function Imago___ImagoAI__Attack takes unit imago,integer id returns nothing
+        // 不是普通命令Id 说明在放技能
+        if not (LoadBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, (id))) then // INLINED!!
+            call Imago___ImagoAI__AddCommandQueue(imago)
+            return
+        endif
+        
+    endfunction
+    function Imago___ImagoAI__CallBack takes nothing returns boolean
+        local eventid trigEventId= GetTriggerEventId()
+        local integer iHandleId= GetHandleId(GetTriggeringTrigger())
+        local unit imago= LoadUnitHandle(HT, iHandleId, 0)
+        local integer currentOrderId= GetUnitCurrentOrder(imago)
+        if trigEventId == EVENT_GAME_TIMER_EXPIRED then
+            if currentOrderId == 0 or currentOrderId != ORDER_ATTACK then
+                set Tmp__ArrayInt[1]=iHandleId
+                call Imago___ImagoAI__Attack(imago , currentOrderId)
+            endif
+        elseif trigEventId == EVENT_UNIT_SPELL_FINISH then
+            // 如果命令队列有动作就执行队列动作
+            set Tmp__ArrayInt[1]=iHandleId
+            set Tmp__ArrayInt[2]=(LoadInteger(HT, Tmp__ArrayInt[1], 100)) // INLINED!!
+            if Tmp__ArrayInt[2] != 0 then
+                if (LoadUnitHandle(HT, Tmp__ArrayInt[1], 100)) == null then // INLINED!!
+                    // 如果释放无目标命令失败 则释放点目标
+                    if not IssueImmediateOrderById(imago, Tmp__ArrayInt[2]) then
+                        call IssuePointOrderById(imago, Tmp__ArrayInt[2], (LoadReal(HT, Tmp__ArrayInt[1], 101)), (LoadReal(HT, Tmp__ArrayInt[1], 102))) // INLINED!!
+                    endif
+                else
+                    // 有技能目标就对技能目标放
+                    call IssueTargetOrderById(imago, Tmp__ArrayInt[2], (LoadUnitHandle(HT, Tmp__ArrayInt[1], 100))) // INLINED!!
+                endif
+            endif
+        elseif trigEventId == EVENT_UNIT_ACQUIRED_TARGET then
+            // 获取攻击目标
+            // 没在cd 并且魔法百分比＞20
+            if YDWEGetUnitAbilityState(imago , 'A00C' , 1) == 0. and GetUnitManaPercent(imago) > 20. then
+                call IssueTargetOrderByIdWait0S(imago , ORDER_CHARGE , GetEventTargetUnit())
+            endif
+        elseif trigEventId == EVENT_WIDGET_DEATH then
+        else
+            set Tmp__ArrayInt[1]=GetIssuedOrderId()
+            if Tmp__ArrayInt[1] != 0 and (LoadBoolean(ObjectData, OBJ_KEY_COMMON_ORDERID, (Tmp__ArrayInt[1]))) then // INLINED!!
+                // 保存命令Id的发布时间
+                call SaveInteger(HT, iHandleId, Tmp__ArrayInt[1], R2I((TimerGetElapsed(base___GameTimer)))) // INLINED!!
+            endif
+        endif
+        set imago=null
+        set trigEventId=null
+        return false
+    endfunction
+    // 初始化Imago的技能
+    function InitImagoSkills takes nothing returns nothing
+        
+    endfunction
+    function InitImagoAI takes unit imago returns nothing
+        local trigger trig= CreateTrigger()
+        call InitImagoSkills()
+        call TriggerRegisterTimerEvent(trig, 0.25, true) // 时间
+call TriggerRegisterDeathEvent(trig, imago) // 死亡
+
+        call TriggerRegisterUnitEvent(trig, imago, EVENT_UNIT_ISSUED_TARGET_ORDER) // 发布目标事件
+call TriggerRegisterUnitEvent(trig, imago, EVENT_UNIT_ISSUED_POINT_ORDER) // 发布指定点
+call TriggerRegisterUnitEvent(trig, imago, EVENT_UNIT_ISSUED_ORDER) // 发布无目标
+
+        call TriggerRegisterUnitEvent(trig, imago, EVENT_UNIT_SPELL_FINISH) // 施法结束
+
+        
+        call TriggerRegisterUnitEvent(trig, imago, EVENT_UNIT_ACQUIRED_TARGET) // 注意攻击目标
+call TriggerRegisterUnitEvent(trig, imago, EVENT_UNIT_TARGET_IN_RANGE) // 获取攻击目标
+call TriggerRegisterUnitEvent(trig, imago, EVENT_UNIT_ATTACKED) // 被攻击
+call TriggerAddCondition(trig, Condition(function Imago___ImagoAI__CallBack))
+        call SaveUnitHandle(HT, GetHandleId(trig), 0, imago)
+        set trig=null
+    endfunction
+// scope Imago ends
+// scope Boss begins
+    function ExecuteBossAI takes unit whichUnit returns nothing
         local integer bossType= GetUnitTypeId(whichUnit)
         if bossType == 'U001' then
             call InitPudgeAI(whichUnit)
+        elseif bossType == 'u000' then
+            call InitImagoAI(whichUnit)
         endif
-    
     endfunction
     
-    function StartPedugAI takes nothing returns boolean
+    function StartBossAI takes nothing returns boolean
         local trigger trig= GetTriggeringTrigger()
         local integer iHandleId= GetHandleId(trig)
-        call StartBossAI(LoadUnitHandle(HT, iHandleId, 0))
+        call ExecuteBossAI(LoadUnitHandle(HT, iHandleId, 0))
         call FlushChildHashtable(HT, iHandleId)
         call ClearTrigger(trig)
         return false
     endfunction
-// scope Pudge ends
-// UI在英雄后面加载
+    function Boss_Init takes nothing returns nothing
+       
+        local trigger trig= CreateTrigger()
+        local integer iHandleId= GetHandleId(trig)
+        local unit whichBoss
+            
+        //屠夫 9级
+        set whichBoss=CreateUnit(Player(9), 'U001', - 13853.3, - 27003.7, 89.893)
+        call SetHeroLevel(whichBoss, 9, false)
+        call TriggerRegisterUnitInRange(trig, whichBoss, 600, null)
+        call TriggerAddCondition(trig, Condition(function StartBossAI))
+        call SaveUnitHandle(HT, iHandleId, 0, whichBoss)
+        
+        set whichBoss=CreateUnit(Player(9), 'u000', - 24785.3, - 25275.7, 89.893)
+        // call SetHeroLevel(whichBoss, 9, false)
+        call TriggerRegisterUnitInRange(trig, whichBoss, 600, null)
+        call TriggerAddCondition(trig, Condition(function StartBossAI))
+        call SaveUnitHandle(HT, iHandleId, 0, whichBoss)
+        
+        //死灵法师 10级
+        set whichBoss=CreateUnit(Player(9), 'U002', - 8341.3, - 18597.8, 165.143)
+        call SetHeroLevel(whichBoss, 10, false)
+        
+        set whichBoss=null
+        set trig=null
+    endfunction
+// scope Boss ends
 //非常奇怪 SimpleFrame的Show似乎是颠倒的
 function UnitStateUpdateCallback takes nothing returns nothing
  local real value= 0.
@@ -7087,7 +7573,7 @@ function ClickPickHeroButton takes nothing returns nothing
 	call EnablePreSelect(false, false)
 endfunction
 function DisableHeroUI takes integer frameId,boolean enable returns nothing
- local string artPath= GetUnitSlkData(AllHeroTypeId[frameId] , "Art")
+ local string artPath= (GetObjectDataBySlk((AllHeroTypeId[frameId] ) , "unit" , ( "Art"))) // INLINED!!
 	set artPath="ReplaceableTextures\\CommandButtonsDisabled\\DIS" + SubString(artPath, 35, StringLength(artPath))
 	call DzFrameSetTexture(HeroBackDrop[frameId], artPath, 0)
 	set HeroIsSelected[frameId]=true
@@ -7120,6 +7606,7 @@ function PickHeroSync takes nothing returns boolean
 		endif
 		call InitHeroTriggerById(newHero)
 		set PlayerHeroUnit[GetUnitPointValue(newHero)]=newHero
+		call GroupAddUnit(AllHerosGroup, newHero)
 		set newHero=null
 	endif
 	call DisableHeroUI(frameId , true)
@@ -7150,9 +7637,9 @@ endfunction
 function CreatePickHeroButton takes integer attributeId,integer frameId,integer heroTypeId,real x,real y returns nothing
  local real frameX= x + 0.05 * attributeId
  local real frameY= y
- local string heroArt= GetUnitSlkData(heroTypeId , "Art")
- local string tip= GetUnitSlkData(heroTypeId , "Tip")
- local string ubertip= GetUnitSlkData(heroTypeId , "UberTip")
+ local string heroArt= (GetObjectDataBySlk((heroTypeId ) , "unit" , ( "Art"))) // INLINED!!
+ local string tip= (GetObjectDataBySlk((heroTypeId ) , "unit" , ( "Tip"))) // INLINED!!
+ local string ubertip= (GetObjectDataBySlk((heroTypeId ) , "unit" , ( "UberTip"))) // INLINED!!
 	if heroArt == null then
 		call Debug("log" , "error, HeroArt=null id:" + I2S(attributeId))
 	endif
@@ -7268,375 +7755,8 @@ function InitUIFrame takes nothing returns boolean
 	call ClearTrigger(GetTriggeringTrigger())
 	return false
 endfunction
-// 获取鼠标在游戏内的坐标X
-
-// 获取鼠标在游戏内的坐标Y
-
-// 获取鼠标在游戏内的坐标Z
-
-// 鼠标是否在游戏内
-
-// 获取鼠标屏幕坐标X
-
-// 获取鼠标屏幕坐标Y
-
-// 获取鼠标游戏窗口坐标X
-
-// 获取鼠标游戏窗口坐标Y
-
-// 设置鼠标位置
-
-// 注册鼠标点击触发（sync为true时，调用TriggerExecute。为false时，直接运行action函数，可以异步不掉线，action里不要有同步操作）
-
-// 注册鼠标点击触发（sync为true时，调用TriggerExecute。为false时，直接运行action函数，可以异步不掉线，action里不要有同步操作）
-
-// 注册键盘点击触发
-
-// 注册键盘点击触发
-
-// 注册鼠标滚轮触发
-
-// 注册鼠标滚轮触发
-
-// 注册鼠标移动触发
-
-// 注册鼠标移动触发
-
-// 获取触发器的按键码
-
-// 获取滚轮delta
-
-// 判断按键是否按下
-
-// 获取触发key的玩家
-
-// 获取war3窗口宽度
-
-// 获取war3窗口高度
-
-// 获取war3窗口X坐标
-
-// 获取war3窗口Y坐标
-
-// 注册war3窗口大小变化事件
-
-// 注册war3窗口大小变化事件
-
-// 判断窗口是否激活
-
-// 设置可摧毁物位置
-
-// 设置单位位置-本地调用
-
-// 异步执行函数
-
-// 取鼠标指向的单位
-
-// 设置单位的贴图
-
-//  设置内存数值
-
-//  替换单位类型 [BZAPI]
-
-//  替换单位模型 [BZAPI]
-
-//  原生 - 设置小地图背景贴图
-
-// 注册数据同步触发器
-
-// 同步游戏数据
-
-// 获取同步的数据
-
-// 获取同步数据的玩家
-
-// 隐藏界面元素
-
-// 修改游戏世界窗口位置
-
-// 头像
-
-// 小地图
-
-// 技能按钮
-
-// 英雄按钮
-
-// 英雄血条
-
-// 英雄蓝条
-
-// 道具按钮
-
-// 小地图按钮
-
-// 左上菜单按钮
-
-// 鼠标提示
-
-// 聊天信息
-
-// 单位信息
-
-// 获取最上的信息
-
-// 取rgba色值
-
-// 设置界面更新回调（非同步）
-
-// 界面更新回调
-
-// 显示/隐藏窗体
-
-// 创建窗体
-
-// 创建简单的窗体
-
-// 销毁窗体
-
-// 加载内容目录 (Toc table of contents)
-
-// 设置窗体相对位置 [0:左上|1:上|2:右上|3:左|4:中|5:右|6:左下|7:下|8:右下]
-
-// 设置窗体绝对位置
-
-// 清空窗体锚点
-
-// 设置窗体禁用/启用
-
-// 注册用户界面事件回调
-
-//  注册UI事件回调(func handle)
-
-// 获取触发用户界面事件的玩家
-
-// 获取触发用户界面事件的窗体
-
-// 通过名称查找窗体
-
-// 通过名称查找普通窗体
-
-// 查找字符串
-
-// 查找BACKDROP frame
-
-// 获取游戏用户界面
-
-// 点击窗体
-
-// 自定义屏幕比例
-
-// 使用宽屏模式
-
-// 设置文字（支持EditBox, TextFrame, TextArea, SimpleFontString、GlueEditBoxWar3、SlashChatBox、TimerTextFrame、TextButtonFrame、GlueTextButton）
-
-// 获取文字（支持EditBox, TextFrame, TextArea, SimpleFontString）
-
-// 设置字数限制（支持EditBox）
-
-// 获取字数限制（支持EditBox）
-
-// 设置文字颜色（支持TextFrame, EditBox）
-
-// 获取鼠标所在位置的用户界面控件指针
-
-// 设置所有锚点到目标窗体上
-
-// 设置焦点
-
-// 设置模型（支持Sprite、Model、StatusBar）
-
-// 获取控件是否启用
-
-// 设置透明度（0-255）
-
-// 获取透明度（0-255）
-
-// 设置动画
-
-// 设置动画进度（autocast为false是可用）
-
-// 设置texture（支持Backdrop、SimpleStatusBar）
-
-// 设置缩放
-
-// 设置提示
-
-// 鼠标限制在用户界面内
-
-// 获取当前值（支持Slider、SimpleStatusBar、StatusBar）
-
-// 设置最大最小值（支持Slider、SimpleStatusBar、StatusBar）
-
-// 设置Step值（支持Slider）
-
-// 设置当前值（支持Slider、SimpleStatusBar、StatusBar）
-
-// 设置窗体大小
-
-// 根据tag创建窗体
-
-// 设置颜色（支持SimpleStatusBar）
-
-// 不明觉厉
-
-//  设置优先级 [NEW]
-
-//  设置父窗口 [NEW]
-
-//  设置字体 [NEW]
-
-//  获取 Frame 的 高度 [NEW]
-
-//  设置对齐方式 [NEW]
-
-//  获取 Frame 的 Parent [NEW]
-
-//==========================================================================
-//===========================================================================
-// 
-// 基佬之岛v1.15
-// 
-//   Warcraft III map script
-//   Generated by the Warcraft III World Editor
-//   Date: Wed Apr 07 20:33:49 2021
-//   Map Author: 未知
-// 
-//===========================================================================
-//***************************************************************************
-//*
-//*  Global Variables
-//*
-//***************************************************************************
-// 队伍颜色
-// 菊花 - 绿色
-// 卡尔 - 紫色
-//***************************************************************************
-//*
-//*  Sounds
-//*
-//***************************************************************************
-//***************************************************************************
-//*
-//*  Items
-//*
-//***************************************************************************
-
-//***************************************************************************
-//*
-//*  Unit Creation
-//*
-//***************************************************************************//===========================================================================
-
-//***************************************************************************
-//*
-//*  Quest
-//*
-//***************************************************************************
-
-//***************************************************************************
-//*
-//*  Regions
-//*
-//***************************************************************************
-
-//***************************************************************************
-//*
-//*  Cameras
-//*
-//***************************************************************************
-
-//***************************************************************************
-//*
-//*  Custom Script Code
-//*
-//***************************************************************************
-//TESH.scrollpos=0
-//TESH.alwaysfold=0
-//吸血
-function GetUnitLifestealValue takes unit stealUnit returns real
-	if EffectIsEnabled[2] then
-		if GetUnitAbilityLevel(stealUnit, 'Acs0') == 1 then
-			return 0.10
-		endif
-	endif
-	return 0.
-endfunction
-function SetUnitLifesteal takes nothing returns nothing
- local real value
-	set value=GetUnitLifestealValue(Tmp_DamageSource)
-	if value == 0. then
-		return
-	endif
-	if not IsUnitIllusion(Tmp_DamageSource) and not IsUnitIllusion(Tmp_DamageInjured) then
-		call UnitRestoreLife(Tmp_DamageSource , Tmp_DamageValue * value)
-	endif
-	call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Undead\\VampiricAura\\VampiricAuraTarget.mdl", Tmp_DamageSource, "origin"))
-endfunction
-//使得单位本次攻击 暴击
-function SetUnitCriticalStrike takes real c,boolean isAttackTarget returns nothing
-	set Tmp_DamageValue=Tmp_DamageValue + Tmp_DamageValue * c //设置这个全局值为暴击后的伤害
-call EXSetEventDamage(Tmp_DamageValue) //设置伤害值
-if isAttackTarget then
-		call CriticalStrikeTextTag(Tmp_DamageSource , Tmp_DamageValue)
-	endif
-endfunction
-//任意单位受伤动作
-function TraversalDamagedEvent takes integer id returns nothing
- local integer i= id * 200
-	loop //遍历其他攻击特效
-exitwhen i >= DamageEventNumber[id]
-		if DamageEventQueue[i] != null and IsTriggerEnabled(DamageEventQueue[i]) then
-			call TriggerEvaluate(DamageEventQueue[i])
-		endif
-		set i=i + 1
-	endloop
-endfunction
-//
-function DamageReduction takes nothing returns nothing
- local integer level
-	if EffectIsEnabled[3] then
-		set level=GetUnitAbilityLevel(Tmp_DamageInjured, 'Acs3')
-		if level > 0 then
-			if IsPointBlighted(GetUnitX(Tmp_DamageInjured), GetUnitY(Tmp_DamageInjured)) then
-				//call Debug("log", "减少"+R2S( Tmp_DamageValue * 0.05 * level))
-				set Tmp_DamageValue=Tmp_DamageValue - Tmp_DamageValue * 0.05 * level
-				call EXSetEventDamage(Tmp_DamageValue) //设置伤害值
-endif
-		endif
-	endif
-endfunction
-function YDWEAnyUnitDamagedTriggerAction takes nothing returns boolean
- local integer i
- local real c
- local boolean isAttackTarget
-	set Tmp_DamageValue=GetEventDamage() //伤害值
-if Tmp_DamageValue > 0 then
-		set Tmp_DamageSource=GetEventDamageSource() //伤害来源
-set Tmp_DamageInjured=GetTriggerUnit() //受伤单位
-set i=GetHandleId(Tmp_DamageSource)
-		//伤害减免
-		call DamageReduction()
-		if EXGetEventDamageData(EVENT_DAMAGE_DATA_IS_ATTACK) != 0 then //如果是物理伤害则运行此部分
-//伤害减免后运行暴击
-set isAttackTarget=LoadUnitHandle(UnitKeyBuff, i, AttackTarget) == Tmp_DamageInjured
-			set c=LoadReal(UnitKeyBuff, i, CriticalStrikeDamage)
-			if c != .0 then
-				call SetUnitCriticalStrike(c , isAttackTarget) //先一步把暴击运行了 因为这会改变伤害值
-			endif
-			// 这里是判断一下该单位是否是普通攻击的目标(排除溅射伤害)
-			if isAttackTarget then
-				if CommonAttackEffectFilter(Tmp_DamageSource , Tmp_DamageInjured) then
-					call TraversalDamagedEvent(1)
-					call SetUnitLifesteal()
-				endif
-			endif
-		endif
-	endif
-	return false
-endfunction
 function RestoreAura_Filter takes nothing returns boolean
-	return IsMechanical_Ally_Alive_NoStructure(GetFilterUnit())
+	return IsMechanicalAllyAliveNoStructure(GetFilterUnit())
 endfunction
 function damageevent_EnchantEquipment takes nothing returns nothing
  local integer addedDamage
@@ -7653,234 +7773,10 @@ function EnchantEquipment_Learn1 takes nothing returns nothing
  local trigger t= CreateTrigger()
 	call TriggerAddCondition(t, Condition(function damageevent_EnchantEquipment))
 	call TriggerRegisterAnyUnitDamagedEvent(t , 1) //
-
-	set t=null
+set t=null
 endfunction
 function CriticalStrikeAura_Learn1 takes nothing returns nothing
 	call EnabledAttackEffect(1 , 0.) //永久激活
-endfunction
-//防御光环选取条件
-function defense_aura_filter takes nothing returns boolean
-	//call Debug("log", "filter" + GetUnitName(GetFilterUnit()))
-	return Ally_Alive_NoStructure(GetFilterUnit())
-endfunction
-//光环类型
-//共存模式 取最高值
-function defense_aura_actions takes nothing returns boolean
- local trigger t= GetTriggeringTrigger()
- local integer h= GetHandleId(t)
- local integer firstUnitH
- local unit sourceUnit= LoadUnitHandle(HT, h, 200)
- local real value= LoadReal(HT, h, 200)
- local real maxValue= 0.
- local integer iBuff
- local integer buffCount
- local unit firstUnit= null
- local group g1= null
- local group g2= null
- local group g3= LoadGroupHandle(HT, h, 201)
- local integer buffId= LoadInteger(HT, h, 202)
- local integer level= GetUnitAbilityLevel(sourceUnit, LoadInteger(HT, h, 203))
-	if not UnitAlive(sourceUnit) then
-		call Debug("log" , "ClearTrigger")
-		call FlushChildHashtable(HT, h)
-		call ClearTrigger(t)
-		loop
-			set firstUnit=FirstOfGroup(g3)
-			exitwhen firstUnit == null
-			call GroupRemoveUnit(g3, firstUnit)
-			call UnitReduceArmorBonus(firstUnit , value)
-		endloop
-		call LogoutGroup(g3)
-	else
-		set g1=LoginGroup()
-		set P2=GetOwningPlayer(sourceUnit) //Real 201为光环范围
-call GroupEnumUnitsInRange(g1, GetUnitX(sourceUnit), GetUnitY(sourceUnit), LoadReal(HT, h, 201), LoadBooleanExprHandle(HT, h, 205))
-		set g2=LoginGroup()
-		call GroupAddGroup(g3, g2)
-		loop
-			set firstUnit=FirstOfGroup(g2)
-			exitwhen firstUnit == null
-			if not IsUnitInGroup(firstUnit, g1) then
-				set firstUnitH=GetHandleId(firstUnit)
-				set iBuff=0 //GetUnitBuff(firstUnit, buffId)
-				set maxValue=0 //GetBuffMaxData(iBuff, 1)
-				//call UnitRemoveBuffByCount(firstUnit, buffId, LoadInteger(HT, h, firstUnitH))
-				//删之前查buff 有没有次一级的buff
-				if value == maxValue then
-					set maxValue=0 //GetBuffMaxData(iBuff, 1)
-					set value=value - maxValue
-					call UnitReduceArmorBonus(firstUnit , value)
-				endif
-				call GroupRemoveUnit(g3, firstUnit)
-			endif
-			call GroupRemoveUnit(g2, firstUnit)
-		endloop
-		call LogoutGroup(g2)
-		loop
-			set firstUnit=FirstOfGroup(g1)
-			exitwhen firstUnit == null
-			if not IsUnitInGroup(firstUnit, g3) then
-				//set BuffDataA = value
-				set iBuff=0 //GetUnitBuff(firstUnit, buffId)
-				set maxValue=0 //GetBuffMaxData(iBuff, 1)
-				set buffCount=0 //EXUnitAddAbilityTimed(firstUnit, buffId, BuffAddType_Positive + BuffAddType_Aura, level)
-				set firstUnitH=GetHandleId(firstUnit)
-				if iBuff == 0 then
-					set iBuff=0 //GetUnitBuff(firstUnit, buffId)
-				endif
-				call SaveInteger(HT, h, firstUnitH, buffCount)
-				if value > maxValue then
-					call UnitAddArmorBonus(firstUnit , value - maxValue)
-				endif
-			endif
-			call GroupRemoveUnit(g1, firstUnit)
-			call GroupAddUnit(g3, firstUnit)
-		endloop
-		call LogoutGroup(g1)
-	endif
-	set t=null
-	set sourceUnit=null
-	set firstUnit=null
-	set g1=null
-	set g2=null
-	set g3=null
-	return false
-endfunction
-//防御光环
-function DefenseAura takes unit whichUnit,real value,real range,integer abilityId,integer buffId,code filter returns nothing
- local trigger trig= CreateTrigger()
- local integer h= GetHandleId(trig)
-	call TriggerRegisterTimerEvent(trig, AuraFrame, true)
-	call TriggerAddCondition(trig, Condition(function defense_aura_actions))
-	call SaveBooleanExprHandle(HT, h, 205, Condition(filter))
-	call SaveReal(HT, h, 200, value)
-	call SaveReal(HT, h, 201, range)
-	call SaveInteger(HT, h, 202, buffId)
-	call SaveInteger(HT, h, 203, abilityId)
-	call SaveUnitHandle(HT, h, 200, whichUnit)
-	call SaveGroupHandle(HT, h, 201, LoginGroup())
-	set trig=null
-endfunction
-//光环类型
-//独立,暂时不考虑叠加,仅用作生命之泉的百分比回血
-function restore_aura_actions takes nothing returns boolean
- local trigger t= GetTriggeringTrigger()
- local integer h= GetHandleId(t)
- local integer firstUnitH
- local unit sourceUnit= LoadUnitHandle(HT, h, 200)
- local real value= LoadReal(HT, h, 200)
- local real oldRestoreLife
- local real restoreLife
- local unit firstUnit= null
- local group g1= null
- local group g2= null
- local group g3= LoadGroupHandle(HT, h, 201)
- local integer buffId= LoadInteger(HT, h, 202)
-	if not UnitAlive(sourceUnit) then
-		call Debug("log" , "ClearTrigger")
-		call FlushChildHashtable(HT, h)
-		call ClearTrigger(t)
-		call UnitRemoveAbility(sourceUnit, LoadInteger(HT, h, 203))
-		loop
-			set firstUnit=FirstOfGroup(g3)
-			exitwhen firstUnit == null
-			call GroupRemoveUnit(g3, firstUnit)
-			call UnitRemoveAbility(firstUnit, buffId)
-			call UnitReduceLifeRestore(firstUnit , value)
-		endloop
-		call LogoutGroup(g3)
-	else
-		set g1=LoginGroup()
-		set P2=GetOwningPlayer(sourceUnit) //Real 201为光环范围
-call GroupEnumUnitsInRange(g1, GetUnitX(sourceUnit), GetUnitY(sourceUnit), LoadReal(HT, h, 201), LoadBooleanExprHandle(HT, h, 205))
-		set g2=LoginGroup()
-		call GroupAddGroup(g3, g2)
-		loop
-			set firstUnit=FirstOfGroup(g2)
-			exitwhen firstUnit == null
-			if not IsUnitInGroup(firstUnit, g1) then
-				set firstUnitH=GetHandleId(firstUnit)
-				set oldRestoreLife=LoadReal(HT, h, firstUnitH)
-				call UnitReduceLifeRestore(firstUnit , oldRestoreLife)
-				call RemoveSavedReal(HT, h, firstUnitH)
-				call UnitRemoveAbility(firstUnit, buffId)
-				call GroupRemoveUnit(g3, firstUnit)
-				//call Debug("log", "4减少" + R2S(oldRestoreLife))
-			endif
-			call GroupRemoveUnit(g2, firstUnit)
-		endloop
-		call LogoutGroup(g2)
-		loop
-			set firstUnit=FirstOfGroup(g1)
-			exitwhen firstUnit == null
-			set firstUnitH=GetHandleId(firstUnit)
-			set restoreLife=GetUnitState(firstUnit, UNIT_STATE_MAX_LIFE) * value
-			if IsUnitInGroup(firstUnit, g3) then
-				set oldRestoreLife=LoadReal(HT, h, firstUnitH)
-	
-				if restoreLife > oldRestoreLife then
-					call SaveReal(HT, h, firstUnitH, restoreLife)
-					//call Debug("log", "2添加" + R2S(restoreLife - oldRestoreLife))
-					set restoreLife=restoreLife - oldRestoreLife
-					call UnitAddLifeRestore(firstUnit , restoreLife)
-				elseif oldRestoreLife > restoreLife then
-					call SaveReal(HT, h, firstUnitH, restoreLife)
-					//call Debug("log", "3减少" + R2S(oldRestoreLife - restoreLife))
-					set restoreLife=oldRestoreLife - restoreLife
-					call UnitReduceLifeRestore(firstUnit , restoreLife)
-				endif
-			else
-				call UnitAddLifeRestore(firstUnit , restoreLife)
-				call SaveReal(HT, h, firstUnitH, restoreLife)
-				//call Debug("log", "1添加" + R2S(restoreLife))
-			endif
-			call GroupRemoveUnit(g1, firstUnit)
-			call GroupAddUnit(g3, firstUnit)
-		endloop
-		call LogoutGroup(g1)
-	endif
-	set t=null
-	set sourceUnit=null
-	set firstUnit=null
-	set g1=null
-	set g2=null
-	set g3=null
-	return false
-endfunction
-//百分比 回复光环
-function PercentRestoreAura takes unit whichUnit,real value,real range,integer abilityId,integer buffId,code filter returns nothing
- local integer h= CreateTimerEventTrigger(AuraFrame , true , function restore_aura_actions)
-	call SaveBooleanExprHandle(HT, h, 205, Condition(filter))
-	call SaveReal(HT, h, 200, value)
-	call SaveReal(HT, h, 201, range)
-	call SaveInteger(HT, h, 202, buffId)
-	call SaveInteger(HT, h, 203, abilityId)
-	call SaveUnitHandle(HT, h, 200, whichUnit)
-	call SaveGroupHandle(HT, h, 201, LoginGroup())
-endfunction
-//任意单位腐烂
-function UnitDecayEvnetActions takes nothing returns boolean
- local unit decayUnit= GetDecayingUnit()
-	set decayUnit=null
-	return false
-endfunction
-function InitBoss takes nothing returns nothing
- local trigger trig= CreateTrigger()
- local integer iHandleId= GetHandleId(trig)
- local unit whichBoss
-	
-	//屠夫 9级
-	set whichBoss=CreateUnit(Player(9), 'U001', - 13853.3, - 27003.7, 89.893)
-	call SetHeroLevel(whichBoss, 9, false)
-	call TriggerRegisterUnitInRange(trig, whichBoss, 600, null)
-	call TriggerAddCondition(trig, Condition(function StartPedugAI))
-	call SaveUnitHandle(HT, iHandleId, 0, whichBoss)
-	//死灵法师 10级
-	set whichBoss=CreateUnit(Player(9), 'U002', - 8341.3, - 18597.8, 165.143)
-	call SetHeroLevel(whichBoss, 10, false)
-	set whichBoss=null
-	set trig=null
 endfunction
 //***************************************************************************
 //*
@@ -7888,46 +7784,6 @@ endfunction
 //*
 //***************************************************************************
 //===========================================================================
-function funcTestSpeed takes nothing returns nothing
- local integer i= 0
-	loop
-		exitwhen i == 1000
-		call GetDetectedUnit()
-		set i=i + 1
-	endloop
-endfunction
-function TestEsc takes nothing returns boolean
- local integer i= 0
- local real time
-	call ClearTextMessages()
-	if false then
-		set time=S2R(EXExecuteScript("os.clock()"))
-		loop
-			exitwhen i == 100
-			call ExecuteFunc("funcTestSpeed")
-			set i=i + 1
-		endloop
-		//call ClearTextMessages()
-		call DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "运行时间" + R2S(S2R(EXExecuteScript("os.clock()")) - time))
-		call BJDebugMsg(R2S(GetUnitState(LocalPlayerSelectUnit, UNIT_STATE_RATE_OF_FIRE)))
-	endif
-	//call GetLocalizedHotkey("yd_leak_monitor::create_report")
-	//call EnableNewUnitStateUI(not NewUnitStateUIIsEnable)
-	return false
-endfunction
-
-//***************************************************************************
-//*
-//*  Map Configuration
-//*
-//***************************************************************************
-//***************************************************************************
-//*
-//*  Players
-//*
-//***************************************************************************
-
-//Struct method generated initializers/callers:
 //***************************************************************************
 //*
 //*  Triggers
@@ -8271,7 +8127,6 @@ endfunction
 //===========================================================================
 function InitTrig_Intro_Start takes nothing returns nothing
     set gg_trg_Intro_Start=CreateTrigger()
-    call DoNothing()
     call TriggerAddAction(gg_trg_Intro_Start, function Trig_Intro_StartActions)
 endfunction
 //===========================================================================
@@ -8327,7 +8182,6 @@ endfunction
 //===========================================================================
 function InitTrig_Init_IntroCine takes nothing returns nothing
     set gg_trg_Init_IntroCine=CreateTrigger()
-    call DoNothing()
     call TriggerAddAction(gg_trg_Init_IntroCine, function Trig_Init_IntroCineActions)
 endfunction
 //===========================================================================
@@ -8363,7 +8217,6 @@ endfunction
 //===========================================================================
 function InitTrig_Intro_Skipped_Orig takes nothing returns nothing
     set gg_trg_Intro_Skipped=CreateTrigger()
-    call DoNothing()
 
         call TriggerRegisterPlayerEventEndCinematic(gg_trg_Intro_Skipped, Player(0))
         call TriggerRegisterPlayerEventEndCinematic(gg_trg_Intro_Skipped, Player(1))
@@ -8439,8 +8292,8 @@ function Trig_Intro_CleanupActions takes nothing returns nothing
             call IssueTargetOrder(ydl_unit, "smart", udg_TavernUnit[1])
         else
             if ( ( IsUnitInGroup(ydl_unit, udg_CinematicUnitsGroup) == true ) ) then
-                call PauseUnit(ydl_unit, true)
                 call ShowUnit(ydl_unit, false)
+                call PauseUnit(ydl_unit, true)
             else
             endif
         endif
@@ -8459,7 +8312,6 @@ endfunction
 //===========================================================================
 function InitTrig_Intro_Cleanup takes nothing returns nothing
     set gg_trg_Intro_Cleanup=CreateTrigger()
-    call DoNothing()
     call TriggerAddAction(gg_trg_Intro_Cleanup, function Trig_Intro_CleanupActions)
 endfunction
 //===========================================================================
@@ -8475,7 +8327,6 @@ endfunction
 //===========================================================================
 function InitTrig_GameStart takes nothing returns nothing
     set gg_trg_GameStart=CreateTrigger()
-    call DoNothing()
     call TriggerAddAction(gg_trg_GameStart, function Trig_GameStartActions)
 endfunction
 //===========================================================================
@@ -8500,7 +8351,6 @@ endfunction
 //===========================================================================
 function InitTrig_InitQuest takes nothing returns nothing
     set gg_trg_InitQuest=CreateTrigger()
-    call DoNothing()
     call TriggerAddAction(gg_trg_InitQuest, function Trig_InitQuestActions)
 endfunction
 //===========================================================================
@@ -8513,7 +8363,6 @@ endfunction
 //===========================================================================
 function InitTrig_SideQuest1 takes nothing returns nothing
     set gg_trg_SideQuest1=CreateTrigger()
-    call DoNothing()
     call TriggerAddAction(gg_trg_SideQuest1, function Trig_SideQuest1Actions)
 endfunction
 //===========================================================================
@@ -8530,7 +8379,6 @@ endfunction
 //===========================================================================
 function InitTrig_ShanTaoZombie_Orig takes nothing returns nothing
     set gg_trg_ShanTaoZombie=CreateTrigger()
-    call DoNothing()
     call YDWETriggerRegisterEnterRectSimpleNull(gg_trg_ShanTaoZombie , gg_rct_Egg__ShanTaoZombie)
     call TriggerAddCondition(gg_trg_ShanTaoZombie, Condition(function Trig_ShanTaoZombieConditions))
     call TriggerAddAction(gg_trg_ShanTaoZombie, function Trig_ShanTaoZombieActions)
@@ -8807,10 +8655,15 @@ endfunction
 //***************************************************************************
 //===========================================================================
 function main takes nothing returns nothing
-    //一些函数调用可能会在这里
  local trigger trig
-	//lua入口
-	call Cheat("exec-lua:lua.base")
+	// 因为只能注册不规则区域被单位进入事件 所以这里用Region
+ local rect world= GetWorldBounds()
+	set WorldRegion=CreateRegion()
+	call RegionAddRect(WorldRegion, world)
+	call RemoveRect(world)
+	set world=null
+	// lua入口
+	call Cheat("exec-lua:\"scripts\\war3map\"")
 	call SetCameraBounds(- 28416.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), - 28544.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 18176.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 18048.0 - GetCameraMargin(CAMERA_MARGIN_TOP), - 28416.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 18048.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 18176.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), - 28544.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
 	// 光照
 	call SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl")
@@ -8819,90 +8672,49 @@ function main takes nothing returns nothing
 	call SetAmbientDaySound("SunkenRuinsDay")
 	// 入夜狼嚎
 	call SetAmbientNightSound("SunkenRuinsNight")
-	// 强制时间为12点
+	// 修正时间为12点
 	call SetFloatGameState(GAME_STATE_TIME_OF_DAY, 12)
 	call SetMapMusic("Music", true, 0)
+	// 任意单位受伤事件
+	call YDWESyStemAnyUnitDamagedRegistTrigger()
+	// 将vJass初始化放置在此处，注意，结构优先被初始化，然后是库初始化 
+
+
+call ExecuteFunc("InitUnitRestore")
+call ExecuteFunc("YDTriggerSaveLoadSystem__Init")
+call ExecuteFunc("InitializeYD")
+call ExecuteFunc("math__Init")
+call ExecuteFunc("base___Init")
+call ExecuteFunc("UnitAttackEvent___Init")
+call ExecuteFunc("CustomAnyEvent__Init")
+call ExecuteFunc("BuffSystem___InitBuff")
+call ExecuteFunc("TestSystem___Init")
+call Order__Init()
+call InitItemSystem()
+call UnitDeathEvent___Init()
+call UnitAbilityEvent___Init()
+call TriggerRegisterEnterRegion(EnterMapTrigger, WorldRegion, Condition(function UnitEnterMapAction)) // INLINED!!
+call TriggerAddCondition(HeroLevelUpTrigger, Condition(function HeroLevelUpActions)) // INLINED!!
+call UnitSummonEvent___Init()
+call UnitDecayEvnet___Init()
+call Boss_Init()
+call SetHeroVariable()
+
+	// 也许您想使用WorldEditor的该功能…
+	// 编辑器的初始化
+	call InitBlizzard()
 	call InitSounds()
 	call CreateRegions()
 	call CreateCameras()
 	call CreateAllItems()
-    //其他的调用可能会在这里
- 
-    //也许您想使用WorldEditor的该功能…
-	
-	//要在bj初始化前使用
-	set DamageEventCondition=Condition(function YDWEAnyUnitDamagedTriggerAction)
-	
-	call InitBlizzard()
-    //call InitGlobals(  )
-    call InitCustomTriggers()
-	if M_OnlinePlayerAmount == 1 then
-		set PlayerMaxHeroAmount=4
-	elseif M_OnlinePlayerAmount == 2 then
-		set PlayerMaxHeroAmount=2
-	endif
-	//单机测试
-	if bj_isSinglePlayer then
-		call SetPlayerState(Player(0), PLAYER_STATE_RESOURCE_GOLD, 99999)
-		//测试时Esc清屏
-		set IsMirage=true
-		call FogEnable(false)
-		call FogMaskEnable(false)
-		set trig=CreateTrigger()
-		call TriggerRegisterPlayerEvent(trig, Player(0), EVENT_PLAYER_END_CINEMATIC)
-		call TriggerAddCondition(trig, Condition(function TestEsc))
-	endif
-	//预先创建马甲单位,防止被设置生命周期
-	set BonusDummy=CreateUnit(Player(bj_PLAYER_NEUTRAL_VICTIM), 'ndum', 0, 0, 0)
-	//攻击
-	call UnitAddAbility(BonusDummy, 'AIat')
-	//防御
-	call UnitAddAbility(BonusDummy, 'AId1')
-	//攻速
-	call UnitAddAbility(BonusDummy, 'AIsx')
-	//移速
-	call UnitAddAbility(BonusDummy, 'AIms')
-	//三围
-	call UnitAddAbility(BonusDummy, 'Aamk')
-	//给马甲单位添加这些会被改变数据的技能
-	//事先创建电影马甲单位
-	// call CreateMovieDummyUnit()
-	//将vJass初始化放置在此处，注意，结构优先被初始化，然后是库初始化 
-
-
-call ExecuteFunc("InitSetUp___Init")
-call ExecuteFunc("YDTriggerSaveLoadSystem___Init")
-call ExecuteFunc("InitializeYD")
-call ExecuteFunc("TestSystem___Init")
-call BuffSystem___InitBuff()
-call InitUnitRestore()
-call InitItemSystem()
-call UnitAttackEvent__Init()
-call UnitDeathEvent__Init()
-call UnitAbilityEvent__Init()
-call UnitEnterMapEvent__Init()
-call HeroLevelUp__Init()
-call UnitSummonEvent__Init()
-call SetHeroVariable()
-
-	//创建单位进入地图事件 早于任意单位受伤事件之前
-	//call SetWorldRegion() 
-	//任意单位受伤事件
-	call YDWESyStemAnyUnitDamagedRegistTrigger()
-	//创建单位
-	call CreateAllUnits()
-	//创建所有任务
-	// call CreateAllQuest()
-	set IsInitUnit=false
-	call InitBoss()
-	//set trig = CreateTrigger() 
-	//call TriggerRegisterAnyUnitEventBJ(trig, EVENT_PLAYER_UNIT_DECAY)
-	//call TriggerAddCondition(trig, Condition(function UnitDecayEvnetActions))
-	call TriggerExecute(gg_trg_Intro_Start)
-	//初始化UI
+    call CreateAllUnits()
+	// 初始化UI
 	call CreateTimerEventTrigger(.0 , false , function InitUIFrame)
-	//设置英雄变量
-	set trig=null
+	// 个人认为T的初始化全局变量是完全多余的功能 所以如果在T中使用变量请自行初始化
+ 	//call InitGlobals(  )
+	call InitCustomTriggers()
+	call TriggerExecute(gg_trg_Intro_Start) // 游戏开始
+
 
 endfunction //injected main function (! inject command)??
 //***************************************************************************
