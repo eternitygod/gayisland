@@ -5,6 +5,9 @@
 #include "Vjass\Boss.j"
 #include "Vjass\UI.j" // UI在英雄后面加载
 
+#include "Vjass\SaveItemData.j"
+#include "Vjass\SaveUnitBaseData.j"
+
 globals
 	// 野外生物起义和基佬岛公用基础库，但会有区别
 	constant boolean IS_ISLAND = true
@@ -22,8 +25,7 @@ globals
 	// Frame
 	// 光环刷新间隔
 	constant real AuraFrame = 0.5 
-	// 单位恢复间隔
-	constant real RestoreFrame = 0.2 
+
 	// 枷锁闪电效果移动间隔
 	constant real LeashFrame = 0.05 
 

@@ -3,54 +3,8 @@
 
 library UnitBonusSystem requires Common, UnitRestore
 
-    globals
-        // BonusKey
-        constant key BONUS_DAMAGE   //攻击力
-        constant key BONUS_ARMOR //护甲
-        constant key BONUS_ATTACK    //攻速
-        constant key BONUS_LIFE //最大生命
-        constant key BONUS_MANA //最大魔法
-        constant key BONUS_STR // 
-        constant key BONUS_AGI // 
-        constant key BONUS_INT // 
-        constant key BONUS_MOVESPEED  //移动速度
 
-        constant key DAMAGE_BASE_BONUS //基础攻击力奖励 白字
-        constant key ARMOR_BASE_BONUS //基础护甲奖励 白字
-    endglobals
 
-    //设置单位生命恢复速度 这里GetHandleId用了三次 待优化
-    function UnitSetLifeRestore takes unit whichUnit, real newValue returns nothing
-        local integer h = GetHandleId(whichUnit)
-        local integer index = LoadInteger(DynamicData, h, UNIT_LIFERESTORE)
-        if index == 0 then
-            call QueuedUnitLifeRestoreAdd(whichUnit)
-        endif
-        call SaveReal(DynamicData, h, UNIT_LIFERESTORE, newValue)
-        call RefreshLifeUnitRestore(whichUnit)
-    endfunction
-    function UnitAddLifeRestore takes unit whichUnit, real value returns nothing
-        call UnitSetLifeRestore(whichUnit, LoadReal(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE) + value)
-    endfunction
-    function UnitReduceLifeRestore takes unit whichUnit, real value returns nothing
-        call UnitSetLifeRestore(whichUnit, LoadReal(DynamicData, GetHandleId(whichUnit), UNIT_LIFERESTORE) - value)
-    endfunction
-    //设置单位魔法恢复速度
-    function UnitSetManaRestore takes unit whichUnit, real newValue returns nothing
-        local integer h = GetHandleId(whichUnit)
-        local integer index = LoadInteger(DynamicData, h, UNIT_MANARESTORE)
-        if index == 0 then
-            call QueuedUnitManaRestoreAdd(whichUnit)
-        endif
-        call SaveReal(DynamicData, h, UNIT_MANARESTORE, newValue)
-        call RefreshManaUnitRestore(whichUnit)
-    endfunction
-    function UnitAddManaRestore takes unit whichUnit, real value returns nothing
-        call UnitSetManaRestore(whichUnit, LoadReal(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE) + value)
-    endfunction
-    function UnitReduceManaRestore takes unit whichUnit, real value returns nothing
-        call UnitSetManaRestore(whichUnit, LoadReal(DynamicData, GetHandleId(whichUnit), UNIT_MANARESTORE) - value)
-    endfunction
     //JAPI修改技能数据，并且刷新。
     //*额外 攻击 防御 攻速*/
     //升级并降低技能等级以此达到刷新属性的目的

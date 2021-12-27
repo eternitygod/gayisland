@@ -95,6 +95,15 @@ scope ItemSystem initializer InitItemSystem
             set data = LoadReal(ObjectData, itemId, BONUS_MOVESPEED)
             call UnitAddMoveSpeedBonus(whichUnit, data)
         endif
+
+        if HaveSavedReal(ObjectData, itemId, LIFE_RESTORE_BONUS) then
+            set data = LoadReal(ObjectData, itemId, LIFE_RESTORE_BONUS)
+            call UnitAddLifeRestore(whichUnit, data)
+        endif
+        if HaveSavedReal(ObjectData, itemId, MANA_RESTORE_BONUS) then
+            set data = LoadReal(ObjectData, itemId, MANA_RESTORE_BONUS)
+            call UnitAddManaRestore(whichUnit, data)
+        endif
     endfunction
     function ReduceUnitItemState takes unit whichUnit, integer itemId returns nothing
         local real data = 0
@@ -122,6 +131,15 @@ scope ItemSystem initializer InitItemSystem
         if HaveSavedReal(ObjectData, itemId, BONUS_MOVESPEED) then
             set data = LoadReal(ObjectData, itemId, BONUS_MOVESPEED)
             call UnitReduceMoveSpeedBonus(whichUnit, data)
+        endif
+
+        if HaveSavedReal(ObjectData, itemId, LIFE_RESTORE_BONUS) then
+            set data = LoadReal(ObjectData, itemId, LIFE_RESTORE_BONUS)
+            call UnitReduceLifeRestore(whichUnit, data)
+        endif
+        if HaveSavedReal(ObjectData, itemId, MANA_RESTORE_BONUS) then
+            set data = LoadReal(ObjectData, itemId, MANA_RESTORE_BONUS)
+            call UnitReduceManaRestore(whichUnit, data)
         endif
     endfunction
 
@@ -275,11 +293,10 @@ scope ItemSystem initializer InitItemSystem
         endif
     endfunction
 
-    function registeritem takes integer powerup, integer i_real, integer i_disabled returns integer
+    private function RegisterItem takes integer powerup, integer i_real returns integer
         set ItemStack_Number = ItemStack_Number + 1
         set ItemStack_PowerUp[ItemStack_Number]= powerup
         set ItemStack_Real[ItemStack_Number]= i_real
-        set ItemStack_Disabled[ItemStack_Number] = i_disabled
         return ItemStack_Number
     endfunction
 
@@ -296,27 +313,14 @@ scope ItemSystem initializer InitItemSystem
     endglobals
 
     //注册物品
+    // PowerUp物品P开头 正常物品I开头
     function InitRegisterItem takes nothing returns nothing
-        set ITEM_ArcaneBoots = registeritem('IP01','IR01', 'ID01')
-        set ITEM_SpeedBoots = registeritem('IP02','IR02', 'ID02')
-        set ITEM_AssaultCuirass = registeritem('IP03','IR03', 'ID03')
-        set ITEM_Satanic = registeritem('IP04','IR04', 'ID04')
-        set ITEM_MoonShard = registeritem('IP05','IR05', 'ID05')
+        set ITEM_ArcaneBoots = RegisterItem('P001','I001')
+        set ITEM_SpeedBoots = RegisterItem('P002','I002')
+        set ITEM_AssaultCuirass = RegisterItem('P003','I003')
+        set ITEM_Satanic = RegisterItem('P004','I004')
+        set ITEM_MoonShard = RegisterItem('P005','I005')
     endfunction
-
-    //初始化物品属性 - 英雄三围
-    function InitItemHeroAttribute takes nothing returns nothing
-        call SetItemHeroAttribute('cnob', 5, 5, 5)  //贵族圆环
-        //call SetItemHeroAttribute('Idms', 0, 0, 0) //幻影斧
-    endfunction
-    //初始化物品属性 - 攻击防御生命魔法攻速
-    function InitItemAttribute takes nothing returns nothing
-        //call SetItemAttribute('cnob', 10, 200, 100 , 0 , 0.0)  //贵族圆环
-        call ItemAddStateBonus('IR01', BONUS_MANA, 250)
-        call ItemAddStateBonus('IR01', BONUS_MOVESPEED, 50)
-        call ItemAddStateBonus('IR02', BONUS_MOVESPEED, 50)
-    endfunction
-
     //初始化物品
     function InitItemSystem takes nothing returns nothing
         set ItemAttrTrig = CreateTrigger()
@@ -326,8 +330,8 @@ scope ItemSystem initializer InitItemSystem
         call TriggerAddCondition(ItemAttrTrig, Condition(function itemtrigger_actions)) 
 	
         call InitRegisterItem() //注册物品
-        call InitItemHeroAttribute() //初始化物品英雄三围属性
-        call InitItemAttribute()    //初始化物品属性
+        //call InitItemHeroAttribute() //初始化物品英雄三围属性
+        //call InitItemAttribute()    //初始化物品属性
     endfunction
 
 endscope 
