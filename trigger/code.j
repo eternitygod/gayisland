@@ -3,4 +3,4 @@
 
 
 
-#include "map\main.j"
+#include "main.j"

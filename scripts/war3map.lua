@@ -1,4 +1,12 @@
 
+
+local runtime	= require 'jass.runtime'
+--将句柄等级设置为0(地图中所有的句柄均使用table封装)
+runtime.handle_level = 0
+
+--关闭等待
+runtime.sleep = false
+
 japi = require 'jass.japi'
 jass = require 'jass.common'
 
